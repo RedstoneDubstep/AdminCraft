@@ -236,8 +236,8 @@ public class Config {
         SANCTION_TEMPLATES = BUILDER.comment("The sanction presets for the /sanction command. Must follow the format 'displayName@used reason@level->type:duration(if required)@level@...'.")
                 .comment("Exemple: 'Cheating@Using cheats to get unfair advantages@1->warn@2->tempban:5d@5:ban'")
                 .comment("This config key will be updated in hte future to be more intuitive, stay tuned!")
-                .define("sanctions", List.of("Cheating@Unfair advantage@1->tempban:1d@2->tempban:30d@3->ban",
-                        "spam@Spamming@1->warn@3->kick@4->tempmute:1d@5->mute"));
+                .defineListAllowEmpty("sanctions", Arrays.asList("Cheating@Unfair advantage@1->tempban:1d@2->tempban:30d@3->ban",
+                        "spam@Spamming@1->warn@3->kick@4->tempmute:1d@5->mute"), Config::validateSanction);
 
         BUILDER.pop();
     }
@@ -336,6 +336,43 @@ public class Config {
         BUILDER.pop();
     }
 
+    private static boolean validateSanction(final Object obj) {
+        if (!(obj instanceof String sanc)) return false;
+        String[] parts = sanc.split("@");
+        if (parts.length < 3) {
+            AdminCraft.LOGGER.warn("Invalid length for the current sanction ('{}'): Expecting at least 3 subsection but found {}", sanc, parts.length);
+            return false;
+        }
+        for (int i = 2; i < parts.length; i++) {
+            String segment = parts[i].trim();
+            String[] levelSplit = segment.split("->");
+            if (levelSplit.length != 2) {
+                AdminCraft.LOGGER.warn("Invalid length for the segment '{}', found {} parts instead of 2", segment, levelSplit.length);
+                return false;
+            }
+
+            String action = levelSplit[1].trim();
+
+            if (action.contains(":")) {
+                String[] actSplit = action.split(":");
+                try {
+                    AdminCraft.LOGGER.debug("Template level validated (detected: complex): {}", Sanction.valueOf(actSplit[0].trim().toUpperCase()));
+                } catch (IllegalArgumentException e) {
+                    AdminCraft.LOGGER.warn("Failed to validate action {} (detected: double): sanction not found", action);
+                    return false;
+                }
+            } else {
+                try {
+                    AdminCraft.LOGGER.debug("Template level validated (detected: simple): {}", Sanction.valueOf(action.trim().toUpperCase()));
+                } catch (IllegalArgumentException e) {
+                    AdminCraft.LOGGER.warn("Failed to validate action {} (detected: simple): sanction not found", action);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     static final ModConfigSpec SPEC = BUILDER.build();
 
     private static boolean validateBlockName(final Object obj) {
@@ -367,6 +404,13 @@ public class Config {
 
     @SubscribeEvent
     static void onLoad(final ModConfigEvent.Loading event) {
+        if (event.getConfig().getSpec() != SPEC) return;
+
+        if (sp_effects != null) sp_effects.clear();
+        if (allowedBlocks != null) allowedBlocks.clear();
+        if (mute_forbidden_cmd != null) mute_forbidden_cmd.clear();
+        sanctions.clear();
+        availableReasons.clear();
 
         readme = README.get();
         _config_version = _CONFIG_VERSION.get();
@@ -414,10 +458,18 @@ public class Config {
 
                     if (action.contains(":")) {
                         String[] actSplit = action.split(":");
-                        type = Sanction.valueOf(actSplit[0].trim().toUpperCase());
+                        try {
+                            type = Sanction.valueOf(actSplit[0].trim().toUpperCase());
+                        } catch (IllegalArgumentException e) {
+                            continue;
+                        }
                         duration = actSplit[1].trim();
                     } else {
-                        type = Sanction.valueOf(action.trim().toUpperCase());
+                        try {
+                            type = Sanction.valueOf(action.trim().toUpperCase());
+                        } catch (IllegalArgumentException e) {
+                            continue;
+                        }
                     }
 
                     SanctionTemplate template = new SanctionTemplate(displayName, reason, type, duration);
@@ -510,14 +562,6 @@ public class Config {
 
         freeze_start = FREEZE_START.get();
         freeze_stop = FREEZE_STOP.get();
-    }
-
-    @SubscribeEvent
-    static void onReload(final ModConfigEvent.Reloading event) {
-        sp_effects.clear();
-        allowedBlocks.clear();
-        mute_forbidden_cmd.clear();
-        onLoad(null);
     }
 
     public static Set<Holder<MobEffect>> loadEffects(Level level) {
