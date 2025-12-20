@@ -59,6 +59,18 @@ public class LoggingDatabase {
         });
     }
 
+    public rollbackWorld(BlockPos rollbackOrigin, Date from, int radius, @Nullable String playerUUID, @Nullable InteractionType action) {
+        //todo
+    }
+
+    public restaureWorld(BlockPos rollbackOrigin, Date from, int radius, @Nullable String playerUUID, @Nullable InteractionType action) {
+        //todo
+    }
+
+    public logAction(BlockPos location, Block material, String playerUUID, InteractionType action) {
+        //todo
+    }
+
     private static void asyncPostCommandToDB(@NotNull String command) {
         getDatabaseExecutor().submit(() -> {
             try (Connection conn = DriverManager.getConnection(URL);
