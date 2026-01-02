@@ -15,8 +15,9 @@ public class LogEntry {
     public Block material;
     public String playerUUID;
     public Date timestamp;
+    public boolean rollbacked;
 
-    public LogEntry(int id, String worldName, int x, int y, int z, InteractionType type, Block material, String playerUUID, Date timestamp) {
+    public LogEntry(int id, String worldName, int x, int y, int z, InteractionType type, Block material, String playerUUID, Date timestamp, boolean rollbacked) {
         this.id = id;
         this.worldName = worldName;
         this.x = x;
@@ -26,5 +27,6 @@ public class LogEntry {
         this.material = material;
         this.playerUUID = playerUUID;
         this.timestamp = timestamp;
+        this.rollbacked = rollbacked;
     }
 }
