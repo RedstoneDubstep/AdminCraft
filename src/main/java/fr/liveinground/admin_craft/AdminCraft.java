@@ -2,7 +2,7 @@ package fr.liveinground.admin_craft;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.logging.LogUtils;
-import fr.liveinground.admin_craft.commands.AltCommand;
+import fr.liveinground.admin_craft.commands.tools.AltCommand;
 import fr.liveinground.admin_craft.commands.moderation.*;
 import fr.liveinground.admin_craft.moderation.SanctionConfig;
 import fr.liveinground.admin_craft.mutes.MuteEventsHandler;
