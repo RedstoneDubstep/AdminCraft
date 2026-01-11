@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.logging.LogUtils;
 import fr.liveinground.admin_craft.commands.tools.AltCommand;
 import fr.liveinground.admin_craft.commands.moderation.*;
+import fr.liveinground.admin_craft.commands.tools.EchestCommand;
 import fr.liveinground.admin_craft.commands.tools.InvseeCommand;
 import fr.liveinground.admin_craft.moderation.SanctionConfig;
 import fr.liveinground.admin_craft.mutes.MuteEventsHandler;
@@ -85,6 +86,7 @@ public class AdminCraft {
         ReportCommand.register(dispatcher);
         TempBanCommand.register(dispatcher);
         InvseeCommand.register(dispatcher);
+        EchestCommand.register(dispatcher);
         // StaffModeCommand.register(dispatcher);
     }
 
