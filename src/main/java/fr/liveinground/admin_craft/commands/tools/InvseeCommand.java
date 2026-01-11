@@ -3,6 +3,7 @@ package fr.liveinground.admin_craft.commands.tools;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import fr.liveinground.admin_craft.Config;
+import fr.liveinground.admin_craft.storage.nbt.PlayerDataLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -19,11 +20,10 @@ import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.LevelResource;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -33,6 +33,9 @@ public class InvseeCommand {
                 .requires(commandSource -> commandSource.hasPermission(Config.invsee_level) && commandSource.isPlayer())
                 .then(Commands.argument("player", GameProfileArgument.gameProfile())
                         .executes(ctx -> {
+                            ServerPlayer operator = ctx.getSource().getPlayer();
+                            assert operator != null;
+
                             Collection<GameProfile> profiles = GameProfileArgument.getGameProfiles(ctx, "player");
                             if (profiles.isEmpty()) {
                                 ctx.getSource().sendFailure(Component.literal("No player was found.").withStyle(ChatFormatting.RED));
@@ -55,15 +58,16 @@ public class InvseeCommand {
 
                             if (onlinePlayer == null) {
                                 try {
-                                    CompoundTag data = loadOfflinePlayerData(ctx.getSource().getLevel(), profile.getId());
-                                    if (data == null) {
-                                        ctx.getSource().sendFailure(Component.literal("An error occurred when attempting to load this offline player data's: CompoundTag is null."));
+                                    SimpleContainer inv = PlayerDataLoader.loadInventoryFromUUID(ctx.getSource().getLevel(), profile.getId());
+
+                                    if (inv == null) {
+                                        ctx.getSource().sendFailure(Component.literal("No data was found.").withStyle(ChatFormatting.RED));
                                         return 1;
                                     }
-                                    SimpleContainer inv = loadInventoryFromNBT(data);
-                                    ctx.getSource().getPlayer().openMenu(new SimpleMenuProvider((id, ownInv, player) -> new ChestMenu(MenuType.GENERIC_9x6, id, ownInv, inv, 6) {
+
+                                    operator.openMenu(new SimpleMenuProvider((id, ownInv, player) -> new ChestMenu(MenuType.GENERIC_9x6, id, ownInv, inv, 6) {
                                         @Override
-                                        public boolean stillValid(Player _ignored) {
+                                        public boolean stillValid(@NotNull Player _ignored) {
                                             return true;
                                         }
                                     }, Component.literal(profile.getName() + "'s inventory")));
@@ -74,9 +78,9 @@ public class InvseeCommand {
                                 }
                             } else {
                                 Inventory playerInv = onlinePlayer.getInventory();
-                                ctx.getSource().getPlayer().openMenu(new SimpleMenuProvider((id, ownInv, player) -> new ChestMenu(MenuType.GENERIC_9x4, id, ownInv, playerInv, 4) {
+                                operator.openMenu(new SimpleMenuProvider((id, ownInv, player) -> new ChestMenu(MenuType.GENERIC_9x4, id, ownInv, playerInv, 4) {
                                     @Override
-                                    public boolean stillValid(Player _ignored) {
+                                    public boolean stillValid(@NotNull Player _ignored) {
                                         return true;
                                     }
                                 }, Component.literal(onlinePlayer.getDisplayName().getString() + "'s inventory")));
@@ -86,30 +90,6 @@ public class InvseeCommand {
                         })
                 )
         );
-    }
-
-    @Nullable
-    private static CompoundTag loadOfflinePlayerData(ServerLevel level, UUID uuid) throws IOException {
-        File playerDataDir = level.getServer().getWorldPath(LevelResource.PLAYER_DATA_DIR).toFile();
-        File file = new File(playerDataDir, uuid.toString() + ".dat");
-
-        if (!file.exists()) return null;
-
-        return NbtIo.readCompressed(file);
-    }
-
-    private static SimpleContainer loadInventoryFromNBT(CompoundTag tag) {
-        SimpleContainer inv = new SimpleContainer(41);
-
-        ListTag list = tag.getList("Inventory", Tag.TAG_COMPOUND);
-        for (Tag t : list) {
-            CompoundTag item = (CompoundTag) t;
-            int slot = item.getByte("Slot") & 255;
-            if (slot < inv.getContainerSize()) {
-                inv.setItem(slot, ItemStack.of(item));
-            }
-        }
-        return inv;
     }
 
     private static void saveInventoryToNBT(SimpleContainer inv, CompoundTag tag) {
