@@ -2,6 +2,7 @@ package fr.liveinground.admin_craft.commands.tools;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
+import fr.liveinground.admin_craft.Config;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -27,10 +28,9 @@ import java.util.Collection;
 import java.util.UUID;
 
 public class InvseeCommand {
-    private static final int temp_level_todo_add_config = 4;
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("invsee")
-                .requires(commandSource -> commandSource.hasPermission(temp_level_todo_add_config) && commandSource.isPlayer())
+                .requires(commandSource -> commandSource.hasPermission(Config.invsee_level) && commandSource.isPlayer())
                 .then(Commands.argument("player", GameProfileArgument.gameProfile())
                         .executes(ctx -> {
                             Collection<GameProfile> profiles = GameProfileArgument.getGameProfiles(ctx, "player");
