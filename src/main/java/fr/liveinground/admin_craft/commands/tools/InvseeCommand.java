@@ -65,7 +65,7 @@ public class InvseeCommand {
                                         return 1;
                                     }
 
-                                    operator.openMenu(new SimpleMenuProvider((id, ownInv, player) -> new ChestMenu(MenuType.GENERIC_9x6, id, ownInv, inv, 6) {
+                                    operator.openMenu(new SimpleMenuProvider((id, ownInv, player) -> new ChestMenu(MenuType.GENERIC_9x4, id, ownInv, inv, 4) {
                                         @Override
                                         public boolean stillValid(@NotNull Player _ignored) {
                                             return true;

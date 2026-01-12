@@ -27,7 +27,7 @@ public class PlayerDataLoader {
     }
 
     private static SimpleContainer loadInventoryFromNBT(CompoundTag tag) {
-        SimpleContainer inv = new SimpleContainer(41);
+        SimpleContainer inv = new SimpleContainer(36);
 
         ListTag list = tag.getList("Inventory", Tag.TAG_COMPOUND);
         for (Tag t : list) {
