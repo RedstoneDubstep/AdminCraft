@@ -2,8 +2,10 @@ package fr.liveinground.admin_craft.commands.tools;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
+import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
 import fr.liveinground.admin_craft.storage.nbt.PlayerDataLoader;
+import fr.liveinground.admin_craft.storage.nbt.PlayerDataSaver;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -64,11 +66,29 @@ public class InvseeCommand {
                                         ctx.getSource().sendFailure(Component.literal("No data was found.").withStyle(ChatFormatting.RED));
                                         return 1;
                                     }
+                                    final UUID targetUUID = profile.getId();
 
                                     operator.openMenu(new SimpleMenuProvider((id, ownInv, player) -> new ChestMenu(MenuType.GENERIC_9x4, id, ownInv, inv, 4) {
                                         @Override
-                                        public boolean stillValid(@NotNull Player _ignored) {
-                                            return true;
+                                        public boolean stillValid(@NotNull Player player) {
+                                            return player.isAlive();
+                                        }
+                                        @Override
+                                        public void removed(@NotNull Player viewer) {
+                                            super.removed(viewer);
+                                            ServerPlayer online = ctx.getSource().getServer()
+                                                    .getPlayerList()
+                                                    .getPlayer(targetUUID);
+
+                                            if (online != null) {
+                                                try {
+                                                    PlayerDataSaver.saveInventory(ctx.getSource().getLevel(), targetUUID, (SimpleContainer) this.getContainer());
+                                                } catch (IOException e) {
+                                                    AdminCraft.LOGGER.error("Failed to save offline data on a reconnected player: ", e);
+                                                }
+                                            } else {
+                                                PlayerDataSaver.saveToNBT(targetUUID, ctx.getSource().getLevel(), (SimpleContainer) this.getContainer());
+                                            }
                                         }
                                     }, Component.literal(profile.getName() + "'s inventory")));
 
@@ -80,8 +100,8 @@ public class InvseeCommand {
                                 Inventory playerInv = onlinePlayer.getInventory();
                                 operator.openMenu(new SimpleMenuProvider((id, ownInv, player) -> new ChestMenu(MenuType.GENERIC_9x4, id, ownInv, playerInv, 4) {
                                     @Override
-                                    public boolean stillValid(@NotNull Player _ignored) {
-                                        return true;
+                                    public boolean stillValid(@NotNull Player player) {
+                                        return player.isAlive();
                                     }
                                 }, Component.literal(onlinePlayer.getDisplayName().getString() + "'s inventory")));
                             }

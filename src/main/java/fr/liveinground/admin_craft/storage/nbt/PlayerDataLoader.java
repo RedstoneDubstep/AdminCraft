@@ -1,5 +1,6 @@
 package fr.liveinground.admin_craft.storage.nbt;
 
+import fr.liveinground.admin_craft.AdminCraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
