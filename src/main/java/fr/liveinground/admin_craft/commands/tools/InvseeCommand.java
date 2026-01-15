@@ -81,11 +81,7 @@ public class InvseeCommand {
                                                     .getPlayer(targetUUID);
 
                                             if (online != null) {
-                                                try {
-                                                    PlayerDataSaver.saveInventory(ctx.getSource().getLevel(), targetUUID, (SimpleContainer) this.getContainer());
-                                                } catch (IOException e) {
-                                                    AdminCraft.LOGGER.error("Failed to save offline data on a reconnected player: ", e);
-                                                }
+                                                PlayerDataSaver.applyToOnlinePlayer((SimpleContainer) this.getContainer(), online);
                                             } else {
                                                 PlayerDataSaver.saveToNBT(targetUUID, ctx.getSource().getLevel(), (SimpleContainer) this.getContainer());
                                             }
@@ -110,27 +106,5 @@ public class InvseeCommand {
                         })
                 )
         );
-    }
-
-    private static void saveInventoryToNBT(SimpleContainer inv, CompoundTag tag) {
-        ListTag list = new ListTag();
-
-        for (int i = 0; i < inv.getContainerSize(); i++) {
-            ItemStack stack = inv.getItem(i);
-            if (!stack.isEmpty()) {
-                CompoundTag itemTag = new CompoundTag();
-                itemTag.putByte("Slot", (byte) i);
-                stack.save(itemTag);
-                list.add(itemTag);
-            }
-        }
-        tag.put("Inventory", list);
-    }
-
-    private static void saveOfflinePlayerData(ServerLevel level, UUID uuid, CompoundTag tag) throws IOException {
-        File dir = level.getServer().getWorldPath(LevelResource.PLAYER_DATA_DIR).toFile();
-        File file = new File(dir, uuid.toString() + ".dat");
-
-        NbtIo.writeCompressed(tag, file);
     }
 }
