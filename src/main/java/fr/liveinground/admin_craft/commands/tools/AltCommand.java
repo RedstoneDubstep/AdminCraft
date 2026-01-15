@@ -1,4 +1,4 @@
-package fr.liveinground.admin_craft.commands;
+package fr.liveinground.admin_craft.commands.tools;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;

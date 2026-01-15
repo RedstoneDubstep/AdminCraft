@@ -54,6 +54,9 @@ public class Config {
     private static final ForgeConfigSpec.IntValue TEMPBAN_LEVEL;
     public static int tempban_level;
 
+    private static final ForgeConfigSpec.IntValue INVSEE_LEVEL;
+    public static int invsee_level;
+
     // ---------------
     // -- Sanctions --
     // ---------------
@@ -219,6 +222,7 @@ public class Config {
         WARN_LEVEL = BUILDER.comment("The OP level required to run the /warn command").worldRestart().defineInRange("warn", 3, 0, 4);
         REPORTS_LEVEL = BUILDER.comment("The OP level required to run the /reports command").worldRestart().defineInRange("reports", 3, 0, 4);
         TEMPBAN_LEVEL = BUILDER.comment("The OP level required to run the /tempban command").worldRestart().defineInRange("tempban", 3, 0,4);
+        INVSEE_LEVEL = BUILDER.comment("The OP level required to run the /invsee and /echest commands").worldRestart().defineInRange("invsee", 2, 0,4);
 
         BUILDER.pop();
     }
@@ -419,6 +423,7 @@ public class Config {
         warn_level = WARN_LEVEL.get();
         reports_level = REPORTS_LEVEL.get();
         tempban_level = TEMPBAN_LEVEL.get();
+        invsee_level = INVSEE_LEVEL.get();
 
         // ---------------
         // -- Sanctions --
