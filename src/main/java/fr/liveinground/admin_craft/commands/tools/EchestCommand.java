@@ -2,7 +2,6 @@ package fr.liveinground.admin_craft.commands.tools;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
-import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
 import fr.liveinground.admin_craft.storage.nbt.PlayerDataLoader;
 import fr.liveinground.admin_craft.storage.nbt.PlayerDataSaver;
