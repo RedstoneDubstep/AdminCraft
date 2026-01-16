@@ -54,6 +54,19 @@ public class Config {
     private static final ForgeConfigSpec.IntValue TEMPBAN_LEVEL;
     public static int tempban_level;
 
+    private static final ForgeConfigSpec.IntValue LOOKUP_LEVEL;
+    public static int lookup_level;
+
+    private static final ForgeConfigSpec.IntValue ROLLBACK_LEVEL;
+    public static int rollback_level;
+
+    // -------------
+    // -- Logging --
+    // -------------
+
+    private static final ForgeConfigSpec.BooleanValue ENABLE_LOGGING;
+    public static boolean enable_logging;
+
     // ---------------
     // -- Sanctions --
     // ---------------
@@ -219,6 +232,16 @@ public class Config {
         WARN_LEVEL = BUILDER.comment("The OP level required to run the /warn command").worldRestart().defineInRange("warn", 3, 0, 4);
         REPORTS_LEVEL = BUILDER.comment("The OP level required to run the /reports command").worldRestart().defineInRange("reports", 3, 0, 4);
         TEMPBAN_LEVEL = BUILDER.comment("The OP level required to run the /tempban command").worldRestart().defineInRange("tempban", 3, 0,4);
+        LOOKUP_LEVEL = BUILDER.comment("The OP level required to run the /lookup and the /inspect commands").worldRestart().defineInRange("lookupLevel", 2, 0, 4);
+        ROLLBACK_LEVEL = BUILDER.comment("The OP level required to run the /rollback and the /restaure commands").worldRestart().defineInRange("rollbackLevel", 3, 0, 4);
+
+        BUILDER.pop();
+    }
+
+    static {
+        BUILDER.push("worldLogging");
+
+        ENABLE_LOGGING = BUILDER.comment("If set to true, AdminCraft will record every event related to the world changes, and enable the lookup, rollback and restaure commands").worldRestart().define("enableLogging", true);
 
         BUILDER.pop();
     }
@@ -373,6 +396,14 @@ public class Config {
         warn_level = WARN_LEVEL.get();
         reports_level = REPORTS_LEVEL.get();
         tempban_level = TEMPBAN_LEVEL.get();
+        lookup_level = LOOKUP_LEVEL.get();
+        rollback_level = ROLLBACK_LEVEL.get();
+
+        // -------------
+        // -- Logging --
+        // -------------
+
+        enable_logging = ENABLE_LOGGING.get();
 
         // ---------------
         // -- Sanctions --

@@ -4,5 +4,6 @@ public enum InteractionType {
     PLACE,
     BREAK,
     KILL,
+    DAMAGE,
     USE
 }

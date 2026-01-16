@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.logging.LogUtils;
 import fr.liveinground.admin_craft.commands.AltCommand;
 import fr.liveinground.admin_craft.commands.moderation.*;
+import fr.liveinground.admin_craft.logging.LoggingDatabase;
 import fr.liveinground.admin_craft.moderation.SanctionConfig;
 import fr.liveinground.admin_craft.mutes.MuteEventsHandler;
 import fr.liveinground.admin_craft.storage.PlayerDataManager;
@@ -45,7 +46,6 @@ public class AdminCraft {
     public static final String _VERSION = "1.0.0";
     public static final Logger LOGGER = LogUtils.getLogger();
     private static final String SP_TAG = "inSpawnProtection";
-    public static SanctionConfig sanctionConfig;
 
     public static List<String> mutedPlayersUUID = new ArrayList<>();
     public static List<String> frozenPlayersUUID = new ArrayList<>();

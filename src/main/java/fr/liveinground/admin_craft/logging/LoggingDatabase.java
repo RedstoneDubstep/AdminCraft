@@ -26,6 +26,7 @@ public class LoggingDatabase {
     public static void start() {
         try (Connection connection = DriverManager.getConnection(URL)) {
             if (connection != null) {
+                initDatabase();
                 AdminCraft.LOGGER.info("Connected to logger's database");
             }
         } catch (SQLException e) {
@@ -42,7 +43,7 @@ public class LoggingDatabase {
                 "y INTEGER" +
                 "z INTEGER," +
                 "material STRING," +
-                "timestamp INTEGER" +
+                "timestamp INTEGER," +
                 "rolledback BOOLEAN)";
 
         asyncPostCommandToDB(sql);

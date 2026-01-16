@@ -1,7 +1,6 @@
 package fr.liveinground.admin_craft.logging.objects;
 
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Date;
 
@@ -12,21 +11,23 @@ public class LogEntry {
     public int y;
     public int z;
     public InteractionType type;
-    public Block material;
-    public String playerUUID;
+    public BlockState block;
+    public String source;
+    public String cause;
     public Date timestamp;
-    public boolean rollbacked;
+    public int rollbackID;
 
-    public LogEntry(int id, String worldName, int x, int y, int z, InteractionType type, Block material, String playerUUID, Date timestamp, boolean rollbacked) {
+    public LogEntry(int id, String worldName, int x, int y, int z, InteractionType type, BlockState block, String source, String cause, Date timestamp, int rollbackID) {
         this.id = id;
         this.worldName = worldName;
         this.x = x;
         this.y = y;
         this.z = z;
         this.type = type;
-        this.material = material;
-        this.playerUUID = playerUUID;
+        this.block = block;
+        this.source = source;
+        this.cause = cause;
         this.timestamp = timestamp;
-        this.rollbacked = rollbacked;
+        this.rollbackID = rollbackID;
     }
 }
