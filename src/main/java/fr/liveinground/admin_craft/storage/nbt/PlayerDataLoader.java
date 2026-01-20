@@ -8,6 +8,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -94,5 +95,24 @@ public class PlayerDataLoader {
             tagStringArray.add(t.getAsString());
         }
         return tagStringArray;
+    }
+
+    @Nullable
+    public static Vec3 getOfflineLocation(ServerLevel level, UUID uuid) throws  IOException {
+        File playerDataDir = level.getServer()
+                .getWorldPath(LevelResource.PLAYER_DATA_DIR)
+                .toFile();
+
+        File file = new File(playerDataDir, uuid.toString() + ".dat");
+        if (!file.exists()) return null;
+
+        CompoundTag root = NbtIo.readCompressed(file);
+
+        ListTag list;
+        if (root.contains("Pos", Tag.TAG_LIST)) {
+            list = root.getList("Tags", Tag.TAG_LIST);
+        } else return null;
+
+        return new Vec3(list.getDouble(0), list.getDouble(1), list.getDouble(2));
     }
 }

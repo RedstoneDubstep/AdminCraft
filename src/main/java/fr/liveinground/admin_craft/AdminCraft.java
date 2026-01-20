@@ -1,5 +1,6 @@
 package fr.liveinground.admin_craft;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.logging.LogUtils;
 import fr.liveinground.admin_craft.commands.tools.*;
@@ -35,7 +36,9 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.slf4j.Logger;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Mod(AdminCraft.MODID)
@@ -261,5 +264,14 @@ public class AdminCraft {
             player.sendSystemMessage(Component.literal("It strongly recommended to check the configuration file to check there is no issue with it."));
             player.sendSystemMessage(Component.literal("You can disable this message by changing the 'configVersion' key to " + AdminCraft._VERSION + " in the configuration."));
         }
+    }
+
+    @Nullable
+    public static GameProfile getOneProfile(Collection<GameProfile> profiles) {
+        if (profiles.isEmpty()) return null;
+        for (GameProfile p: profiles) {
+            if (p != null) return p;
+        }
+        return null;
     }
 }
