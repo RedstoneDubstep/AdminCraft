@@ -2,10 +2,8 @@ package fr.liveinground.admin_craft;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.logging.LogUtils;
-import fr.liveinground.admin_craft.commands.tools.AltCommand;
+import fr.liveinground.admin_craft.commands.tools.*;
 import fr.liveinground.admin_craft.commands.moderation.*;
-import fr.liveinground.admin_craft.commands.tools.EchestCommand;
-import fr.liveinground.admin_craft.commands.tools.InvseeCommand;
 import fr.liveinground.admin_craft.moderation.SanctionConfig;
 import fr.liveinground.admin_craft.mutes.MuteEventsHandler;
 import fr.liveinground.admin_craft.storage.PlayerDataManager;
@@ -87,6 +85,8 @@ public class AdminCraft {
         TempBanCommand.register(dispatcher);
         InvseeCommand.register(dispatcher);
         EchestCommand.register(dispatcher);
+        OfflineTeleportCommand.register(dispatcher);
+        OfflineTagCommand.register(dispatcher);
         // StaffModeCommand.register(dispatcher);
     }
 

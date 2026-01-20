@@ -57,6 +57,12 @@ public class Config {
     private static final ForgeConfigSpec.IntValue INVSEE_LEVEL;
     public static int invsee_level;
 
+    private static final ForgeConfigSpec.IntValue OTP_LEVEL;
+    public static int otp_level;
+
+    private static final ForgeConfigSpec.IntValue OTAG_LEVEL;
+    public static int otag_level;
+
     // ---------------
     // -- Sanctions --
     // ---------------
@@ -223,6 +229,8 @@ public class Config {
         REPORTS_LEVEL = BUILDER.comment("The OP level required to run the /reports command").worldRestart().defineInRange("reports", 3, 0, 4);
         TEMPBAN_LEVEL = BUILDER.comment("The OP level required to run the /tempban command").worldRestart().defineInRange("tempban", 3, 0,4);
         INVSEE_LEVEL = BUILDER.comment("The OP level required to run the /invsee and /echest commands").worldRestart().defineInRange("invsee", 2, 0,4);
+        OTP_LEVEL = BUILDER.comment("The OP level required to run the /otp command").worldRestart().defineInRange("otp", 2, 0, 4);
+        OTAG_LEVEL = BUILDER.comment("The OP level required to run the /otag command").worldRestart().defineInRange("otp", 2, 0, 4);
 
         BUILDER.pop();
     }
@@ -424,6 +432,8 @@ public class Config {
         reports_level = REPORTS_LEVEL.get();
         tempban_level = TEMPBAN_LEVEL.get();
         invsee_level = INVSEE_LEVEL.get();
+        otag_level = OTAG_LEVEL.get();
+        otp_level = OTP_LEVEL.get();
 
         // ---------------
         // -- Sanctions --

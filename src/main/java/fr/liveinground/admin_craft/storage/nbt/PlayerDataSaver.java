@@ -1,9 +1,7 @@
 package fr.liveinground.admin_craft.storage.nbt;
 
 import fr.liveinground.admin_craft.AdminCraft;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.*;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleContainer;
@@ -104,6 +102,73 @@ public class PlayerDataSaver {
 
         root.put("EnderItems", list);
         NbtIo.writeCompressed(root, file);
+    }
+
+    public static int addOfflineTag(ServerLevel level, UUID uuid, String tag) throws IOException {
+        File playerDataDir = level.getServer()
+                .getWorldPath(LevelResource.PLAYER_DATA_DIR)
+                .toFile();
+
+        File file = new File(playerDataDir, uuid.toString() + ".dat");
+        if (!file.exists()) return 404;
+
+        CompoundTag root = NbtIo.readCompressed(file);
+        ListTag list = new ListTag();
+
+        if (root.contains("Tags", Tag.TAG_LIST)) {
+            list = root.getList("Tags", Tag.TAG_STRING);
+        } else {
+            list = new ListTag();
+        }
+
+        for (int i = 0; i < list.size(); i++) {
+            if (list.getString(i).equalsIgnoreCase(tag)) {
+                return 409;
+            }
+        }
+
+        list.add(StringTag.valueOf(tag));
+        root.put("Tags", list);
+
+        NbtIo.writeCompressed(root, file);
+
+        return 200;
+    }
+
+    public static int removeOfflineTag(ServerLevel level, UUID uuid, String tag) throws IOException {
+        File playerDataDir = level.getServer()
+                .getWorldPath(LevelResource.PLAYER_DATA_DIR)
+                .toFile();
+
+        File file = new File(playerDataDir, uuid.toString() + ".dat");
+        if (!file.exists()) return 404;
+
+        CompoundTag root = NbtIo.readCompressed(file);
+
+        if (!root.contains("Tags", Tag.TAG_LIST)) {
+            return 409;
+        }
+
+        ListTag list = root.getList("Tags", Tag.TAG_STRING);
+
+        boolean removed = false;
+        for (int i = 0; i < list.size(); i++) {
+            if (list.getString(i).equalsIgnoreCase(tag)) {
+                list.remove(i);
+                removed = true;
+                break;
+            }
+        }
+
+        if (!removed) {
+            return 409;
+        }
+
+        root.put("Tags", list);
+
+        NbtIo.writeCompressed(root, file);
+
+        return 200;
     }
 
 }
