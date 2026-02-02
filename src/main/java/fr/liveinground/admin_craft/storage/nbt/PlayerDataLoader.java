@@ -110,7 +110,7 @@ public class PlayerDataLoader {
 
         ListTag list;
         if (root.contains("Pos", Tag.TAG_LIST)) {
-            list = root.getList("Tags", Tag.TAG_LIST);
+            list = root.getList("Pos", Tag.TAG_LIST);
         } else return null;
 
         return new Vec3(list.getDouble(0), list.getDouble(1), list.getDouble(2));

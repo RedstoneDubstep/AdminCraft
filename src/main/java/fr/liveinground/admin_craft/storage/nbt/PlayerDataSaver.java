@@ -9,6 +9,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.PlayerEnderChestContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.phys.Vec3;
 
 import java.io.File;
 import java.io.IOException;
@@ -113,7 +114,7 @@ public class PlayerDataSaver {
         if (!file.exists()) return 404;
 
         CompoundTag root = NbtIo.readCompressed(file);
-        ListTag list = new ListTag();
+        ListTag list;
 
         if (root.contains("Tags", Tag.TAG_LIST)) {
             list = root.getList("Tags", Tag.TAG_STRING);
@@ -169,6 +170,26 @@ public class PlayerDataSaver {
         NbtIo.writeCompressed(root, file);
 
         return 200;
+    }
+
+    public static void setOfflineLocation(ServerLevel level, UUID uuid, Vec3 position) throws IOException {
+        File playerDataDir = level.getServer()
+                .getWorldPath(LevelResource.PLAYER_DATA_DIR)
+                .toFile();
+
+        File file = new File(playerDataDir, uuid.toString() + ".dat");
+        if (!file.exists()) return;
+
+        CompoundTag root = NbtIo.readCompressed(file);
+
+        ListTag newPos = new ListTag();
+        newPos.add(DoubleTag.valueOf(position.x));
+        newPos.add(DoubleTag.valueOf(position.y));
+        newPos.add(DoubleTag.valueOf(position.z));
+
+        root.put("Pos", newPos);
+
+        NbtIo.writeCompressed(root, file);
     }
 
 }

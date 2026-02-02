@@ -5,6 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
 import fr.liveinground.admin_craft.storage.nbt.PlayerDataLoader;
+import fr.liveinground.admin_craft.storage.nbt.PlayerDataSaver;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -54,7 +55,27 @@ public class OfflineTeleportCommand {
 
     private static void teleportPlayerToCoordinates(CommandSourceStack source, Collection<GameProfile> profiles, Vec3 destination) {
         GameProfile profile = AdminCraft.getOneProfile(profiles);
-
+        if (profile == null) {
+            source.sendFailure(Component.literal("No player was found").withStyle(ChatFormatting.RED));
+            return;
+        }
+        ServerPlayer onlinePlayer = source.getServer().getPlayerList().getPlayer(profile.getId());
+        if (onlinePlayer != null) {
+            onlinePlayer.teleportTo(source.getLevel(), destination.x, destination.y, destination.z, 0, 0);
+            source.sendSuccess(() ->
+                            Component.literal(String.format(
+                                    "Teleported %s to %.2f, %.2f, %.2f",
+                                    onlinePlayer.getDisplayName().getString(),
+                                    destination.x, destination.y, destination.z
+                            )),
+                    true);
+        } else {
+            try {
+                PlayerDataSaver.setOfflineLocation(source.getLevel(), profile.getId(), destination);
+            } catch (IOException e) {
+                source.sendFailure(Component.literal("Failure: something went wrong (IOException)").withStyle(ChatFormatting.RED));
+            }
+        }
     }
 
     private static void teleportToPlayer(CommandSourceStack source, Collection<GameProfile> profiles) {
