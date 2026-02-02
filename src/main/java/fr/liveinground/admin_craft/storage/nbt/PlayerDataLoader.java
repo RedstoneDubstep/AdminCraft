@@ -109,8 +109,8 @@ public class PlayerDataLoader {
         CompoundTag root = NbtIo.readCompressed(file);
 
         ListTag list;
-        if (root.contains("Pos", Tag.TAG_LIST)) {
-            list = root.getList("Pos", Tag.TAG_LIST);
+        if (root.contains("Pos", Tag.TAG_DOUBLE)) {
+            list = root.getList("Pos", Tag.TAG_DOUBLE);
         } else return null;
 
         return new Vec3(list.getDouble(0), list.getDouble(1), list.getDouble(2));

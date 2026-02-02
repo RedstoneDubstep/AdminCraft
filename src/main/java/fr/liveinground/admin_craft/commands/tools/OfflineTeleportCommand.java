@@ -14,7 +14,6 @@ import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 import java.io.IOException;
@@ -48,9 +47,8 @@ public class OfflineTeleportCommand {
         );
     }
 
-    private static void teleportPlayerToPlayer(CommandSourceStack source, Collection<GameProfile> profiles, ServerPlayer destination) {
-        GameProfile profile = AdminCraft.getOneProfile(profiles);
-
+    private static void teleportPlayerToPlayer(CommandSourceStack source, Collection<GameProfile> profiles, ServerPlayer destPlayer) {
+        teleportPlayerToCoordinates(source, profiles, new Vec3(destPlayer.getX(), destPlayer.getY(), destPlayer.getZ()));
     }
 
     private static void teleportPlayerToCoordinates(CommandSourceStack source, Collection<GameProfile> profiles, Vec3 destination) {
@@ -80,7 +78,6 @@ public class OfflineTeleportCommand {
 
     private static void teleportToPlayer(CommandSourceStack source, Collection<GameProfile> profiles) {
         ServerPlayer sourcePlayer = source.getPlayer();
-        assert sourcePlayer != null;
 
         GameProfile profile = AdminCraft.getOneProfile(profiles);
         if (profile == null) {
@@ -101,6 +98,7 @@ public class OfflineTeleportCommand {
                 }
                 sourcePlayer.teleportTo(destination.x(), destination.y(), destination.z());
             } catch (IOException e) {
+                AdminCraft.LOGGER.error("Failed to save offline teleport location for " + profile.getName(), e);
                 source.sendFailure(Component.literal("Failure: something went wrong (IOException)").withStyle(ChatFormatting.RED));
             }
         }
