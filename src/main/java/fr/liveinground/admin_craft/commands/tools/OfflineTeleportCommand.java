@@ -71,6 +71,7 @@ public class OfflineTeleportCommand {
             try {
                 PlayerDataSaver.setOfflineLocation(source.getLevel(), profile.getId(), destination);
             } catch (IOException e) {
+                AdminCraft.LOGGER.error("Failed to save offline teleport location for {}", profile.getName(), e);
                 source.sendFailure(Component.literal("Failure: something went wrong (IOException)").withStyle(ChatFormatting.RED));
             }
         }
@@ -98,7 +99,7 @@ public class OfflineTeleportCommand {
                 }
                 sourcePlayer.teleportTo(destination.x(), destination.y(), destination.z());
             } catch (IOException e) {
-                AdminCraft.LOGGER.error("Failed to save offline teleport location for " + profile.getName(), e);
+                AdminCraft.LOGGER.error("Failed to save offline teleport location for {}", profile.getName(), e);
                 source.sendFailure(Component.literal("Failure: something went wrong (IOException)").withStyle(ChatFormatting.RED));
             }
         }
