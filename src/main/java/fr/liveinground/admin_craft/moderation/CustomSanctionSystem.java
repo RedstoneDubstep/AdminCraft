@@ -54,38 +54,42 @@ public class CustomSanctionSystem {
         AdminCraft.playerDataManager.addSanction(player.getStringUUID(), Sanction.KICK, reason, null);
     }
 
-    public static void mutePlayer(ServerPlayer player, String reason, @Nullable Date expiresOn) {
-        if (!AdminCraft.mutedPlayersUUID.contains(player.getStringUUID())) {
+    public static void mutePlayer(MinecraftServer server, GameProfile player, String reason, @Nullable Date expiresOn) {
+        if (!AdminCraft.mutedPlayersUUID.contains(String.valueOf(player.getId()))) {
             AdminCraft.playerDataManager.addMuteEntry(
-                    new PlayerMuteData(player.getName().getString(), player.getStringUUID(), reason, expiresOn)
+                    new PlayerMuteData(player.getName(), String.valueOf(player.getId()), reason, expiresOn)
             );
 
-            String msg = PlaceHolderSystem.replacePlaceholders(Config.mute_message, Map.of("reason", reason));
-            player.sendSystemMessage(Component.literal(msg).withStyle(ChatFormatting.RED));
+            ServerPlayer serverPlayer = AdminCraft.getOnlinePlayer(server, player);
+            if (serverPlayer != null) {
+                String msg = PlaceHolderSystem.replacePlaceholders(Config.mute_message, Map.of("reason", reason));
+                serverPlayer.sendSystemMessage(Component.literal(msg).withStyle(ChatFormatting.RED));
 
-            if (expiresOn != null) {
-                long diff = expiresOn.getTime() - System.currentTimeMillis();
-                long days = TimeUnit.MILLISECONDS.toDays(diff);
-                diff -= TimeUnit.DAYS.toMillis(days);
 
-                long hours = TimeUnit.MILLISECONDS.toHours(diff);
-                diff -= TimeUnit.HOURS.toMillis(hours);
+                if (expiresOn != null) {
+                    long diff = expiresOn.getTime() - System.currentTimeMillis();
+                    long days = TimeUnit.MILLISECONDS.toDays(diff);
+                    diff -= TimeUnit.DAYS.toMillis(days);
 
-                long minutes = TimeUnit.MILLISECONDS.toMinutes(diff);
+                    long hours = TimeUnit.MILLISECONDS.toHours(diff);
+                    diff -= TimeUnit.HOURS.toMillis(hours);
 
-                String daysStr = String.valueOf(days);
-                String hoursStr = String.valueOf(hours);
-                String minutesStr = String.valueOf(minutes);
+                    long minutes = TimeUnit.MILLISECONDS.toMinutes(diff);
 
-                String timeMsg = PlaceHolderSystem.replacePlaceholders(
-                        Config.time_remaining,
-                        Map.of(
-                                "days", daysStr,
-                                "hours", hoursStr,
-                                "minutes", minutesStr
-                        )
-                );
-                player.sendSystemMessage(Component.literal(timeMsg).withStyle(ChatFormatting.YELLOW));
+                    String daysStr = String.valueOf(days);
+                    String hoursStr = String.valueOf(hours);
+                    String minutesStr = String.valueOf(minutes);
+
+                    String timeMsg = PlaceHolderSystem.replacePlaceholders(
+                            Config.time_remaining,
+                            Map.of(
+                                    "days", daysStr,
+                                    "hours", hoursStr,
+                                    "minutes", minutesStr
+                            )
+                    );
+                    serverPlayer.sendSystemMessage(Component.literal(timeMsg).withStyle(ChatFormatting.YELLOW));
+                }
             }
         }
     }
