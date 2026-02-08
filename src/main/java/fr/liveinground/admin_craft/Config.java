@@ -310,7 +310,7 @@ public class Config {
                 .define("enter", "You are now in the spawn protection");
 
         SPAWN_PROTECTION_LEAVE = BUILDER.comment("Message when leaving spawn protection")
-                .define("leave", "You are no more in the spawn protection");
+                .define("leave", "You are no longer in the spawn protection");
 
         TIME_REMAINING = BUILDER.comment("Message for displaying a sanction duration. Available placeholders: %days%, %hours%, and %minutes%")
                 .define("timeRemainingMessage", "Time remaining: %days% days, %hours%, and %minutes% minutes");
@@ -336,7 +336,7 @@ public class Config {
         REPORT_FAILED_SELF = BUILDER.comment("The message sent to a player trying to report himself").define("selfReport", "You can't report yourself!");
 
         FREEZE_START = BUILDER.comment("The message sent to the player when he is frozen").define("freezeStartMessage", "You have been frozen by an operator. Please wait for instructions and don't log out.");
-        FREEZE_STOP = BUILDER.comment("The message sent to the player when he is unfrozen").define("freezeStopMessage", "You are no more frozen. You can continue playing normally.");
+        FREEZE_STOP = BUILDER.comment("The message sent to the player when he is unfrozen").define("freezeStopMessage", "You are no longer frozen. You can continue playing normally.");
 
         BUILDER.pop();
     }
