@@ -12,6 +12,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -34,6 +35,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
@@ -273,5 +275,14 @@ public class AdminCraft {
             if (p != null) return p;
         }
         return null;
+    }
+
+    public static boolean isOnline(MinecraftServer server, GameProfile profile) {
+        return getOnlinePlayer(server, profile) != null;
+    }
+
+    @Nullable
+    public static ServerPlayer getOnlinePlayer(MinecraftServer server, GameProfile profile) {
+        return server.getPlayerList().getPlayer(profile.getId());
     }
 }

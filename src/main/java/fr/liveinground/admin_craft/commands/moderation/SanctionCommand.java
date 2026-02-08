@@ -81,11 +81,11 @@ public class SanctionCommand {
                                             reason = template.sanctionMessage();
                                             switch (template.type()) {
                                                 case BAN:
-                                                    CustomSanctionSystem.banPlayer(ctx.getSource().getServer(), ctx.getSource().toString(), sanctionedPlayer, reason, null);
+                                                    CustomSanctionSystem.banPlayer(ctx.getSource().getServer(), ctx.getSource().toString(), sanctionedPlayer.getGameProfile(), reason, null);
                                                     break;
                                                 case TEMPBAN:
                                                     Date banExpiresOn = SanctionConfig.getDurationAsDate(template.duration());
-                                                    CustomSanctionSystem.banPlayer(ctx.getSource().getServer(), ctx.getSource().toString(), sanctionedPlayer, reason, banExpiresOn);
+                                                    CustomSanctionSystem.banPlayer(ctx.getSource().getServer(), ctx.getSource().toString(), sanctionedPlayer.getGameProfile(), reason, banExpiresOn);
                                                     break;
                                                 case KICK:
                                                     CustomSanctionSystem.kickPlayer(sanctionedPlayer, reason);
