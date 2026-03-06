@@ -12,6 +12,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 
 import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
+import fr.liveinground.admin_craft.PermissionValue;
 import fr.liveinground.admin_craft.PlaceHolderSystem;
 import fr.liveinground.admin_craft.moderation.CustomSanctionSystem;
 import fr.liveinground.admin_craft.moderation.SanctionConfig;
@@ -44,7 +45,7 @@ public class SanctionCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("sanction")
-                        .requires(commandSource -> commandSource.hasPermission(Config.sanction_level))
+                        .requires(commandSource -> commandSource.permissions().hasPermission(PermissionValue.fromOld(Config.sanction_level).permission()))
                                 .then(Commands.argument("player", EntityArgument.player())
                                         .then(Commands.argument("reason", StringArgumentType.word()).suggests(REASON_SUGGESTIONS).executes(ctx -> {
                                             ServerPlayer sanctionedPlayer = EntityArgument.getPlayer(ctx, "player");
@@ -129,7 +130,7 @@ public class SanctionCommand {
         );
 
         dispatcher.register(Commands.literal("history")
-                .requires(commandSource -> commandSource.hasPermission(Config.sanction_level))
+                .requires(commandSource -> commandSource.permissions().hasPermission(PermissionValue.fromOld(Config.sanction_level).permission()))
                 .then(Commands.argument("player", GameProfileArgument.gameProfile())
                 .executes(ctx -> {
                     Collection<NameAndId> profiles = GameProfileArgument.getGameProfiles(ctx, "player");

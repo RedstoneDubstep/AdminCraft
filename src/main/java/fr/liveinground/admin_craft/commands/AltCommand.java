@@ -8,6 +8,7 @@ import com.mojang.brigadier.CommandDispatcher;
 
 import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
+import fr.liveinground.admin_craft.PermissionValue;
 import fr.liveinground.admin_craft.PlaceHolderSystem;
 import fr.liveinground.admin_craft.storage.types.tools.PlayerIPSData;
 import net.minecraft.ChatFormatting;
@@ -23,7 +24,7 @@ public class AltCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 
         dispatcher.register(Commands.literal("alts")
-                .requires(commandSource -> commandSource.hasPermission(Config.alt_level))
+                .requires(commandSource -> commandSource.permissions().hasPermission(PermissionValue.fromOld(Config.alt_level).permission()))
                 .then(Commands.argument("player", GameProfileArgument.gameProfile()).executes(ctx -> {
                     // Get the target player
                     Collection<NameAndId> profiles = GameProfileArgument.getGameProfiles(ctx, "player");

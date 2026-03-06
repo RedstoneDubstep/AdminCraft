@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
+import fr.liveinground.admin_craft.PermissionValue;
 import fr.liveinground.admin_craft.PlaceHolderSystem;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -25,7 +26,7 @@ public class Utils {
         return onlinePlayers.stream()
                 .filter(player -> {
                     ServerOpListEntry entry = opList.get(player.nameAndId());
-                    return entry != null && entry.getLevel() >= 1; // niveau OP ≥ 1
+                    return entry != null && entry.permissions().hasPermission(PermissionValue.MODERATORS.permission()); // niveau OP ≥ 1
                 })
                 .collect(Collectors.toList());
     }

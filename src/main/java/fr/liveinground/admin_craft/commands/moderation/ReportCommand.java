@@ -16,6 +16,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 
 import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
+import fr.liveinground.admin_craft.PermissionValue;
 import fr.liveinground.admin_craft.PlaceHolderSystem;
 import fr.liveinground.admin_craft.mutes.Utils;
 import fr.liveinground.admin_craft.storage.types.reports.PlayerReportsData;
@@ -79,7 +80,7 @@ public class ReportCommand {
         );
 
         dispatcher.register(Commands.literal("reports")
-                .requires(commandSource -> commandSource.hasPermission(Config.reports_level))
+                .requires(commandSource -> commandSource.permissions().hasPermission(PermissionValue.fromOld(Config.reports_level).permission()))
                 .then(Commands.argument("player", GameProfileArgument.gameProfile())
                         .executes(ctx -> {
                             Collection<NameAndId> profiles = GameProfileArgument.getGameProfiles(ctx, "player");
