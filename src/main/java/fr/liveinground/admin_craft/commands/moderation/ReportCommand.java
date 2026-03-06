@@ -1,8 +1,19 @@
 package fr.liveinground.admin_craft.commands.moderation;
 
-import com.mojang.authlib.GameProfile;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+
 import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
 import fr.liveinground.admin_craft.PlaceHolderSystem;
@@ -17,17 +28,7 @@ import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
-
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import net.minecraft.server.players.NameAndId;
 
 public class ReportCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -81,11 +82,11 @@ public class ReportCommand {
                 .requires(commandSource -> commandSource.hasPermission(Config.reports_level))
                 .then(Commands.argument("player", GameProfileArgument.gameProfile())
                         .executes(ctx -> {
-                            Collection<GameProfile> profiles = GameProfileArgument.getGameProfiles(ctx, "player");
+                            Collection<NameAndId> profiles = GameProfileArgument.getGameProfiles(ctx, "player");
                             if (!profiles.isEmpty()) {
 
-                                GameProfile targetProfile = profiles.iterator().next();
-                                ServerPlayer player = ctx.getSource().getServer().getPlayerList().getPlayer(targetProfile.getId());
+                                NameAndId targetProfile = profiles.iterator().next();
+                                ServerPlayer player = ctx.getSource().getServer().getPlayerList().getPlayer(targetProfile.id());
                                 if (player == null) {
                                     ctx.getSource().sendFailure(Component.literal("No player was found"));
                                     return 1;
