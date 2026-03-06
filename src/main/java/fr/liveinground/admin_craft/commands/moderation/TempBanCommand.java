@@ -9,6 +9,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 
 import fr.liveinground.admin_craft.Config;
+import fr.liveinground.admin_craft.PermissionValue;
 import fr.liveinground.admin_craft.moderation.CustomSanctionSystem;
 import fr.liveinground.admin_craft.moderation.SanctionConfig;
 import net.minecraft.commands.CommandSourceStack;
@@ -22,7 +23,7 @@ import net.minecraft.server.players.NameAndId;
 public class TempBanCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("tempban")
-                        .requires(commandSource -> commandSource.hasPermission(Config.tempban_level))
+                        .requires(commandSource -> commandSource.permissions().hasPermission(PermissionValue.fromOld(Config.tempban_level).permission()))
                                 .then(Commands.argument("player", GameProfileArgument.gameProfile())
                                         .then(Commands.argument("duration", StringArgumentType.word())
                                                 .executes(ctx -> {

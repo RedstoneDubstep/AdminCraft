@@ -15,6 +15,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
+import fr.liveinground.admin_craft.PermissionValue;
 import fr.liveinground.admin_craft.PlaceHolderSystem;
 import fr.liveinground.admin_craft.moderation.CustomSanctionSystem;
 import fr.liveinground.admin_craft.moderation.SanctionConfig;
@@ -33,7 +34,7 @@ public class MuteCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 
         dispatcher.register(Commands.literal("mute")
-                .requires(commandSource -> commandSource.hasPermission(Config.mute_level))
+                .requires(commandSource -> commandSource.permissions().hasPermission(PermissionValue.fromOld(Config.mute_level).permission()))
                 .then(Commands.argument("player", EntityArgument.player())
                         .executes(ctx -> {
                            mute(ctx, null, null);
@@ -47,7 +48,7 @@ public class MuteCommand {
                         ))));
 
         dispatcher.register(Commands.literal("unmute")
-                .requires(source -> source.hasPermission(Config.mute_level))
+                .requires(source -> source.permissions().hasPermission(PermissionValue.fromOld(Config.mute_level).permission()))
                 .then(Commands.argument("player", GameProfileArgument.gameProfile())
                         .executes(ctx -> {
                             Collection<NameAndId> profiles = GameProfileArgument.getGameProfiles(ctx, "player");
@@ -81,7 +82,7 @@ public class MuteCommand {
                 ));
 
         dispatcher.register(Commands.literal("tempmute")
-                .requires(commandSource -> commandSource.hasPermission(Config.mute_level))
+                .requires(commandSource -> commandSource.permissions().hasPermission(PermissionValue.fromOld(Config.mute_level).permission()))
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("duration", StringArgumentType.word())
                                         .executes(ctx -> {
