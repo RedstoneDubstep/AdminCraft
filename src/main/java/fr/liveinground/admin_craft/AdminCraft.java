@@ -1,9 +1,20 @@
 package fr.liveinground.admin_craft;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.logging.LogUtils;
+
 import fr.liveinground.admin_craft.commands.AltCommand;
-import fr.liveinground.admin_craft.commands.moderation.*;
+import fr.liveinground.admin_craft.commands.moderation.FreezeCommand;
+import fr.liveinground.admin_craft.commands.moderation.MuteCommand;
+import fr.liveinground.admin_craft.commands.moderation.ReportCommand;
+import fr.liveinground.admin_craft.commands.moderation.SanctionCommand;
+import fr.liveinground.admin_craft.commands.moderation.TempBanCommand;
+import fr.liveinground.admin_craft.commands.moderation.WarnCommand;
 import fr.liveinground.admin_craft.moderation.SanctionConfig;
 import fr.liveinground.admin_craft.mutes.MuteEventsHandler;
 import fr.liveinground.admin_craft.storage.PlayerDataManager;
@@ -19,6 +30,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.LevelData;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -35,10 +47,6 @@ import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.ExplosionEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
-import org.slf4j.Logger;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Mod(AdminCraft.MODID)
 public class AdminCraft {
@@ -54,7 +62,7 @@ public class AdminCraft {
     public static PlayerDataManager playerDataManager;
 
     public AdminCraft(IEventBus modEventBus, ModContainer modContainer) {
-        if (FMLEnvironment.dist == Dist.CLIENT) {
+        if (FMLEnvironment.getDist() == Dist.CLIENT) {
             LOGGER.error("AdminCraft mod can only be loaded on a server! " +
                     "Please remove it from your 'mods' folder.");
             return;
@@ -92,7 +100,7 @@ public class AdminCraft {
         if (Config.spawn_override) {
             event.getServer().overworld().getGameRules().getRule(GameRules.RULE_SPAWN_RADIUS).set(0, event.getServer());
             BlockPos spawnPos = new BlockPos(Config.spawn_x, Config.spawn_y, Config.spawn_z);
-            event.getServer().overworld().setDefaultSpawnPos(spawnPos, 0);
+            event.getServer().setRespawnData(LevelData.RespawnData.of(Level.OVERWORLD, spawnPos, 0, 0));
         }
     }
 

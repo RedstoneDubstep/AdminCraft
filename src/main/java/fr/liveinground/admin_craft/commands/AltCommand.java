@@ -1,7 +1,11 @@
 package fr.liveinground.admin_craft.commands;
 
-import com.mojang.authlib.GameProfile;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
 import com.mojang.brigadier.CommandDispatcher;
+
 import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
 import fr.liveinground.admin_craft.PlaceHolderSystem;
@@ -12,10 +16,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import net.minecraft.server.players.NameAndId;
 
 public class AltCommand {
 
@@ -25,10 +26,10 @@ public class AltCommand {
                 .requires(commandSource -> commandSource.hasPermission(Config.alt_level))
                 .then(Commands.argument("player", GameProfileArgument.gameProfile()).executes(ctx -> {
                     // Get the target player
-                    Collection<GameProfile> profiles = GameProfileArgument.getGameProfiles(ctx, "player");
+                    Collection<NameAndId> profiles = GameProfileArgument.getGameProfiles(ctx, "player");
                     if (!profiles.isEmpty()) {
-                        GameProfile targetProfile = profiles.iterator().next();
-                        ServerPlayer player = ctx.getSource().getServer().getPlayerList().getPlayer(targetProfile.getId());
+                        NameAndId targetProfile = profiles.iterator().next();
+                        ServerPlayer player = ctx.getSource().getServer().getPlayerList().getPlayer(targetProfile.id());
                         if (player == null) {
                             ctx.getSource().sendFailure(Component.literal("No player with this username was found."));
                             return 1;
