@@ -57,6 +57,15 @@ public class Config {
     private static final ModConfigSpec.IntValue TEMPBAN_LEVEL;
     public static int tempban_level;
 
+    private static final ModConfigSpec.IntValue INVSEE_LEVEL;
+    public static int invsee_level;
+
+    private static final ModConfigSpec.IntValue OTP_LEVEL;
+    public static int otp_level;
+
+    private static final ModConfigSpec.IntValue OTAG_LEVEL;
+    public static int otag_level;
+
     // ---------------
     // -- Sanctions --
     // ---------------
@@ -226,6 +235,9 @@ public class Config {
         WARN_LEVEL = BUILDER.comment("The OP level required to run the /warn command").worldRestart().defineInRange("warn", 3, 0, 4);
         REPORTS_LEVEL = BUILDER.comment("The OP level required to run the /reports command").worldRestart().defineInRange("reports", 3, 0, 4);
         TEMPBAN_LEVEL = BUILDER.comment("The OP level required to run the /tempban command").worldRestart().defineInRange("tempban", 3, 0,4);
+        INVSEE_LEVEL = BUILDER.comment("The OP level required to run the /invsee and /echest commands").worldRestart().defineInRange("invsee", 2, 0,4);
+        OTP_LEVEL = BUILDER.comment("The OP level required to run the /otp command").worldRestart().defineInRange("otp", 2, 0, 4);
+        OTAG_LEVEL = BUILDER.comment("The OP level required to run the /otag command").worldRestart().defineInRange("otp", 2, 0, 4);
 
         BUILDER.pop();
     }
@@ -307,7 +319,7 @@ public class Config {
                 .define("enter", "You are now in the spawn protection");
 
         SPAWN_PROTECTION_LEAVE = BUILDER.comment("Message when leaving spawn protection")
-                .define("leave", "You are no more in the spawn protection");
+                .define("leave", "You are no longer in the spawn protection");
 
         TIME_REMAINING = BUILDER.comment("Message for displaying a sanction duration. Available placeholders: %days%, %hours%, and %minutes%")
                 .define("timeRemainingMessage", "Time remaining: %days% days, %hours%, and %minutes% minutes");
@@ -333,7 +345,7 @@ public class Config {
         REPORT_FAILED_SELF = BUILDER.comment("The message sent to a player trying to report himself").define("selfReport", "You can't report yourself!");
 
         FREEZE_START = BUILDER.comment("The message sent to the player when he is frozen").define("freezeStartMessage", "You have been frozen by an operator. Please wait for instructions and don't log out.");
-        FREEZE_STOP = BUILDER.comment("The message sent to the player when he is unfrozen").define("freezeStopMessage", "You are no more frozen. You can continue playing normally.");
+        FREEZE_STOP = BUILDER.comment("The message sent to the player when he is unfrozen").define("freezeStopMessage", "You are no longer frozen. You can continue playing normally.");
 
         BUILDER.pop();
     }
@@ -368,14 +380,14 @@ public class Config {
         if (parts.length < 3) {
             AdminCraft.LOGGER.warn("Invalid length for the current sanction ('{}'): Expecting at least 3 subsection but found {}", sanc, parts.length);
             return false;
-        };
+        }
         for (int i = 2; i < parts.length; i++) {
             String segment = parts[i].trim();
             String[] levelSplit = segment.split("->");
             if (levelSplit.length != 2) {
                 AdminCraft.LOGGER.warn("Invalid length for the segment '{}', found {} parts instead of 2", segment, levelSplit.length);
                 return false;
-            };
+            }
 
             String action = levelSplit[1].trim();
 
@@ -429,6 +441,9 @@ public class Config {
         warn_level = WARN_LEVEL.get();
         reports_level = REPORTS_LEVEL.get();
         tempban_level = TEMPBAN_LEVEL.get();
+        invsee_level = INVSEE_LEVEL.get();
+        otag_level = OTAG_LEVEL.get();
+        otp_level = OTP_LEVEL.get();
 
         // ---------------
         // -- Sanctions --

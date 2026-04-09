@@ -111,7 +111,7 @@ public class MuteCommand {
     }
 
     private static void mute(@NotNull CommandContext<CommandSourceStack> ctx, @Nullable String reason, @Nullable Date duration) throws CommandSyntaxException {
-        GameProfile profile = AdminCraft.getOneProfile(GameProfileArgument.getGameProfiles(ctx, "player"));
+        NameAndId profile = AdminCraft.getOneProfile(GameProfileArgument.getGameProfiles(ctx, "player"));
         if (profile == null) {
             ctx.getSource().sendFailure(Component.literal("No player was found").withStyle(ChatFormatting.RED));
             return;
@@ -120,13 +120,13 @@ public class MuteCommand {
         if (reason == null) {
             reason = "Muted by an operator.";
         }
-        if (AdminCraft.mutedPlayersUUID.contains(String.valueOf(profile.getId()))) {
-            ctx.getSource().sendFailure(Component.literal(PlaceHolderSystem.replacePlaceholders(Config.mute_failed_already_muted, Map.of("player", profile.getName()))));
+        if (AdminCraft.mutedPlayersUUID.contains(String.valueOf(profile.id()))) {
+            ctx.getSource().sendFailure(Component.literal(PlaceHolderSystem.replacePlaceholders(Config.mute_failed_already_muted, Map.of("player", profile.name()))));
             return;
         }
         CustomSanctionSystem.mutePlayer(ctx.getSource().getServer(), profile, reason, duration);
 
-        String msgToOperator = PlaceHolderSystem.replacePlaceholders(Config.mute_success, Map.of("player", profile.getName(), "reason", reason));
+        String msgToOperator = PlaceHolderSystem.replacePlaceholders(Config.mute_success, Map.of("player", profile.name(), "reason", reason));
         ctx.getSource().sendSuccess(() -> Component.literal(msgToOperator), true);
     }
 }

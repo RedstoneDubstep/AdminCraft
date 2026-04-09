@@ -1,8 +1,12 @@
 package fr.liveinground.admin_craft;
 
+import com.mojang.authlib.GameProfile;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.liveinground.admin_craft.commands.tools.OfflineTagCommand;
+import fr.liveinground.admin_craft.commands.tools.OfflineTeleportCommand;
+import net.minecraft.server.players.NameAndId;
 import org.slf4j.Logger;
 
 import com.mojang.brigadier.CommandDispatcher;
@@ -23,6 +27,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -47,6 +52,9 @@ import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.ExplosionEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+
+import javax.annotation.Nullable;
+import java.util.Collection;
 
 @Mod(AdminCraft.MODID)
 public class AdminCraft {
@@ -92,6 +100,11 @@ public class AdminCraft {
         FreezeCommand.register(dispatcher);
         ReportCommand.register(dispatcher);
         TempBanCommand.register(dispatcher);
+        //todo: copy echest and invsee from anticipated features
+        InvseeCommand.register(dispatcher);
+        EchestCommand.register(dispatcher);
+        OfflineTeleportCommand.register(dispatcher);
+        OfflineTagCommand.register(dispatcher);
         // StaffModeCommand.register(dispatcher);
     }
 
@@ -262,5 +275,23 @@ public class AdminCraft {
             player.sendSystemMessage(Component.literal("It strongly recommended to check the configuration file to check there is no issue with it."));
             player.sendSystemMessage(Component.literal("You can disable this message by changing the 'configVersion' key to " + AdminCraft._VERSION + " in the configuration."));
         }
+    }
+
+    @Nullable
+    public static NameAndId getOneProfile(Collection<NameAndId> profiles) {
+        if (profiles.isEmpty()) return null;
+        for (NameAndId p: profiles) {
+            if (p != null) return p;
+        }
+        return null;
+    }
+
+    public static boolean isOnline(MinecraftServer server, NameAndId profile) {
+        return getOnlinePlayer(server, profile) != null;
+    }
+
+    @Nullable
+    public static ServerPlayer getOnlinePlayer(MinecraftServer server, NameAndId profile) {
+        return server.getPlayerList().getPlayer(profile.id());
     }
 }
