@@ -13,6 +13,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.UUID;
 
 public class PlayerDataSaver {
@@ -44,7 +45,10 @@ public class PlayerDataSaver {
         File file = new File(playerDataDir, uuid.toString() + ".dat");
         if (!file.exists()) return;
 
-        CompoundTag root = NbtIo.readCompressed(file);
+        CompoundTag root = NbtIo.readCompressed(
+                file.toPath(),
+                NbtAccounter.unlimitedHeap()
+        );
         ListTag list = new ListTag();
 
         for (int i = 0; i < container.getContainerSize(); i++) {
@@ -58,7 +62,7 @@ public class PlayerDataSaver {
         }
 
         root.put("Inventory", list);
-        NbtIo.writeCompressed(root, file);
+        NbtIo.writeCompressed(root, file.toPath());
     }
 
     public static void applyEchestToOnlinePlayer(SimpleContainer container, ServerPlayer player) {
@@ -88,7 +92,10 @@ public class PlayerDataSaver {
         File file = new File(playerDataDir, uuid.toString() + ".dat");
         if (!file.exists()) return;
 
-        CompoundTag root = NbtIo.readCompressed(file);
+        CompoundTag root = NbtIo.readCompressed(
+                file.toPath(),
+                NbtAccounter.unlimitedHeap()
+        );
         ListTag list = new ListTag();
 
         for (int i = 0; i < container.getContainerSize(); i++) {
@@ -102,7 +109,7 @@ public class PlayerDataSaver {
         }
 
         root.put("EnderItems", list);
-        NbtIo.writeCompressed(root, file);
+        NbtIo.writeCompressed(root, file.toPath());
     }
 
     public static int addOfflineTag(ServerLevel level, UUID uuid, String tag) throws IOException {
@@ -113,17 +120,21 @@ public class PlayerDataSaver {
         File file = new File(playerDataDir, uuid.toString() + ".dat");
         if (!file.exists()) return 404;
 
-        CompoundTag root = NbtIo.readCompressed(file);
+        CompoundTag root = NbtIo.readCompressed(
+                file.toPath(),
+                NbtAccounter.unlimitedHeap()
+        );
         ListTag list;
-
-        if (root.contains("Tags", Tag.TAG_LIST)) {
-            list = root.getList("Tags", Tag.TAG_STRING);
+        Optional<ListTag> olt = root.getList("Tags");
+        if (root.contains("Tags") && olt.isPresent()) {
+            list = olt.get();
         } else {
             list = new ListTag();
         }
 
         for (int i = 0; i < list.size(); i++) {
-            if (list.getString(i).equalsIgnoreCase(tag)) {
+            Optional<String> os = list.getString(i);
+            if (os.isPresent() && os.get().equalsIgnoreCase(tag)) {
                 return 409;
             }
         }
@@ -131,7 +142,7 @@ public class PlayerDataSaver {
         list.add(StringTag.valueOf(tag));
         root.put("Tags", list);
 
-        NbtIo.writeCompressed(root, file);
+        NbtIo.writeCompressed(root, file.toPath());
 
         return 200;
     }
@@ -144,32 +155,36 @@ public class PlayerDataSaver {
         File file = new File(playerDataDir, uuid.toString() + ".dat");
         if (!file.exists()) return 404;
 
-        CompoundTag root = NbtIo.readCompressed(file);
+        CompoundTag root = NbtIo.readCompressed(
+                file.toPath(),
+                NbtAccounter.unlimitedHeap()
+        );
 
-        if (!root.contains("Tags", Tag.TAG_LIST)) {
+        Optional<ListTag> olt = root.getList("Tags");
+        if (!root.contains("Tags") || olt.isEmpty()) {
             return 409;
-        }
+        } else {
+            ListTag list = root.getList("Tags").get();  // (ignore "'Optional.get()' without 'isPresent()' check" warning)
 
-        ListTag list = root.getList("Tags", Tag.TAG_STRING);
-
-        boolean removed = false;
-        for (int i = 0; i < list.size(); i++) {
-            if (list.getString(i).equalsIgnoreCase(tag)) {
-                list.remove(i);
-                removed = true;
-                break;
+            boolean removed = false;
+            for (int i = 0; i < list.size(); i++) {
+                Optional<String> os = list.getString(i);
+                if (os.isPresent() && os.get().equalsIgnoreCase(tag)) {
+                    list.remove(i);
+                    removed = true;
+                    break;
+                }
             }
-        }
 
-        if (!removed) {
-            return 409;
-        }
+            if (!removed) {
+                return 409;
+            }
 
-        root.put("Tags", list);
+            root.put("Tags", list);
 
-        NbtIo.writeCompressed(root, file);
+            NbtIo.writeCompressed(root, file.toPath());
 
-        return 200;
+            return 200;}
     }
 
     public static void setOfflineLocation(ServerLevel level, UUID uuid, Vec3 position) throws IOException {
@@ -180,8 +195,10 @@ public class PlayerDataSaver {
         File file = new File(playerDataDir, uuid.toString() + ".dat");
         if (!file.exists()) return;
 
-        CompoundTag root = NbtIo.readCompressed(file);
-
+        CompoundTag root = NbtIo.readCompressed(
+                file.toPath(),
+                NbtAccounter.unlimitedHeap()
+        );
         ListTag newPos = new ListTag();
         newPos.add(DoubleTag.valueOf(position.x));
         newPos.add(DoubleTag.valueOf(position.y));
@@ -189,7 +206,7 @@ public class PlayerDataSaver {
 
         root.put("Pos", newPos);
 
-        NbtIo.writeCompressed(root, file);
+        NbtIo.writeCompressed(root, file.toPath());
     }
 
 }
