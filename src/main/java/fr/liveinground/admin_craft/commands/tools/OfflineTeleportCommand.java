@@ -1,6 +1,5 @@
 package fr.liveinground.admin_craft.commands.tools;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
@@ -15,11 +14,12 @@ import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.NameAndId;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.phys.Vec3;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Objects;
+import java.util.Set;
 
 public class OfflineTeleportCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -60,7 +60,8 @@ public class OfflineTeleportCommand {
         }
         ServerPlayer onlinePlayer = source.getServer().getPlayerList().getPlayer(profile.id());
         if (onlinePlayer != null) {
-            onlinePlayer.teleportTo(source.getLevel(), destination.x, destination.y, destination.z, 0, 0);
+            Set<Relative> _ignored = Set.of();
+            onlinePlayer.teleportTo(source.getLevel(), destination.x, destination.y, destination.z, _ignored, onlinePlayer.getYRot(), onlinePlayer.getXRot(), true);
             source.sendSuccess(() ->
                             Component.literal(String.format(
                                     "Teleported %s to %.2f, %.2f, %.2f",
@@ -89,7 +90,8 @@ public class OfflineTeleportCommand {
 
         ServerPlayer player = source.getServer().getPlayerList().getPlayer(profile.id());
         if (player != null) {
-            sourcePlayer.teleportTo(Objects.requireNonNull(source.getServer().getLevel(player.level().dimension())), player.getX(), player.getY(), player.getZ(), 0, 0);
+            Set<Relative> _ignored = Set.of();
+            sourcePlayer.teleportTo(source.getLevel(), player.getX(), player.getY(), player.getZ(), _ignored, player.getYRot(), player.getXRot(), true);
             source.sendSuccess(() -> Component.literal("Teleported to " + player.getDisplayName().getString()), true);
         } else {
             try {
