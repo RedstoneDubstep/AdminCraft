@@ -450,11 +450,11 @@ public class Config {
         // ---------------
 
         for (String entry: SANCTION_TEMPLATES.get()) {
-            AdminCraft.LOGGER.debug("Analysing sanction entry " + entry);
+            AdminCraft.LOGGER.debug("Analysing sanction entry {}", entry);
             try {
                 String[] parts = entry.split("@");
                 if (parts.length < 3) {
-                    AdminCraft.LOGGER.error("Invalid template (length < 3): " + entry);
+                    AdminCraft.LOGGER.error("Invalid template (length < 3): {}", entry);
                     continue;
                 }
 

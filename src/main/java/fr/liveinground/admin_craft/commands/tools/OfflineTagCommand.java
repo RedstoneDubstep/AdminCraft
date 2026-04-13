@@ -1,6 +1,5 @@
 package fr.liveinground.admin_craft.commands.tools;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import fr.liveinground.admin_craft.Config;
@@ -69,7 +68,6 @@ public class OfflineTagCommand {
         if (player != null) {
             player.addTag(tag);
             source.sendSuccess(() -> Component.literal("Added tag '" + tag + "' to " + player.getDisplayName().getString()), true);
-            return 1;
         } else {
             try {
                 int success = PlayerDataSaver.addOfflineTag(source.getLevel(), profile.id(), tag);
@@ -86,8 +84,8 @@ public class OfflineTagCommand {
             } catch (IOException e) {
                 source.sendFailure(Component.literal("Failure: something went wrong (IOException)").withStyle(ChatFormatting.RED));
             }
-            return 1;
         }
+        return 1;
     }
 
     private static int removeTagToProfile(CommandSourceStack source, Collection<NameAndId> profiles, String tag) {
@@ -111,7 +109,6 @@ public class OfflineTagCommand {
         if (player != null) {
             player.addTag(tag);
             source.sendSuccess(() -> Component.literal("Removed tag '" + tag + "' to " + player.getDisplayName().getString()), true);
-            return 1;
         } else {
             try {
                 int success = PlayerDataSaver.removeOfflineTag(source.getLevel(), profile.id(), tag);
@@ -128,8 +125,8 @@ public class OfflineTagCommand {
             } catch (IOException e) {
                 source.sendFailure(Component.literal("Failure: something went wrong (IOException)").withStyle(ChatFormatting.RED));
             }
-            return 1;
         }
+        return 1;
     }
 
     private static int listProfileTags(CommandSourceStack source, Collection<NameAndId> profiles) {

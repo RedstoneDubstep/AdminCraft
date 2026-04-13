@@ -215,9 +215,9 @@ public class ReportCommand {
                 InputStream error = connection.getErrorStream();
                 if (error != null) {
                     String err = new String(error.readAllBytes(), StandardCharsets.UTF_8);
-                    AdminCraft.LOGGER.error("Webhook HTTP error (" + responseCode + "): " + err);
+                    AdminCraft.LOGGER.error("Webhook HTTP error ({}): {}", responseCode, err);
                 } else {
-                    AdminCraft.LOGGER.error("Webhook returned HTTP " + responseCode + " with no content.");
+                    AdminCraft.LOGGER.error("Webhook returned HTTP {} with no content.", responseCode);
                 }
             }
         }
