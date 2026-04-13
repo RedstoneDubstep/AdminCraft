@@ -1,12 +1,15 @@
 package fr.liveinground.admin_craft.storage.nbt;
 
+import fr.liveinground.admin_craft.AdminCraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.Vec3;
 
@@ -15,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class PlayerDataLoader {
@@ -26,18 +30,22 @@ public class PlayerDataLoader {
 
         if (!file.exists()) return null;
 
-        return NbtIo.readCompressed(file);
+        return NbtIo.readCompressed(
+                file.toPath(),
+                NbtAccounter.unlimitedHeap()
+        );
     }
 
-    private static SimpleContainer loadInventoryFromNBT(CompoundTag tag) {
+    private static SimpleContainer loadInventoryFromNBT(CompoundTag tag, Level level) {
         SimpleContainer inv = new SimpleContainer(36);
 
-        ListTag list = tag.getList("Inventory", Tag.TAG_COMPOUND);
+        Optional<ListTag> olt = tag.getList("Inventory");
+        ListTag list = olt.orElse(new ListTag());
         for (Tag t : list) {
             CompoundTag item = (CompoundTag) t;
-            int slot = item.getByte("Slot") & 255;
+            int slot = item.getByte("Slot").map(b -> b & 255).orElseThrow(() -> new IllegalStateException("Missing slot in nbt"));
             if (slot < inv.getContainerSize()) {
-                inv.setItem(slot, ItemStack.of(item));
+                inv.setItem(slot, ItemStack.parseOptional(level.registryAccess(), item));
             }
         }
         return inv;
@@ -47,19 +55,19 @@ public class PlayerDataLoader {
     public static SimpleContainer loadInventoryFromUUID(ServerLevel level, UUID uuid) throws IOException {
         CompoundTag tag = loadOfflinePlayerData(level, uuid);
         if (tag == null) return null;
-        else return loadInventoryFromNBT(tag);
+        else return loadInventoryFromNBT(tag, level);
     }
 
-    private static SimpleContainer loadEnderChestFromNBT(CompoundTag tag) {
+    private static SimpleContainer loadEnderChestFromNBT(CompoundTag tag, Level level) {
         SimpleContainer ec = new SimpleContainer(27);
-
-        ListTag list = tag.getList("EnderItems", Tag.TAG_COMPOUND);
+        Optional<ListTag> olt = tag.getList("EnderItems");
+        ListTag list = olt.orElse(new ListTag());
         for (Tag t : list) {
             CompoundTag item = (CompoundTag) t;
-            int slot = item.getByte("Slot") & 255;
+            int slot = item.getByte("Slot").map(b -> b & 255).orElseThrow(() -> new IllegalStateException("Missing slot in nbt"));
 
             if (slot < ec.getContainerSize()) {
-                ec.setItem(slot, ItemStack.of(item));
+                ec.setItem(slot, ItemStack.parseOptional(level.registryAccess(), item));
             }
         }
         return ec;
@@ -69,7 +77,7 @@ public class PlayerDataLoader {
     public static SimpleContainer loadEnderChestFromUUID(ServerLevel level, UUID uuid) throws IOException {
         CompoundTag tag = loadOfflinePlayerData(level, uuid);
         if (tag == null) return null;
-        else return loadEnderChestFromNBT(tag);
+        else return loadEnderChestFromNBT(tag, level);
     }
 
     @Nullable
@@ -81,18 +89,21 @@ public class PlayerDataLoader {
         File file = new File(playerDataDir, uuid.toString() + ".dat");
         if (!file.exists()) return null;
 
-        CompoundTag root = NbtIo.readCompressed(file);
+        CompoundTag root = NbtIo.readCompressed(
+                file.toPath(),
+                NbtAccounter.unlimitedHeap()
+        );
         ListTag list;
-
-        if (root.contains("Tags", Tag.TAG_LIST)) {
-            list = root.getList("Tags", Tag.TAG_STRING);
+        if (root.contains("Tags")) {
+            Optional<ListTag> olt = root.getList("Tags");
+            list = olt.orElse(new ListTag());
         } else {
             list = new ListTag();
         }
 
         List<String> tagStringArray = new ArrayList<>();
         for (Tag t: list) {
-            tagStringArray.add(t.getAsString());
+            tagStringArray.add(t.asString().orElse(""));
         }
         return tagStringArray;
     }
@@ -106,13 +117,29 @@ public class PlayerDataLoader {
         File file = new File(playerDataDir, uuid.toString() + ".dat");
         if (!file.exists()) return null;
 
-        CompoundTag root = NbtIo.readCompressed(file);
+        CompoundTag root = NbtIo.readCompressed(
+                file.toPath(),
+                NbtAccounter.unlimitedHeap()
+        );
 
         ListTag list;
-        if (root.contains("Pos", Tag.TAG_DOUBLE)) {
-            list = root.getList("Pos", Tag.TAG_DOUBLE);
+        if (root.contains("Pos")) {
+            list = root.getList("Pos").orElse(null);
         } else return null;
+        if (list == null || list.isEmpty()) {
+            AdminCraft.LOGGER.warn("Offline player location unavailable (UUID: {}): 'Pos' tag missing or empty. Defaulting to (0,0,0).", uuid);
+            return new Vec3(0, 0, 0);
 
-        return new Vec3(list.getDouble(0), list.getDouble(1), list.getDouble(2));
+        } else {
+            Optional<Double> x = list.getDouble(0);
+            Optional<Double> y = list.getDouble(1);
+            Optional<Double> z = list.getDouble(2);
+            if (x.isPresent() && y.isPresent() && z.isPresent())
+                return new Vec3(x.get(), y.get(), z.get());
+            else {
+                AdminCraft.LOGGER.warn("Offline player location invalid (UUID: {}): 'Pos' tag does not contain 3 valid doubles. Defaulting to (0,0,0).", uuid);
+                return new Vec3(0, 0, 0);
+            }
+        }
     }
 }
