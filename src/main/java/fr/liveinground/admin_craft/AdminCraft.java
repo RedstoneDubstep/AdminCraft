@@ -3,15 +3,13 @@ package fr.liveinground.admin_craft;
 import java.util.ArrayList;
 import java.util.List;
 
-import fr.liveinground.admin_craft.commands.tools.OfflineTagCommand;
-import fr.liveinground.admin_craft.commands.tools.OfflineTeleportCommand;
+import fr.liveinground.admin_craft.commands.tools.*;
 import net.minecraft.server.players.NameAndId;
 import org.slf4j.Logger;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.logging.LogUtils;
 
-import fr.liveinground.admin_craft.commands.AltCommand;
 import fr.liveinground.admin_craft.commands.moderation.FreezeCommand;
 import fr.liveinground.admin_craft.commands.moderation.MuteCommand;
 import fr.liveinground.admin_craft.commands.moderation.ReportCommand;
@@ -99,7 +97,6 @@ public class AdminCraft {
         FreezeCommand.register(dispatcher);
         ReportCommand.register(dispatcher);
         TempBanCommand.register(dispatcher);
-        //todo: copy echest and invsee from anticipated features
         InvseeCommand.register(dispatcher);
         EchestCommand.register(dispatcher);
         OfflineTeleportCommand.register(dispatcher);

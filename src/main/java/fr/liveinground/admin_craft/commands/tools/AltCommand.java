@@ -1,4 +1,4 @@
-package fr.liveinground.admin_craft.commands;
+package fr.liveinground.admin_craft.commands.tools;
 
 import java.util.Collection;
 import java.util.List;
