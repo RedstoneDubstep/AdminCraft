@@ -1,6 +1,7 @@
 package fr.liveinground.admin_craft.storage.nbt;
 
 import fr.liveinground.admin_craft.AdminCraft;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtAccounter;
@@ -8,7 +9,9 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.Vec3;
@@ -45,7 +48,7 @@ public class PlayerDataLoader {
             CompoundTag item = (CompoundTag) t;
             int slot = item.getByte("Slot").map(b -> b & 255).orElseThrow(() -> new IllegalStateException("Missing slot in nbt"));
             if (slot < inv.getContainerSize()) {
-                inv.setItem(slot, ItemStack.parseOptional(level.registryAccess(), item));
+                inv.setItem(slot, ((CompoundTag) t).read(String.valueOf(slot), ItemStack.CODEC).orElse(ItemStack.EMPTY));
             }
         }
         return inv;
@@ -67,7 +70,7 @@ public class PlayerDataLoader {
             int slot = item.getByte("Slot").map(b -> b & 255).orElseThrow(() -> new IllegalStateException("Missing slot in nbt"));
 
             if (slot < ec.getContainerSize()) {
-                ec.setItem(slot, ItemStack.parseOptional(level.registryAccess(), item));
+                ec.setItem(slot, ((CompoundTag) t).read(String.valueOf(slot), ItemStack.CODEC).orElse(ItemStack.EMPTY));
             }
         }
         return ec;
