@@ -11,6 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.Vec3;
 
+import java.io.DataOutput;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
@@ -53,11 +54,12 @@ public class PlayerDataSaver {
 
         for (int i = 0; i < container.getContainerSize(); i++) {
             ItemStack stack = container.getItem(i);
-            if (!stack.isEmpty()) {
-                CompoundTag item = new CompoundTag();
-                item.putByte("Slot", (byte) i);
-                stack.save(item);
-                list.add(item);
+            Tag item = ItemStack.CODEC.encodeStart(NbtOps.INSTANCE, stack).result().orElse(new CompoundTag());
+            if (item instanceof CompoundTag compound) {
+                list.add(compound);
+            } else {
+                AdminCraft.LOGGER.error("Encoding issue (inventory), item encoding for slot {} hasn't returned a CompoundTag.", stack.getEquipmentSlot());
+                AdminCraft.LOGGER.error("This item stack (inventory) is lost: {}", stack);
             }
         }
 
@@ -100,16 +102,16 @@ public class PlayerDataSaver {
 
         for (int i = 0; i < container.getContainerSize(); i++) {
             ItemStack stack = container.getItem(i);
-            if (!stack.isEmpty()) {
-                CompoundTag item = new CompoundTag();
-                item.putByte("Slot", (byte) i);
-                stack.save(item);
-                list.add(item);
+            Tag item = ItemStack.CODEC.encodeStart(NbtOps.INSTANCE, stack).result().orElse(new CompoundTag());
+            if (item instanceof CompoundTag compound) {
+                list.add(compound);
+            } else {
+                AdminCraft.LOGGER.error("Encoding issue (enderchest), item encoding for slot {} hasn't returned a CompoundTag.", stack.getEquipmentSlot());
+                AdminCraft.LOGGER.error("This item stack (enderchest) is lost: {}", stack);
             }
+            root.put("EnderItems", list);
+            NbtIo.writeCompressed(root, file.toPath());
         }
-
-        root.put("EnderItems", list);
-        NbtIo.writeCompressed(root, file.toPath());
     }
 
     public static int addOfflineTag(ServerLevel level, UUID uuid, String tag) throws IOException {
