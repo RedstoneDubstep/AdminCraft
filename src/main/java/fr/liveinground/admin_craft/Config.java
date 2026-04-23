@@ -150,6 +150,25 @@ public class Config {
     private static final ModConfigSpec.ConfigValue<String> REPORT_WEBHOOK;
     public static String report_webhook;
 
+    // -------------------------
+    // -- Appeals and Discord --
+    // -------------------------
+
+    private static final ModConfigSpec.ConfigValue<Boolean> ENABLE_APPEALS;
+    public static boolean enable_appeals;
+
+    private static final ModConfigSpec.ConfigValue<String> BOT_TOKEN;
+    public static String bot_token;
+
+    private static final ModConfigSpec.ConfigValue<String> GUID_ID;
+    public static String guild_id;
+
+    private static final ModConfigSpec.ConfigValue<String> INVITE_LINK;
+    public static String invite_link;
+
+    private static final ModConfigSpec.ConfigValue<String> STAFF_ROLE_ID;
+    public static String staff_role_id;
+
     // --------------
     // -- Messages --
     // --------------
@@ -308,6 +327,18 @@ public class Config {
         ENABLE_REPORTS = BUILDER.comment("Enable the /report command for every players").worldRestart().define("enable", true);
         USE_SANCTIONS_REASONS = BUILDER.comment("Should the mod suggests the sanctions defined in admin_craft_sanctions.toml as report reasons?").worldRestart().define("sanctionReasons", true);
         REPORT_WEBHOOK = BUILDER.comment("Discord webhook to relay reports. Set to 'null' to disable").define("discordWebhook", "null");
+
+        BUILDER.pop();
+    }
+
+    static {
+        BUILDER.push("discordAppeals");
+
+        ENABLE_APPEALS = BUILDER.comment("Enable the discord appeal system").worldRestart().define("enable", false);
+        BOT_TOKEN = BUILDER.comment("The discord bot token for the appeal system").worldRestart().define("discordToken", "configthisplease");
+        GUID_ID = BUILDER.comment("The Guild ID where the appeal system should work").worldRestart().define("guildID", "configthisplease");
+        INVITE_LINK = BUILDER.comment("The invite link to the appeal server, displayed on sanction messages").worldRestart().define("invite", "https://discord.com/invite/yourinvite");
+        STAFF_ROLE_ID = BUILDER.comment("The role id allowing to manage appeal tickers").worldRestart().define("staffRoleID", "configthisplease");
 
         BUILDER.pop();
     }
@@ -549,6 +580,16 @@ public class Config {
         use_sanction_reasons = USE_SANCTIONS_REASONS.get();
         if (checkWebhook(REPORT_WEBHOOK.get())) report_webhook = REPORT_WEBHOOK.get();
         else report_webhook = null;
+
+        // ---------------
+        // -- Appeals  --
+        // ---------------
+
+        enable_appeals = ENABLE_APPEALS.get();
+        bot_token = BOT_TOKEN.get();
+        guild_id = GUID_ID.get();
+        invite_link = INVITE_LINK.get();
+        staff_role_id = STAFF_ROLE_ID.get();
 
         // --------------
         // -- Messages --
