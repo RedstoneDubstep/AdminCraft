@@ -1,5 +1,6 @@
 package fr.liveinground.admin_craft.discord;
 
+import fr.liveinground.admin_craft.storage.SanctionDatabase;
 import fr.liveinground.admin_craft.storage.types.sanction.SanctionData;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -83,6 +84,10 @@ public class BotListener extends ListenerAdapter {
             String id = event.getValue("id").getAsString();
             String ign = event.getValue("ign").getAsString();
             //todo: check id with ign, get data
+            if (!SanctionDatabase.isPlayerCurrentlySanctioned(id, ign)) {
+                event.reply("No sanction matches with this id and this player. Please check your input and try again").setEphemeral(true).queue();
+                return;
+            }
             SanctionData data;
             String uuid;
 
@@ -97,13 +102,13 @@ public class BotListener extends ListenerAdapter {
             embed.addField("Sanction type", data.sanctionType, true);
             embed.addField("Date", data.date, true);
             if (data.expiresOn != null) {
-                embed.addField("Expires on", data.expiresOn, true);
+                embed.addField("Expires on", data.expiresOn.toString(), true);
             }
 
-            event.replyEmbeds(embed.build()).addActionRow(Button.success(DiscordBot.APPEAL_BUTTON_ID, "Appeal")).queue();
+            event.replyEmbeds(embed.build()).addActionRow(Button.success(DiscordBot.APPEAL_BUTTON_ID, "Appeal")).setEphemeral(true).queue();
 
         } else if (event.getId().equals(DiscordBot.APPEAL_MODAL_ID)) {
-
+            //todo
         }
     }
 }

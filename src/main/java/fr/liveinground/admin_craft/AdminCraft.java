@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import fr.liveinground.admin_craft.commands.tools.*;
+import fr.liveinground.admin_craft.discord.DiscordBot;
+import fr.liveinground.admin_craft.storage.SanctionDatabase;
 import net.minecraft.server.players.NameAndId;
 import org.slf4j.Logger;
 
@@ -77,6 +79,7 @@ public class AdminCraft {
         NeoForge.EVENT_BUS.register(this);
         NeoForge.EVENT_BUS.register(MuteEventsHandler.class);
         NeoForge.EVENT_BUS.register(FreezeEventListener.class);
+        SanctionDatabase.start();
     }
 
     /*
