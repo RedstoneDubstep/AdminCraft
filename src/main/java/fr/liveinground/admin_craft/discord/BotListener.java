@@ -88,8 +88,7 @@ public class BotListener extends ListenerAdapter {
                 event.reply("No sanction matches this id and this player. Please check your input and try again").setEphemeral(true).queue();
                 return;
             }
-            SanctionData data;
-            String uuid;
+            SanctionData data = SanctionDatabase.getSanctionData(id, ign);
 
             EmbedBuilder embed = new EmbedBuilder();
             embed.setTitle("Sanction information");
@@ -99,8 +98,8 @@ public class BotListener extends ListenerAdapter {
             embed.addField("IGN", ign, true);
             embed.addField("UUID", uuid, true);
             embed.addField("Sanction ID", id, true);
-            embed.addField("Sanction type", data.sanctionType, true);
-            embed.addField("Date", data.date, true);
+            embed.addField("Sanction type", data.sanctionType.toString(), true);
+            embed.addField("Date", data.date.toString(), true);
             if (data.expiresOn != null) {
                 embed.addField("Expires on", data.expiresOn.toString(), true);
             }
