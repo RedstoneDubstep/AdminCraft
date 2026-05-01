@@ -22,7 +22,7 @@ public class SanctionDatabase {
     }
 
     private static String generateID() {
-        StringBuilder builder = new StringBuilder(8);
+        StringBuilder builder = new StringBuilder(9);
         builder.append("#");
         for (int i = 0; i < 8; i++) {
             int index = RANDOM.nextInt(CHARACTERS.length());

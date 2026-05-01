@@ -80,12 +80,12 @@ public class BotListener extends ListenerAdapter {
 
     @Override
     public void onModalInteraction(ModalInteractionEvent event) {
-        if (event.getId().equals(DiscordBot.INFO_BUTTON_ID)) {
+        if (event.getId().equals(DiscordBot.INFO_MODAL_ID)) {
             String id = event.getValue("id").getAsString();
             String ign = event.getValue("ign").getAsString();
             //todo: check id with ign, get data
             if (!SanctionDatabase.isPlayerCurrentlySanctioned(id, ign)) {
-                event.reply("No sanction matches with this id and this player. Please check your input and try again").setEphemeral(true).queue();
+                event.reply("No sanction matches this id and this player. Please check your input and try again").setEphemeral(true).queue();
                 return;
             }
             SanctionData data;
