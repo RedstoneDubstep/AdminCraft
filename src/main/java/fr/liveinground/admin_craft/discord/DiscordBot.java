@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class DiscordBot {
@@ -22,7 +23,7 @@ public class DiscordBot {
     public static final String INFO_MODAL_ID = "info_modal";
     public static final String APPEAL_MODAL_ID = "appeal_modal";
 
-    public static Map<String, String> playerCache = new HashMap<>();
+    public static Map<String, List<String>> playerCache = new HashMap<>();
 
     public static void start() {
         AdminCraft.LOGGER.info("Starting appeal bot...");
