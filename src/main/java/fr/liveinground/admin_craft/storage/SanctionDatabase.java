@@ -1,7 +1,6 @@
 package fr.liveinground.admin_craft.storage;
 
 import fr.liveinground.admin_craft.AdminCraft;
-import fr.liveinground.admin_craft.moderation.SanctionConfig;
 import fr.liveinground.admin_craft.storage.types.sanction.AppealStatus;
 import fr.liveinground.admin_craft.storage.types.sanction.Sanction;
 import fr.liveinground.admin_craft.storage.types.sanction.SanctionData;
@@ -13,6 +12,7 @@ import java.sql.*;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class SanctionDatabase {
 
@@ -36,7 +36,7 @@ public class SanctionDatabase {
         }
         String id = builder.toString();
         final String finalId = id;
-        if (query("SELECT ign FROM sanctions WHERE id = ?", stmt -> stmt.setString(1, finalId), rs -> rs.next() ? rs.getString("ign") : null) != null) {
+        if (query("SELECT ign FROM sanctions WHERE id = ?;", stmt -> stmt.setString(1, finalId), rs -> rs.next() ? rs.getString("ign") : null) != null) {
             id = generateID();
         }
         return id;
@@ -105,10 +105,10 @@ public class SanctionDatabase {
                     uuid TEXT NOT NULL,
                     ign TEXT,
                     reason TEXT NOT NULL,
-                    date TEXT NOT NULL,
+                    date BIGINT NOT NULL,
                     expires TEXT,
                     appealStatus TEXT NOT NULL,
-                    appealDate TEXT
+                    appealDate BIGINT
                     );""";
         Exception ans = post(init);
         if (ans == null) {
@@ -121,13 +121,13 @@ public class SanctionDatabase {
     @Nullable
     public static String registerSanction(String uuid, String ign, SanctionData data, boolean appealable, @Nullable Date appealDelay) {
         final String ID = generateID();
-        boolean result = update("INSERT INTO sanctions(id, type, uuid, ign, reason, date, expires, appealStatus, appealDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", stmt -> {
+        boolean result = update("INSERT INTO sanctions(id, type, uuid, ign, reason, date, expires, appealStatus, appealDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);", stmt -> {
             stmt.setString(1, ID);
             stmt.setString(2, data.sanctionType.toString());
             stmt.setString(3, uuid);
             stmt.setString(4, ign);
             stmt.setString(5, data.reason);
-            stmt.setString(6, data.date.toString());
+            stmt.setLong(6, data.date.getTime());
             if (data.expiresOn != null) {
                 stmt.setString(7, data.expiresOn.toString());
             } else {
@@ -156,7 +156,7 @@ public class SanctionDatabase {
 
     public static boolean isPlayerCurrentlySanctioned(String id, String ign) {
         return query(
-                "SELECT ign FROM sanctions WHERE id = ? AND ign = ?",
+                "SELECT ign FROM sanctions WHERE id = ? AND ign = ?;<",
                 stmt -> {
                     stmt.setString(1, id);
                     stmt.setString(2, ign);
@@ -167,7 +167,7 @@ public class SanctionDatabase {
 
     public static @Nullable AppealStatus getAppealStatus(String id) {
         String status = query(
-                "SELECT appealStatus FROM sanctions WHERE id = ?",
+                "SELECT appealStatus FROM sanctions WHERE id = ?;",
                 stmt -> stmt.setString(1, id),
                 rs -> rs.next() ? rs.getString("appealStatus") : null
         );
@@ -184,11 +184,35 @@ public class SanctionDatabase {
     }
 
     @Nullable
-    public static SanctionData getSanctionData(String id, String ign) {
+    public static Date getAppealDelay(String id) {
+        if (!getAppealStatus(id).equals(AppealStatus.DELAYED)) return null;
+        Long datelong = query("SELECT appealDelay FROM sanctions WHERE id = ?;",
+                stmt -> {
+            stmt.setString(1, id);
+                },
+                rs -> {if (!rs.next()) {
+                    return null;
+                }
+                return rs.getLong("appealDelay");
+        });
+        if (datelong == null) return null;
+        return new Date(datelong);
+    }
+
+    public static boolean changeAppealStatus(String id, AppealStatus status) {
+        return update("UPDATE sanctions SET status = ? WHERE id = ?;",
+                stmt -> {
+            stmt.setString(1, status.toString());
+            stmt.setString(2, id);
+                });
+    }
+
+    @Nullable
+    public static Map<UUID, SanctionData> getSanctionData(String id, String ign) {
         if (!isPlayerCurrentlySanctioned(id, ign)) {
             return null;
         }
-        Map<String, Object> map = query("SELECT * FROM sanctions WHERE id = ? AND ign = ?",
+        Map<String, Object> map = query("SELECT * FROM sanctions WHERE id = ? AND ign = ?;",
                 stmt -> {
             stmt.setString(1, id);
             stmt.setString(2, ign);
@@ -200,11 +224,14 @@ public class SanctionDatabase {
             Map<String, Object> data = new HashMap<>();
             data.put("type", rs.getString("type"));
             data.put("reason", rs.getString("reason"));
-            data.put("date", rs.getString("date"));
+            data.put("date", rs.getLong("date"));
             data.put("expires", Sanction.valueOf(rs.getString("expires")));
+            data.put("uuid", rs.getString("uuid"));
             return data;
         });
         if (map == null) return null;
-        return new SanctionData((Sanction) map.get("type"), (String) map.get("reason"), (Date) map.get("date"), (Date) map.get("expires"));
+        Map<UUID, SanctionData> dataMap = new HashMap<>();
+        dataMap.put(UUID.fromString((String) map.get("uuid")), new SanctionData((Sanction) map.get("type"), (String) map.get("reason"), new Date((long) map.get("date")), (Date) map.get("expires")));
+        return dataMap;
     }
 }

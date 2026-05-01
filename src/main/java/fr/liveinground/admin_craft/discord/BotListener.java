@@ -1,6 +1,8 @@
 package fr.liveinground.admin_craft.discord;
 
+import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.storage.SanctionDatabase;
+import fr.liveinground.admin_craft.storage.types.sanction.AppealStatus;
 import fr.liveinground.admin_craft.storage.types.sanction.SanctionData;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -15,6 +17,9 @@ import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 
 import java.awt.*;
+import java.util.Date;
+import java.util.Map;
+import java.util.UUID;
 
 public class BotListener extends ListenerAdapter {
 
@@ -83,12 +88,24 @@ public class BotListener extends ListenerAdapter {
         if (event.getId().equals(DiscordBot.INFO_MODAL_ID)) {
             String id = event.getValue("id").getAsString();
             String ign = event.getValue("ign").getAsString();
-            //todo: check id with ign, get data
             if (!SanctionDatabase.isPlayerCurrentlySanctioned(id, ign)) {
                 event.reply("No sanction matches this id and this player. Please check your input and try again").setEphemeral(true).queue();
                 return;
             }
-            SanctionData data = SanctionDatabase.getSanctionData(id, ign);
+            Map<UUID, SanctionData> map = SanctionDatabase.getSanctionData(id, ign);
+            if (map == null) {
+                event.reply("No sanction matches this id and this player. Please check your input and try again").setEphemeral(true).queue();
+                return;
+            }
+            UUID uuid=null;
+            for (UUID i: map.keySet()) {
+                uuid = i;
+            }
+            if (uuid == null) {
+                event.reply("No sanction matches this id and this player. Please check your input and try again").setEphemeral(true).queue();
+                return;
+            }
+            SanctionData data = map.get(uuid);
 
             EmbedBuilder embed = new EmbedBuilder();
             embed.setTitle("Sanction information");
@@ -96,15 +113,39 @@ public class BotListener extends ListenerAdapter {
             embed.setColor(Color.RED);
 
             embed.addField("IGN", ign, true);
-            embed.addField("UUID", uuid, true);
+            embed.addField("UUID", uuid.toString(), true);
             embed.addField("Sanction ID", id, true);
             embed.addField("Sanction type", data.sanctionType.toString(), true);
             embed.addField("Date", data.date.toString(), true);
             if (data.expiresOn != null) {
                 embed.addField("Expires on", data.expiresOn.toString(), true);
             }
-
-            event.replyEmbeds(embed.build()).addActionRow(Button.success(DiscordBot.APPEAL_BUTTON_ID, "Appeal")).setEphemeral(true).queue();
+            AppealStatus status = SanctionDatabase.getAppealStatus(id);
+            if (status == null) {
+                AdminCraft.LOGGER.error("Couldn't get appeal status for sanction id {} getAppealStatus returned null: ", id);
+                event.reply("An issue occurred. Please check your input and try again.").setEphemeral(true).queue();
+                return;
+            }
+            Date delay = null;
+            embed.addField("Appeal status", status.status(), true);
+            if (status.equals(AppealStatus.DELAYED)) {
+                delay = SanctionDatabase.getAppealDelay(id);
+                if (delay == null) {
+                    AdminCraft.LOGGER.error("Could not get appeal delay for sanction id {}", id);
+                    event.reply("An issue occurred. Please check your input and try again.").setEphemeral(true).queue();
+                    return;
+                }
+                if (delay.before(new Date())) {
+                    status = AppealStatus.NOT_REQUESTED;
+                    SanctionDatabase.changeAppealStatus(id, status);
+                }
+            }
+            embed.addField("Appeal status", status.status(), true);
+            if (delay != null && status.equals(AppealStatus.DELAYED)) {
+                embed.addField("Appeal delay", "You will be able to appeal after this date: " + delay, true);
+            }
+            event.replyEmbeds(embed.build()).addActionRow(Button.success(DiscordBot.APPEAL_BUTTON_ID, "Appeal").withDisabled(!status.equals(AppealStatus.NOT_REQUESTED))).setEphemeral(true).queue();
+            DiscordBot.playerCache.put(event.getMember().getId(), id);
 
         } else if (event.getId().equals(DiscordBot.APPEAL_MODAL_ID)) {
             //todo

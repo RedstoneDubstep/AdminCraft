@@ -22,7 +22,7 @@ public class DiscordBot {
     public static final String INFO_MODAL_ID = "info_modal";
     public static final String APPEAL_MODAL_ID = "appeal_modal";
 
-    public static Map<String, String> data = new HashMap<>();
+    public static Map<String, String> playerCache = new HashMap<>();
 
     public static void start() {
         AdminCraft.LOGGER.info("Starting appeal bot...");
