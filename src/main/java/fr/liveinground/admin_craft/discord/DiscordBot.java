@@ -23,6 +23,14 @@ public class DiscordBot {
     public static final String INFO_MODAL_ID = "info_modal";
     public static final String APPEAL_MODAL_ID = "appeal_modal";
 
+    public static final String REFUSE_APPEAL_BUTTON_ID = "_refuse_button_";
+    public static final String OPEN_DISCUSSION_APPEAL_BUTTON_ID = "_discuss_button_";
+    public static final String ACCEPT_LIGHT_APPEAL_BUTTON_ID = "_accept-light_button_";
+    public static final String ACCEPT_TOTAL_APPEAL_BUTTON_ID = "_accept-total_button_";
+
+    public static final String STAFF_REASON_MODAL_ID = "_reason_";
+    public static final String STAFF_DURATION_MODAL_ID = "_duration_";
+
     public static Map<String, List<String>> playerCache = new HashMap<>();
 
     public static void start() {

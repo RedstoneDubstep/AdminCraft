@@ -57,6 +57,22 @@ public class SanctionConfig {
         return Date.from(expiresLocal.atZone(ZoneId.systemDefault()).toInstant());
     }
 
+    public static @Nullable Date getDurationAsDateSince(String input, Date date) {
+        List<Integer> duration = SanctionConfig.getDuration(input);
+        if (duration == null) return null;
+        if (!(duration.size() == 4)) return null;
+        Integer days = duration.get(0);
+        Integer hours = duration.get(1);
+        Integer minutes = duration.get(2);
+        Integer seconds = duration.get(3);
+        LocalDateTime expiresLocal = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+                .plusHours(days * 24)
+                .plusHours(hours)
+                .plusMinutes(minutes)
+                .plusSeconds(seconds);
+        return Date.from(expiresLocal.atZone(ZoneId.systemDefault()).toInstant());
+    }
+
     public static String getDurationAsStringFromDate(Date input) {
         if (input != null) {
             long diff = input.getTime() - System.currentTimeMillis();
