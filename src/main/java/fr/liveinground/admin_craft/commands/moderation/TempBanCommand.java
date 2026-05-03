@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.Optional;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 
@@ -23,63 +24,75 @@ import net.minecraft.server.players.NameAndId;
 public class TempBanCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("tempban")
-                        .requires(commandSource -> commandSource.hasPermission(Config.tempban_level))
-                                .then(Commands.argument("player", GameProfileArgument.gameProfile())
-                                        .then(Commands.argument("duration", StringArgumentType.word())
-                                                .executes(ctx -> {
-                                                    NameAndId profile = AdminCraft.getOneProfile(GameProfileArgument.getGameProfiles(ctx, "player"));
-                                                    if (profile == null) {
-                                                        ctx.getSource().sendFailure(Component.literal("No player was found").withStyle(ChatFormatting.RED));
-                                                        return 1;
+                .requires(commandSource -> commandSource.hasPermission(Config.tempban_level))
+                        .then(Commands.argument("player", GameProfileArgument.gameProfile())
+                                .then(Commands.argument("duration", StringArgumentType.word())
+                                        .executes(ctx -> {
+                                            tempban(
+                                                    ctx,
+                                                    AdminCraft.getOneProfile(GameProfileArgument.getGameProfiles(ctx, "player")),
+                                                    StringArgumentType.getString(ctx, "duration"),
+                                                    ""
+                                            );
+                                            return 1;
+                                        })
+                                        .then(Commands.argument("args", StringArgumentType.greedyString())
+                                                .suggests((ctx, builder) -> {
+                                                    String remaining = builder.getRemaining();
+                                                    if (!remaining.contains("--noappeal")) {
+                                                        builder.suggest("--noappeal");
                                                     }
-                                                    String reason = "Banned by an operator";
-                                                    Date duration = SanctionConfig.getDurationAsDate(StringArgumentType.getString(ctx, "duration"));
-
-                                                    if (duration == null) {
-                                                        ctx.getSource().sendFailure(Component.literal("Invalid duration, expecting format 1d1h1m1s"));
-                                                        return 1;
-                                                    }
-                                                    tempban(ctx, profile, duration, reason);
-                                                    return 1;
-
+                                                    builder.suggest("--delayedappeal:");
+                                                    return builder.buildFuture();
                                                 })
-                                                .then(Commands.argument("reason", StringArgumentType.greedyString())
-                                                        .executes(ctx -> {
-                                                            Collection<NameAndId> profiles = GameProfileArgument.getGameProfiles(ctx, "player");
-                                                            NameAndId profile = AdminCraft.getOneProfile(GameProfileArgument.getGameProfiles(ctx, "player"));
-                                                            if (profile == null) {
-                                                                ctx.getSource().sendFailure(Component.literal("No player was found").withStyle(ChatFormatting.RED));
-                                                                return 1;
-                                                            }
-
-                                                            String reason = StringArgumentType.getString(ctx, "reason");
-                                                            Date duration = SanctionConfig.getDurationAsDate(StringArgumentType.getString(ctx, "duration"));
-
-                                                            if (duration == null) {
-                                                                ctx.getSource().sendFailure(Component.literal("Invalid duration, expecting format 1d1h1m1s"));
-                                                                return 1;
-                                                            }
-                                                            tempban(ctx, profile, duration, reason);
-                                                            return 1;
-                                                        })))
+                                                .executes(ctx -> {
+                                                    tempban(
+                                                            ctx,
+                                                            AdminCraft.getOneProfile(GameProfileArgument.getGameProfiles(ctx, "player")),
+                                                            StringArgumentType.getString(ctx, "duration"),
+                                                            StringArgumentType.getString(ctx, "args")
+                                                    );
+                                                    return 1;
+                                                })
+                                        )
                                 )
+                        )
         );
     }
 
-    private static void tempban(CommandContext<CommandSourceStack> ctx, NameAndId player, Date duration, String reason) {
-        CustomSanctionSystem.banPlayer(ctx.getSource().getServer(), ctx.getSource().getTextName(), player, reason, duration);
-        ctx.getSource().sendSuccess(() -> Component.literal("Temporarily banned " + player.name() + ": " + reason), true);
-    }
-
-    private static void tempban(CommandContext<CommandSourceStack> ctx, Collection<NameAndId> player, Date duration, String reason) {
-        CustomSanctionSystem.banPlayer(ctx.getSource().getServer(), ctx.getSource().getTextName(), player, reason, duration);
-        Optional<NameAndId> p = player.stream().findFirst();
-        if (p.isPresent()) {
-            String p2 = p.get().name();
-            ctx.getSource().sendSuccess(() -> Component.literal("Temporarily banned profile " + p2 + ": " + reason), true);
-        } else {
-            ctx.getSource().sendSuccess(() -> Component.literal("Temporarily banned an unknown profile " + ": " + reason), true);
+    private static void tempban(CommandContext<CommandSourceStack> ctx, NameAndId player, String duration, String args) {
+        Date sanctionDuration = SanctionConfig.getDurationAsDate(duration);
+        if (sanctionDuration == null) {
+            ctx.getSource().sendFailure(Component.literal("Invalid format for the sanction duration.").withStyle(ChatFormatting.RED));
+            return;
         }
 
+        String reason;
+        boolean appealable = true;
+        Date appealDelay = null;
+        String[] splitted = args.split(" ");
+        StringBuilder builder = new StringBuilder();
+
+        for (String i: splitted) {
+            if (i.equals("--noappeal")) appealable = false;
+            else if (i.contains("--delayedappeal:")) {
+                String[] delaysplit = i.split(":");
+                if (delaysplit.length == 2) {
+                    appealDelay = SanctionConfig.getDurationAsDate(delaysplit[1]);
+                    if (appealDelay == null) {
+                        ctx.getSource().sendFailure(Component.literal("Invalid duration format for the appeal delay.").withStyle(ChatFormatting.RED));
+                        return;
+                    }
+                }
+            } else builder.append(" ").append(i);
+        }
+        builder.delete(0, 0);
+        if (!builder.isEmpty()) reason = builder.toString();
+        else {
+            reason = "The Ban Hammer has spoken!";
+        }
+
+        CustomSanctionSystem.banPlayer(ctx.getSource().getServer(), ctx.getSource().getTextName(), player, reason, sanctionDuration, appealable, appealDelay);
+        ctx.getSource().sendSuccess(() -> Component.literal("Temporarily banned " + player.name() + ": " + reason), true);
     }
 }

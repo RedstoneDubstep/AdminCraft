@@ -10,8 +10,10 @@ import javax.annotation.Nullable;
 import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
 import fr.liveinground.admin_craft.PlaceHolderSystem;
+import fr.liveinground.admin_craft.storage.SanctionDatabase;
 import fr.liveinground.admin_craft.storage.types.PlayerMuteData;
 import fr.liveinground.admin_craft.storage.types.sanction.Sanction;
+import fr.liveinground.admin_craft.storage.types.sanction.SanctionData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -22,13 +24,15 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.UserBanList;
 import net.minecraft.server.players.UserBanListEntry;
 
+//todo: remove unused blocks
+//todo: check mute method (what if player offline...?)
 
 public class CustomSanctionSystem {
-    public static void banPlayer(MinecraftServer server, String source, NameAndId player, String reason, @Nullable Date expiresOn) {
+    public static String banPlayer(MinecraftServer server, String source, NameAndId player, String reason, @Nullable Date expiresOn, boolean appealable, @Nullable Date appealDelay) {
         PlayerList playerList = server.getPlayerList();
         UserBanList banList = playerList.getBans();
         if (banList.isBanned(player)) {
-            return;
+            return null;
         }
         UserBanListEntry banEntry = new UserBanListEntry(player, null, source, expiresOn, reason);
         banList.add(banEntry);
@@ -49,11 +53,11 @@ public class CustomSanctionSystem {
             serverPlayer.connection.disconnect(banMessage);
 
         }
-
-        AdminCraft.playerDataManager.addSanction(String.valueOf(player.id()), Sanction.BAN, reason, expiresOn);
+        return SanctionDatabase.registerSanction(player.id().toString(), player.name(), new SanctionData(Sanction.BAN, reason, new Date(), expiresOn), appealable, appealDelay);
+        //AdminCraft.playerDataManager.addSanction(String.valueOf(player.id()), Sanction.BAN, reason, expiresOn);
     }
 
-    public static void banPlayer(MinecraftServer server, String source, Collection<NameAndId> player, String reason, @Nullable Date expiresOn) {
+    public static String banPlayer(MinecraftServer server, String source, Collection<NameAndId> player, String reason, @Nullable Date expiresOn, boolean appealable, @Nullable Date appealDelay) {
         PlayerList playerList = server.getPlayerList();
         UserBanList banList = playerList.getBans();
         for (NameAndId profile: player) {
@@ -63,21 +67,21 @@ public class CustomSanctionSystem {
                 ServerPlayer serverPlayer = server.getPlayerList().getPlayer(profile.id());
                 if (serverPlayer != null) serverPlayer.connection.disconnect(Component.translatable("multiplayer.disconnect.banned"));
             }
-            AdminCraft.playerDataManager.addSanction(profile.id().toString(), Sanction.BAN, reason, expiresOn);
+            return SanctionDatabase.registerSanction(profile.id().toString(), profile.name(), new SanctionData(Sanction.BAN, reason, new Date(), expiresOn), appealable, appealDelay);
+            //AdminCraft.playerDataManager.addSanction(profile.id().toString(), Sanction.BAN, reason, expiresOn);
         }
-
+        return null;
     }
 
     public static void kickPlayer(ServerPlayer player, String reason) {
         player.connection.disconnect(Component.literal(reason).withStyle(ChatFormatting.RED));
-        AdminCraft.playerDataManager.addSanction(player.getStringUUID(), Sanction.KICK, reason, null);
+        SanctionDatabase.registerSanction(player.getStringUUID(), player.getPlainTextName(), new SanctionData(Sanction.KICK, reason, new Date(), null), false, null);
+        //AdminCraft.playerDataManager.addSanction(player.getStringUUID(), Sanction.KICK, reason, null);
     }
 
-    public static void mutePlayer(MinecraftServer server, NameAndId player, String reason, @Nullable Date expiresOn) {
+    public static String mutePlayer(MinecraftServer server, NameAndId player, String reason, @Nullable Date expiresOn, boolean appealable, @Nullable Date appealDelay) {
         if (!AdminCraft.mutedPlayersUUID.contains(String.valueOf(player))) {
-            AdminCraft.playerDataManager.addMuteEntry(
-                    new PlayerMuteData(player.name(), player.id().toString(), reason, expiresOn)
-            );
+            //AdminCraft.playerDataManager.addMuteEntry(new PlayerMuteData(player.name(), player.id().toString(), reason, expiresOn));
 
             ServerPlayer serverPlayer = AdminCraft.getOnlinePlayer(server, player);
             if (serverPlayer != null) {
@@ -110,7 +114,9 @@ public class CustomSanctionSystem {
                     serverPlayer.sendSystemMessage(Component.literal(timeMsg).withStyle(ChatFormatting.YELLOW));
                 }
             }
+            return SanctionDatabase.registerSanction(player.id().toString(), player.name(), new SanctionData(Sanction.MUTE, reason, new Date(), expiresOn), appealable, appealDelay);
         }
+        return null;
     }
 
     public static void unMutePlayer(ServerPlayer player) {
@@ -138,7 +144,7 @@ public class CustomSanctionSystem {
         player.sendSystemMessage(message);
         player.sendSystemMessage(Component.literal("---------------------------------------------").withStyle(ChatFormatting.DARK_RED));
 
-
-        AdminCraft.playerDataManager.addSanction(player.getStringUUID(), Sanction.WARN, reason, null);
+        SanctionDatabase.registerSanction(player.getStringUUID(), player.getPlainTextName(), new SanctionData(Sanction.WARN, reason, new Date(), null), false, null);
+        //AdminCraft.playerDataManager.addSanction(player.getStringUUID(), Sanction.WARN, reason, null);
     }
 }

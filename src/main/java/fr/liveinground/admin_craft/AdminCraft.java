@@ -3,10 +3,13 @@ package fr.liveinground.admin_craft;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.mojang.authlib.GameProfile;
 import fr.liveinground.admin_craft.commands.tools.*;
 import fr.liveinground.admin_craft.discord.DiscordBot;
 import fr.liveinground.admin_craft.storage.SanctionDatabase;
 import net.minecraft.server.players.NameAndId;
+import net.neoforged.neoforge.event.entity.player.PlayerNegotiationEvent;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.slf4j.Logger;
 
 import com.mojang.brigadier.CommandDispatcher;
@@ -292,5 +295,26 @@ public class AdminCraft {
     @Nullable
     public static ServerPlayer getOnlinePlayer(MinecraftServer server, NameAndId profile) {
         return server.getPlayerList().getPlayer(profile.id());
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLogin(PlayerNegotiationEvent event) {
+        GameProfile profile = event.getProfile();
+        if (true) {
+            //todo : check if banned
+            if (ServerLifecycleHooks.getCurrentServer().getPlayerList().getBans().isBanned(new NameAndId(event.getProfile()))) {
+                String reason;
+                String duration;
+                String id;
+                Component message = Component.literal("")
+                        .append(Component.literal("You are banned on this server.\n").withStyle(ChatFormatting.RED))
+                        .append(Component.literal("Sanction ID: " + id).withStyle(ChatFormatting.GOLD))
+                        .append(Component.literal("Reason: ").withStyle(ChatFormatting.RED))
+                        .append(Component.literal(reason).withStyle(ChatFormatting.YELLOW))
+                        .append(Component.literal("\nThis sanction will expire in " + duration).withStyle(ChatFormatting.RED))
+                        .append(Component.literal("\nAppeal on https://discord.com/yourdiscordserver").withStyle(ChatFormatting.YELLOW));
+                event.getConnection().disconnect(message);
+            }
+        }
     }
 }
