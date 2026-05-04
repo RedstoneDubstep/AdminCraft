@@ -86,12 +86,13 @@ public class TempBanCommand {
                 }
             } else builder.append(" ").append(i);
         }
-        builder.delete(0, 0);
-        if (!builder.isEmpty()) reason = builder.toString();
+        if (!builder.isEmpty()) {
+            builder.delete(0, 0);
+            reason = builder.toString();
+        }
         else {
             reason = "The Ban Hammer has spoken!";
         }
-
         CustomSanctionSystem.banPlayer(ctx.getSource().getServer(), ctx.getSource().getTextName(), player, reason, sanctionDuration, appealable, appealDelay);
         ctx.getSource().sendSuccess(() -> Component.literal("Temporarily banned " + player.name() + ": " + reason), true);
     }

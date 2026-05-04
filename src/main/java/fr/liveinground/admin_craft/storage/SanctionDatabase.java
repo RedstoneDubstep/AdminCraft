@@ -258,4 +258,27 @@ public class SanctionDatabase {
         dataMap.put(UUID.fromString((String) map.get("uuid")), new SanctionData((Sanction) map.get("type"), (String) map.get("reason"), new Date((long) map.get("date")), (Date) map.get("expires")));
         return dataMap;
     }
+
+    public static Map<String, SanctionData> getCurrentSanctions(String uuid) {
+        return query(
+                "SELECT * FROM sanctions WHERE uuid = ?;",
+                stmt -> stmt.setString(1, uuid),
+                rs -> {
+                    Map<String, SanctionData> map = new HashMap<>();
+
+                    while (rs.next()) {
+                        String id = rs.getString("id");
+                        SanctionData data = new SanctionData(
+                                Sanction.valueOf(rs.getString("type")),
+                                rs.getString("reason"),
+                                new Date(rs.getLong("date")),
+                                rs.getString("expires") != null ? new Date(Long.parseLong(rs.getString("expires"))) : null
+                        );
+                        map.put(id, data);
+                    }
+
+                    return map;
+                }
+        );
+    }
 }
