@@ -66,6 +66,9 @@ public class Config {
     private static final ModConfigSpec.IntValue OTAG_LEVEL;
     public static int otag_level;
 
+    private static final ModConfigSpec.IntValue HISTORY_LEVEL;
+    public static int history_level;
+
     // ---------------
     // -- Sanctions --
     // ---------------
@@ -257,6 +260,7 @@ public class Config {
         INVSEE_LEVEL = BUILDER.comment("The OP level required to run the /invsee and /echest commands").worldRestart().defineInRange("invsee", 2, 0,4);
         OTP_LEVEL = BUILDER.comment("The OP level required to run the /otp command").worldRestart().defineInRange("otp", 2, 0, 4);
         OTAG_LEVEL = BUILDER.comment("The OP level required to run the /otag command").worldRestart().defineInRange("otp", 2, 0, 4);
+        HISTORY_LEVEL = BUILDER.comment("The OP level required to run the /history command").worldRestart().defineInRange("history", 2, 0, 4);
 
         BUILDER.pop();
     }
@@ -475,6 +479,7 @@ public class Config {
         invsee_level = INVSEE_LEVEL.get();
         otag_level = OTAG_LEVEL.get();
         otp_level = OTP_LEVEL.get();
+        history_level = HISTORY_LEVEL.get();
 
         // ---------------
         // -- Sanctions --
