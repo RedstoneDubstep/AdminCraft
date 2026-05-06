@@ -130,19 +130,19 @@ public class SanctionDatabase {
             if (data.expiresOn != null) {
                 stmt.setLong(7, data.expiresOn.getTime());
             } else {
-                stmt.setString(7, null);
+                stmt.setNull(7, Types.BIGINT);
             }
             if (appealable) {
                 if (appealDelay != null) {
                     stmt.setString(8, AppealStatus.DELAYED.toString());
-                    stmt.setString(9, appealDelay.toString());
+                    stmt.setLong(9, appealDelay.getTime());
                 } else {
                     stmt.setString(8, AppealStatus.NOT_REQUESTED.toString());
-                    stmt.setString(9, null);
+                    stmt.setNull(9, java.sql.Types.BIGINT);
                 }
             } else {
                 stmt.setString(8, AppealStatus.NOT_ALLOWED.toString());
-                stmt.setString(9, null);
+                stmt.setNull(9, java.sql.Types.BIGINT);
             }
 
         });
@@ -154,6 +154,7 @@ public class SanctionDatabase {
     }
 
     public static boolean isPlayerCurrentlySanctioned(String id, String ign) {
+        //REM: I guess I forgot something here... it only checks if the player has been ever sanctioned
         return query(
                 "SELECT ign FROM sanctions WHERE id = ? AND ign = ?;<",
                 stmt -> {
@@ -184,7 +185,8 @@ public class SanctionDatabase {
 
     @Nullable
     public static Date getAppealDelay(String id) {
-        if (!getAppealStatus(id).equals(AppealStatus.DELAYED)) return null;
+        AppealStatus status = getAppealStatus(id);
+        if (status == null || !status.equals(AppealStatus.DELAYED)) return null;
         Long datelong = query("SELECT appealDelay FROM sanctions WHERE id = ?;",
                 stmt -> {
             stmt.setString(1, id);
@@ -211,7 +213,7 @@ public class SanctionDatabase {
         if (!isPlayerCurrentlySanctioned(id, ign)) {
             return null;
         }
-        Map<String, Object> map = query("SELECT * FROM sanctions WHERE id = ? AND ign = ?;",
+        DatabaseSanctionData data = query("SELECT * FROM sanctions WHERE id = ? AND ign = ?;",
                 stmt -> {
             stmt.setString(1, id);
             stmt.setString(2, ign);
@@ -220,17 +222,35 @@ public class SanctionDatabase {
             if (!rs.next()) {
                 return null;
             }
-            Map<String, Object> data = new HashMap<>();
-            data.put("type", rs.getString("type"));
-            data.put("reason", rs.getString("reason"));
-            data.put("date", rs.getLong("date"));
-            data.put("expires", new Date(rs.getLong("expires")));
-            data.put("uuid", rs.getString("uuid"));
-            return data;
+            long expires = rs.getLong("expires");
+            Date expiresDate;
+            Date appealDate;
+            if (rs.wasNull()) {
+                expiresDate = null;
+            } else {
+                expiresDate = new Date(expires);
+            }
+            long appeal = rs.getLong("appealDelay");
+            if (rs.wasNull()) {
+                appealDate = null;
+            } else {
+                appealDate = new Date(appeal);
+            }
+
+            return new DatabaseSanctionData(
+                    rs.getString("id"),
+                    rs.getString("uuid"),
+                    rs.getString("ign"),
+                    Sanction.valueOf(rs.getString("type")),
+                    rs.getString("reason"),
+                    new Date(rs.getLong("date")),
+                    expiresDate,
+                    AppealStatus.valueOf(rs.getString("appealStatus")),
+                    appealDate);
         });
-        if (map == null) return null;
+        if (data == null) return null;
         Map<UUID, SanctionData> dataMap = new HashMap<>();
-        dataMap.put(UUID.fromString((String) map.get("uuid")), new SanctionData((Sanction) map.get("type"), (String) map.get("reason"), new Date((long) map.get("date")), (Date) map.get("expires")));
+        dataMap.put(UUID.fromString(data.uuid()), new SanctionData(data.type(), data.reason(), data.date(), data.expiresOn()));
         return dataMap;
     }
 
