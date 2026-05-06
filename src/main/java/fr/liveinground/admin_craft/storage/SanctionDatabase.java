@@ -2,6 +2,7 @@ package fr.liveinground.admin_craft.storage;
 
 import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.storage.types.sanction.AppealStatus;
+import fr.liveinground.admin_craft.storage.types.sanction.DatabaseSanctionData;
 import fr.liveinground.admin_craft.storage.types.sanction.Sanction;
 import fr.liveinground.admin_craft.storage.types.sanction.SanctionData;
 import net.neoforged.fml.loading.FMLPaths;
@@ -9,10 +10,8 @@ import net.neoforged.fml.loading.FMLPaths;
 import javax.annotation.Nullable;
 import java.security.SecureRandom;
 import java.sql.*;
+import java.util.*;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 public class SanctionDatabase {
 
@@ -106,7 +105,7 @@ public class SanctionDatabase {
                     ign TEXT,
                     reason TEXT NOT NULL,
                     date BIGINT NOT NULL,
-                    expires TEXT,
+                    expires BIGINT,
                     appealStatus TEXT NOT NULL,
                     appealDate BIGINT
                     );""";
@@ -129,7 +128,7 @@ public class SanctionDatabase {
             stmt.setString(5, data.reason);
             stmt.setLong(6, data.date.getTime());
             if (data.expiresOn != null) {
-                stmt.setString(7, data.expiresOn.toString());
+                stmt.setLong(7, data.expiresOn.getTime());
             } else {
                 stmt.setString(7, null);
             }
@@ -225,7 +224,7 @@ public class SanctionDatabase {
             data.put("type", rs.getString("type"));
             data.put("reason", rs.getString("reason"));
             data.put("date", rs.getLong("date"));
-            data.put("expires", Sanction.valueOf(rs.getString("expires")));
+            data.put("expires", new Date(rs.getLong("expires")));
             data.put("uuid", rs.getString("uuid"));
             return data;
         });
@@ -249,7 +248,7 @@ public class SanctionDatabase {
                     data.put("type", rs.getString("type"));
                     data.put("reason", rs.getString("reason"));
                     data.put("date", rs.getLong("date"));
-                    data.put("expires", Sanction.valueOf(rs.getString("expires")));
+                    data.put("expires", new Date(rs.getLong("expires")));
                     data.put("uuid", rs.getString("uuid"));
                     return data;
                 });
@@ -278,6 +277,43 @@ public class SanctionDatabase {
                     }
 
                     return map;
+                }
+        );
+    }
+
+    public static List<DatabaseSanctionData> getHistory(String uuid) {
+        return query(
+                "SELECT * FROM sanctions WHERE uuid = ?;",
+                stmt -> stmt.setString(1, uuid),
+                rs -> {
+                    List<DatabaseSanctionData> list = new ArrayList<>();
+                    while (rs.next()) {
+                        long expires = rs.getLong("expires");
+                        Date expiresOn;
+                        if (rs.wasNull()) {
+                            expiresOn = null;
+                        } else {
+                            expiresOn = new Date(expires);
+                        }
+                        long appealDelay = rs.getLong("appealDate");
+                        Date appealDate;
+                        if (rs.wasNull()) {
+                            appealDate = null;
+                        } else {
+                            appealDate = new Date(appealDelay);
+                        }
+                        list.add(new DatabaseSanctionData(rs.getString("id"),
+                                rs.getString("uuid"),
+                                rs.getString("ign"),
+                                Sanction.valueOf(rs.getString("type")),
+                                rs.getString("reason"),
+                                new Date(rs.getLong("date")),
+                                expiresOn,
+                                AppealStatus.valueOf(rs.getString("appealStatus")),
+                                appealDate
+                        ));
+                    }
+                    return list;
                 }
         );
     }
