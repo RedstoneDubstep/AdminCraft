@@ -2,7 +2,6 @@ package fr.liveinground.admin_craft.discord;
 
 import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
-import fr.liveinground.admin_craft.moderation.CustomSanctionSystem;
 import fr.liveinground.admin_craft.moderation.SanctionConfig;
 import fr.liveinground.admin_craft.storage.SanctionDatabase;
 import fr.liveinground.admin_craft.storage.types.sanction.AppealStatus;
@@ -185,23 +184,16 @@ public class BotListener extends ListenerAdapter {
         if (event.getId().equals(DiscordBot.INFO_MODAL_ID)) {
             String id = event.getValue("id").getAsString();
             String ign = event.getValue("ign").getAsString();
-            if (!SanctionDatabase.isPlayerCurrentlySanctioned(id, ign)) {
+            if (SanctionDatabase.sanctionDoesntExists(id, ign)) {
                 event.reply("No sanction matches this id and this player. Please check your input and try again").setEphemeral(true).queue();
                 return;
             }
             Map<UUID, SanctionData> map = SanctionDatabase.getSanctionData(id, ign);
-            if (map == null) {
+            if (map == null || map.isEmpty()) {
                 event.reply("No sanction matches this id and this player. Please check your input and try again").setEphemeral(true).queue();
                 return;
             }
-            UUID uuid=null;
-            for (UUID i: map.keySet()) {
-                uuid = i;
-            }
-            if (uuid == null) {
-                event.reply("No sanction matches this id and this player. Please check your input and try again").setEphemeral(true).queue();
-                return;
-            }
+            UUID uuid = map.keySet().stream().findFirst().get();
             SanctionData data = map.get(uuid);
 
             EmbedBuilder embed = new EmbedBuilder();
@@ -215,8 +207,14 @@ public class BotListener extends ListenerAdapter {
             embed.addField("Sanction type", data.sanctionType.toString(), true);
             embed.addField("Reason", data.reason, true);
             embed.addField("Date", data.date.toString(), true);
+            boolean expired = false;
             if (data.expiresOn != null) {
-                embed.addField("Expires on", data.expiresOn.toString(), true);
+                if (data.expiresOn.before(new Date())) {
+                    embed.addField("Expires on", data.expiresOn.toString(), true);
+                } else {
+                    embed.addField("Expires on", data.expiresOn.toString() + " **(EXPIRED)**", true);
+                    expired = true;
+                }
             }
             AppealStatus status = SanctionDatabase.getAppealStatus(id);
             if (status == null) {
@@ -241,7 +239,7 @@ public class BotListener extends ListenerAdapter {
             if (delay != null && status.equals(AppealStatus.DELAYED)) {
                 embed.addField("Appeal delay", "You will be able to appeal after this date: " + delay, true);
             }
-            event.replyEmbeds(embed.build()).addActionRow(Button.success(DiscordBot.APPEAL_BUTTON_ID, "Appeal").withDisabled(!status.equals(AppealStatus.NOT_REQUESTED))).setEphemeral(true).queue();
+            event.replyEmbeds(embed.build()).addActionRow(Button.success(DiscordBot.APPEAL_BUTTON_ID, "Appeal").withDisabled(!status.equals(AppealStatus.NOT_REQUESTED) || expired)).setEphemeral(true).queue();
             List<String> cache = new ArrayList<>();
             cache.add(id);
             cache.add(uuid.toString());

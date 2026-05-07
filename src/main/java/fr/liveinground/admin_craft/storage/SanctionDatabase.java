@@ -153,8 +153,7 @@ public class SanctionDatabase {
         }
     }
 
-    public static boolean isPlayerCurrentlySanctioned(String id, String ign) {
-        //REM: I guess I forgot something here... it only checks if the player has been ever sanctioned
+    public static boolean sanctionDoesntExists(String id, String ign) {
         return query(
                 "SELECT ign FROM sanctions WHERE id = ? AND ign = ?;<",
                 stmt -> {
@@ -162,7 +161,7 @@ public class SanctionDatabase {
                     stmt.setString(2, ign);
                 },
                 rs -> rs.next() ? rs.getString("ign") : null
-        ) != null;
+        ) == null;
     }
 
     public static @Nullable AppealStatus getAppealStatus(String id) {
@@ -210,7 +209,7 @@ public class SanctionDatabase {
 
     @Nullable
     public static Map<UUID, SanctionData> getSanctionData(String id, String ign) {
-        if (!isPlayerCurrentlySanctioned(id, ign)) {
+        if (sanctionDoesntExists(id, ign)) {
             return null;
         }
         DatabaseSanctionData data = query("SELECT * FROM sanctions WHERE id = ? AND ign = ?;",
