@@ -5,7 +5,7 @@ import fr.liveinground.admin_craft.Config;
 import fr.liveinground.admin_craft.moderation.SanctionConfig;
 import fr.liveinground.admin_craft.storage.SanctionDatabase;
 import fr.liveinground.admin_craft.storage.types.sanction.AppealStatus;
-import fr.liveinground.admin_craft.storage.types.sanction.Sanction;
+import fr.liveinground.admin_craft.storage.types.sanction.DatabaseSanctionData;
 import fr.liveinground.admin_craft.storage.types.sanction.SanctionData;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -124,14 +124,13 @@ public class BotListener extends ListenerAdapter {
             }
             if (buttonID.equals(DiscordBot.ACCEPT_TOTAL_APPEAL_BUTTON_ID)) {
                 if (event.getMember().getRoles().stream().anyMatch(role -> role.getId().equals(Config.staff_role_id))) {
-                    Map<UUID, SanctionData> dataset = SanctionDatabase.getSanctionData(id);
+                    DatabaseSanctionData dataset = SanctionDatabase.getSanctionData(id);
                     if (dataset == null) {
                         event.reply("Failure: no data found with associated ID " + id).setEphemeral(true).queue();
                         return;
                     }
-                    Sanction type = dataset.get(dataset.keySet().stream().findFirst().get()).sanctionType;
                     if (SanctionDatabase.changeAppealStatus(id, AppealStatus.ACCEPTED)) {
-                        switch (type) {
+                        switch (dataset.type()) {
                             case MUTE:
                                 //todo
                                 break;
@@ -188,13 +187,12 @@ public class BotListener extends ListenerAdapter {
                 event.reply("No sanction matches this id and this player. Please check your input and try again").setEphemeral(true).queue();
                 return;
             }
-            Map<UUID, SanctionData> map = SanctionDatabase.getSanctionData(id, ign);
-            if (map == null || map.isEmpty()) {
+            DatabaseSanctionData data = SanctionDatabase.getSanctionData(id, ign);
+            if (data == null) {
                 event.reply("No sanction matches this id and this player. Please check your input and try again").setEphemeral(true).queue();
                 return;
             }
-            UUID uuid = map.keySet().stream().findFirst().get();
-            SanctionData data = map.get(uuid);
+            UUID uuid = UUID.fromString(data.uuid());
 
             EmbedBuilder embed = new EmbedBuilder();
             embed.setTitle("Sanction information");
@@ -204,15 +202,15 @@ public class BotListener extends ListenerAdapter {
             embed.addField("IGN", ign, true);
             embed.addField("UUID", uuid.toString(), true);
             embed.addField("Sanction ID", id, true);
-            embed.addField("Sanction type", data.sanctionType.toString(), true);
-            embed.addField("Reason", data.reason, true);
-            embed.addField("Date", data.date.toString(), true);
+            embed.addField("Sanction type", data.type().toString(), true);
+            embed.addField("Reason", data.reason(), true);
+            embed.addField("Date", data.date().toString(), true);
             boolean expired = false;
-            if (data.expiresOn != null) {
-                if (data.expiresOn.before(new Date())) {
-                    embed.addField("Expires on", data.expiresOn.toString(), true);
+            if (data.expiresOn() != null) {
+                if (data.expiresOn().before(new Date())) {
+                    embed.addField("Expires on", data.expiresOn().toString(), true);
                 } else {
-                    embed.addField("Expires on", data.expiresOn.toString() + " **(EXPIRED)**", true);
+                    embed.addField("Expires on", data.expiresOn() + " **(EXPIRED)**", true);
                     expired = true;
                 }
             }
@@ -262,13 +260,12 @@ public class BotListener extends ListenerAdapter {
             }
             String appealReason = event.getInteraction().getValue("reason").getAsString();
 
-            Map<UUID, SanctionData> map = SanctionDatabase.getSanctionData(id, ign);
-            if (map == null) {
+            DatabaseSanctionData data = SanctionDatabase.getSanctionData(id, ign);
+            if (data == null) {
                 event.reply("Could not get sanction information. Try again later.").setEphemeral(true).queue();
                 return;
             }
             UUID uuid=UUID.fromString(uuidStr);
-            SanctionData data = map.get(uuid);
 
             EmbedBuilder embed = new EmbedBuilder();
             embed.setTitle("New appeal");
@@ -278,11 +275,11 @@ public class BotListener extends ListenerAdapter {
             embed.addField("IGN", ign, true);
             embed.addField("UUID", uuid.toString(), true);
             embed.addField("Sanction ID", id, true);
-            embed.addField("Sanction type", data.sanctionType.toString(), true);
-            embed.addField("Reason", data.reason, true);
-            embed.addField("Date", data.date.toString(), true);
-            if (data.expiresOn != null) {
-                embed.addField("Expires on", data.expiresOn.toString(), true);
+            embed.addField("Sanction type", data.type().toString(), true);
+            embed.addField("Reason", data.reason(), true);
+            embed.addField("Date", data.date().toString(), true);
+            if (data.expiresOn() != null) {
+                embed.addField("Expires on", data.expiresOn().toString(), true);
             }
             embed.addField("Player's message", appealReason, true);
             embed.addField("Discord user", member.getAsMention() + " (" + member.getEffectiveName() + ")", true);
@@ -350,13 +347,13 @@ public class BotListener extends ListenerAdapter {
                 }
             }
             if (modalID.equals(DiscordBot.STAFF_DURATION_MODAL_ID)) {
-                Map<UUID, SanctionData> dataset = SanctionDatabase.getSanctionData(id);
-                if (dataset == null) {
+                DatabaseSanctionData data = SanctionDatabase.getSanctionData(id);
+                if (data == null) {
                     event.reply("Failure: no data found with associated ID " + id).setEphemeral(true).queue();
                     return;
                 }
                 String duration = event.getValue("duration").getAsString();
-                Date dateFromNow = SanctionConfig.getDurationAsDateSince(duration, dataset.get(dataset.keySet().stream().findFirst()).date);
+                Date dateFromNow = SanctionConfig.getDurationAsDateSince(duration, data.date());
                 if (dateFromNow == null) {
                     event.reply("Failure: Invalid duration format.").setEphemeral(true).queue();
                     return;

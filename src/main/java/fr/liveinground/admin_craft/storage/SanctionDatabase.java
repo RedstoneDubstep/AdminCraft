@@ -34,8 +34,8 @@ public class SanctionDatabase {
             builder.append(CHARACTERS.charAt(index));
         }
         String id = builder.toString();
-        final String finalId = id;
-        if (query("SELECT ign FROM sanctions WHERE id = ?;", stmt -> stmt.setString(1, finalId), rs -> rs.next() ? rs.getString("ign") : null) != null) {
+        String finalId = id;
+        if (!query("SELECT * FROM sanctions WHERE id = ?;", stmt -> stmt.setString(1, finalId)).isEmpty()) {
             id = generateID();
         }
         return id;
@@ -46,13 +46,8 @@ public class SanctionDatabase {
         void prepare(PreparedStatement stmt) throws SQLException;
     }
 
-    @FunctionalInterface
-    public interface ResultExtractor<T> {
-        T extract(ResultSet rs) throws SQLException;
-    }
-
-    @Nullable
-    public static <T> T query(String sql, StatementPreparer preparer, ResultExtractor<T> extractor) {
+    public static List<DatabaseSanctionData> query(String sql, StatementPreparer preparer) {
+        List<DatabaseSanctionData> results = new ArrayList<>();
         try (
                 Connection conn = connect();
                 PreparedStatement stmt = conn.prepareStatement(sql)
@@ -60,11 +55,41 @@ public class SanctionDatabase {
             preparer.prepare(stmt);
 
             try (ResultSet rs = stmt.executeQuery()) {
-                return extractor.extract(rs);
+                while (rs.next()) {
+                    long expires = rs.getLong("expires");
+                    Date expiresDate;
+                    if (rs.wasNull()) {
+                        expiresDate = null;
+                    } else {
+                        expiresDate = new Date(expires);
+                    }
+                    Long appeal = rs.getObject("appealDate", Long.class);
+                    Date appealDate;
+                    if (rs.wasNull()) {
+                        appealDate = null;
+                    } else {
+                        appealDate = new Date(appeal);
+                    }
+
+                    DatabaseSanctionData data = new DatabaseSanctionData(
+                            rs.getString("id"),
+                            rs.getString("uuid"),
+                            rs.getString("ign"),
+                            Sanction.valueOf(rs.getString("type")),
+                            rs.getString("reason"),
+                            new Date(rs.getLong("date")),
+                            expiresDate,
+                            AppealStatus.valueOf(rs.getString("appealStatus")),
+                            appealDate
+                    );
+                    results.add(data);
+                }
             }
         } catch (SQLException e) {
-            return null;
+            AdminCraft.LOGGER.error("Issue while posting a query to the sanction database: ", e);
         }
+
+        return results;
     }
 
     public static boolean update(String sql, StatementPreparer preparer) {
@@ -155,48 +180,32 @@ public class SanctionDatabase {
 
     public static boolean sanctionDoesntExists(String id, String ign) {
         return query(
-                "SELECT ign FROM sanctions WHERE id = ? AND ign = ?;<",
+                "SELECT * FROM sanctions WHERE id = ? AND ign = ?;<",
                 stmt -> {
                     stmt.setString(1, id);
                     stmt.setString(2, ign);
-                },
-                rs -> rs.next() ? rs.getString("ign") : null
-        ) == null;
+                }).isEmpty();
     }
 
     public static @Nullable AppealStatus getAppealStatus(String id) {
-        String status = query(
-                "SELECT appealStatus FROM sanctions WHERE id = ?;",
-                stmt -> stmt.setString(1, id),
-                rs -> rs.next() ? rs.getString("appealStatus") : null
-        );
-
-        if (status == null) {
-            return null;
-        }
-
-        try {
-            return AppealStatus.valueOf(status);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
+        DatabaseSanctionData data = query(
+                "SELECT * FROM sanctions WHERE id = ?;",
+                stmt -> stmt.setString(1, id)
+        ).stream().findFirst().orElse(null);
+        if (data == null) return null;
+        else return data.status();
     }
 
     @Nullable
     public static Date getAppealDelay(String id) {
         AppealStatus status = getAppealStatus(id);
         if (status == null || !status.equals(AppealStatus.DELAYED)) return null;
-        Long datelong = query("SELECT appealDelay FROM sanctions WHERE id = ?;",
+        DatabaseSanctionData data = query("SELECT appealDelay FROM sanctions WHERE id = ?;",
                 stmt -> {
             stmt.setString(1, id);
-                },
-                rs -> {if (!rs.next()) {
-                    return null;
-                }
-                return rs.getLong("appealDelay");
-        });
-        if (datelong == null) return null;
-        return new Date(datelong);
+                }).stream().findFirst().orElse(null);
+        if (data == null) return null;
+        return data.appealDelay();
     }
 
     public static boolean changeAppealStatus(String id, AppealStatus status) {
@@ -208,132 +217,35 @@ public class SanctionDatabase {
     }
 
     @Nullable
-    public static Map<UUID, SanctionData> getSanctionData(String id, String ign) {
-        if (sanctionDoesntExists(id, ign)) {
-            return null;
-        }
-        DatabaseSanctionData data = query("SELECT * FROM sanctions WHERE id = ? AND ign = ?;",
+    public static DatabaseSanctionData getSanctionData(String id, String ign) {
+        return query("SELECT * FROM sanctions WHERE id = ? AND ign = ?;",
                 stmt -> {
-            stmt.setString(1, id);
-            stmt.setString(2, ign);
-                },
-                rs -> {
-            if (!rs.next()) {
-                return null;
-            }
-            long expires = rs.getLong("expires");
-            Date expiresDate;
-            Date appealDate;
-            if (rs.wasNull()) {
-                expiresDate = null;
-            } else {
-                expiresDate = new Date(expires);
-            }
-            long appeal = rs.getLong("appealDelay");
-            if (rs.wasNull()) {
-                appealDate = null;
-            } else {
-                appealDate = new Date(appeal);
-            }
-
-            return new DatabaseSanctionData(
-                    rs.getString("id"),
-                    rs.getString("uuid"),
-                    rs.getString("ign"),
-                    Sanction.valueOf(rs.getString("type")),
-                    rs.getString("reason"),
-                    new Date(rs.getLong("date")),
-                    expiresDate,
-                    AppealStatus.valueOf(rs.getString("appealStatus")),
-                    appealDate);
-        });
-        if (data == null) return null;
-        Map<UUID, SanctionData> dataMap = new HashMap<>();
-        dataMap.put(UUID.fromString(data.uuid()), new SanctionData(data.type(), data.reason(), data.date(), data.expiresOn()));
-        return dataMap;
+                    stmt.setString(1, id);
+                    stmt.setString(2, ign);
+                }).stream().findFirst().orElse(null);
     }
 
     @Nullable
-    public static Map<UUID, SanctionData> getSanctionData(String id) {
-        Map<String, Object> map = query("SELECT * FROM sanctions WHERE id = ?;",
+    public static DatabaseSanctionData getSanctionData(String id) {
+        return query("SELECT * FROM sanctions WHERE id = ?;",
                 stmt -> {
                     stmt.setString(1, id);
-                },
-                rs -> {
-                    if (!rs.next()) {
-                        return null;
-                    }
-                    Map<String, Object> data = new HashMap<>();
-                    data.put("type", rs.getString("type"));
-                    data.put("reason", rs.getString("reason"));
-                    data.put("date", rs.getLong("date"));
-                    data.put("expires", new Date(rs.getLong("expires")));
-                    data.put("uuid", rs.getString("uuid"));
-                    return data;
-                });
-        if (map == null) return null;
-        Map<UUID, SanctionData> dataMap = new HashMap<>();
-        dataMap.put(UUID.fromString((String) map.get("uuid")), new SanctionData((Sanction) map.get("type"), (String) map.get("reason"), new Date((long) map.get("date")), (Date) map.get("expires")));
-        return dataMap;
+                }).stream().findFirst().orElse(null);
     }
 
-    public static Map<String, SanctionData> getCurrentSanctions(String uuid) {
+    public static List<DatabaseSanctionData> getCurrentSanctions(String uuid) {
         return query(
                 "SELECT * FROM sanctions WHERE uuid = ?;",
-                stmt -> stmt.setString(1, uuid),
-                rs -> {
-                    Map<String, SanctionData> map = new HashMap<>();
-
-                    while (rs.next()) {
-                        String id = rs.getString("id");
-                        SanctionData data = new SanctionData(
-                                Sanction.valueOf(rs.getString("type")),
-                                rs.getString("reason"),
-                                new Date(rs.getLong("date")),
-                                rs.getString("expires") != null ? new Date(Long.parseLong(rs.getString("expires"))) : null
-                        );
-                        map.put(id, data);
-                    }
-
-                    return map;
-                }
-        );
+                stmt -> stmt.setString(1, uuid)
+        ).stream()
+                .filter(databaseSanctionData -> databaseSanctionData.expiresOn() == null || databaseSanctionData.expiresOn().after(new Date()))
+                .toList();
     }
 
     public static List<DatabaseSanctionData> getHistory(String uuid) {
         return query(
                 "SELECT * FROM sanctions WHERE uuid = ?;",
-                stmt -> stmt.setString(1, uuid),
-                rs -> {
-                    List<DatabaseSanctionData> list = new ArrayList<>();
-                    while (rs.next()) {
-                        long expires = rs.getLong("expires");
-                        Date expiresOn;
-                        if (rs.wasNull()) {
-                            expiresOn = null;
-                        } else {
-                            expiresOn = new Date(expires);
-                        }
-                        long appealDelay = rs.getLong("appealDate");
-                        Date appealDate;
-                        if (rs.wasNull()) {
-                            appealDate = null;
-                        } else {
-                            appealDate = new Date(appealDelay);
-                        }
-                        list.add(new DatabaseSanctionData(rs.getString("id"),
-                                rs.getString("uuid"),
-                                rs.getString("ign"),
-                                Sanction.valueOf(rs.getString("type")),
-                                rs.getString("reason"),
-                                new Date(rs.getLong("date")),
-                                expiresOn,
-                                AppealStatus.valueOf(rs.getString("appealStatus")),
-                                appealDate
-                        ));
-                    }
-                    return list;
-                }
+                stmt -> stmt.setString(1, uuid)
         );
     }
 }

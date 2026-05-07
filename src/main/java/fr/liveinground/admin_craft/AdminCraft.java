@@ -5,8 +5,8 @@ import java.util.*;
 import com.mojang.authlib.GameProfile;
 import fr.liveinground.admin_craft.commands.tools.*;
 import fr.liveinground.admin_craft.storage.types.sanction.AppealStatus;
+import fr.liveinground.admin_craft.storage.types.sanction.DatabaseSanctionData;
 import fr.liveinground.admin_craft.storage.types.sanction.Sanction;
-import fr.liveinground.admin_craft.storage.types.sanction.SanctionData;
 import fr.liveinground.admin_craft.storage.SanctionDatabase;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.players.NameAndId;
@@ -300,49 +300,35 @@ public class AdminCraft {
     @SubscribeEvent
     public static void onPlayerLogin(PlayerNegotiationEvent event) {
         GameProfile profile = event.getProfile();
-        Map<String, SanctionData> punishments = SanctionDatabase.getCurrentSanctions(profile.id().toString());
-        if (punishments == null || punishments.isEmpty()) return;
+        List<DatabaseSanctionData> punishments = SanctionDatabase.getCurrentSanctions(profile.id().toString());
+        if (punishments.isEmpty()) return;
 
-        boolean isBanned = false;
-        String id = null;
-        String reason = "<Failed to load reason>";
-        String duration = "<Failed to load duration>";
-        boolean permanent = true;
+        DatabaseSanctionData sanction = null;
 
-        for (String id1: punishments.keySet()) {
-            SanctionData data = punishments.get(id1);
-            if (data.sanctionType.equals(Sanction.BAN)) {
-                if (data.expiresOn == null || data.expiresOn.after(new Date())) {
-                    isBanned = true;
-                    id = id1;
-                    reason = data.reason;
-                    if (data.expiresOn != null) {
-                        duration = SanctionConfig.getDurationAsStringFromDate(data.expiresOn);
-                        permanent = false;
-                    }
-                    break;
-                }
+        for (DatabaseSanctionData data: punishments) {
+            if (data.type().equals(Sanction.BAN)) {
+                sanction = data;
+                break;
             }
         }
 
-        if (isBanned) {
-            MutableComponent message = Component.literal("")
-                    .append(Component.literal("You are banned on this server.\n").withStyle(ChatFormatting.RED))
-                    .append(Component.literal("Sanction ID: " + id).withStyle(ChatFormatting.GOLD))
-                    .append(Component.literal("Reason: ").withStyle(ChatFormatting.RED))
-                    .append(Component.literal(reason).withStyle(ChatFormatting.YELLOW));
-            if (permanent) {
-                message.append(Component.literal("\nThis sanction is definitive.").withStyle(ChatFormatting.RED));
-            } else {
-                message.append(Component.literal("\nThis sanction will expire in " + duration).withStyle(ChatFormatting.RED));
-            }
-            AppealStatus status = SanctionDatabase.getAppealStatus(id);
-            if (status == null || status.equals(AppealStatus.NOT_ALLOWED)) {
-                message.append(Component.literal("\nThis sanction is not appealable.").withStyle(ChatFormatting.YELLOW));
-            } else {
-                message.append(Component.literal("\nYou can appeal on " + Config.invite_link).withStyle(ChatFormatting.YELLOW));
-            }
-            event.getConnection().disconnect(message);
+        if (sanction == null) return;
+
+        MutableComponent message = Component.literal("")
+                .append(Component.literal("You are banned on this server.\n").withStyle(ChatFormatting.RED))
+                .append(Component.literal("Sanction ID: " + sanction.id()).withStyle(ChatFormatting.GOLD))
+                .append(Component.literal("Reason: ").withStyle(ChatFormatting.RED))
+                .append(Component.literal(sanction.reason()).withStyle(ChatFormatting.YELLOW));
+        if (sanction.expiresOn() == null) {
+            message.append(Component.literal("\nThis sanction is permanent.").withStyle(ChatFormatting.RED));
+        } else {
+            message.append(Component.literal("\nThis sanction will expire in " + SanctionConfig.getDurationAsStringFromDate(sanction.expiresOn())).withStyle(ChatFormatting.RED));
         }
+        if (sanction.status().equals(AppealStatus.NOT_ALLOWED)) {
+            message.append(Component.literal("\nThis sanction is not appealable.").withStyle(ChatFormatting.YELLOW));
+        } else {
+            message.append(Component.literal("\nYou can appeal on " + Config.invite_link).withStyle(ChatFormatting.YELLOW));
+        }
+        event.getConnection().disconnect(message);
     }
 }

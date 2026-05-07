@@ -7,7 +7,8 @@ public enum AppealStatus {
     IN_PROGRESS("In progress"),
     REFUSED("Refused"),
     REDUCED("Sanction reduced"),
-    ACCEPTED("Accepted");
+    ACCEPTED("Accepted"),
+    UNSET("An error occurred");
 
     private final String label;
 
