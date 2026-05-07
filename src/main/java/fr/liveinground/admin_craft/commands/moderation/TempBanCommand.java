@@ -39,7 +39,9 @@ public class TempBanCommand {
                                                     if (!remaining.contains("--noappeal")) {
                                                         builder.suggest("--noappeal");
                                                     }
-                                                    builder.suggest("--delayedappeal:");
+                                                    if (!remaining.contains("--delayedappeal:")) {
+                                                        builder.suggest("--delayedappeal:");
+                                                    }
                                                     return builder.buildFuture();
                                                 })
                                                 .executes(ctx -> {

@@ -36,15 +36,24 @@ public class MuteCommand {
                 .requires(commandSource -> commandSource.hasPermission(Config.mute_level))
                 .then(Commands.argument("player", GameProfileArgument.gameProfile())
                         .executes(ctx -> {
-                           mute(ctx, null, null);
-                           return 1;
-                        })
-                    .then(Commands.argument("reason", StringArgumentType.greedyString()).executes(ctx -> {
-                            String reason = StringArgumentType.getString(ctx, "reason");
-                            mute(ctx, reason, null);
+                            mute(ctx, null, null);
                             return 1;
-                        }
-                        ))));
+                        })
+                        .then(Commands.argument("args", StringArgumentType.greedyString())
+                                .suggests((ctx, builder) -> {
+                                    String remaining = builder.getRemaining();
+                                    if (!remaining.contains("--noappeal")) {
+                                        builder.suggest("--noappeal");
+                                    }
+                                    if (!remaining.contains("--delayedappeal:")) {
+                                        builder.suggest("--delayedappeal:");
+                                    }
+                                    return builder.buildFuture();
+                                })
+                                .executes(ctx -> {
+                                    mute(ctx, StringArgumentType.getString(ctx, "args"), null);
+                                    return 1;
+                                }))));
 
         dispatcher.register(Commands.literal("unmute")
                 .requires(source -> source.hasPermission(Config.mute_level))
@@ -85,22 +94,24 @@ public class MuteCommand {
                         .then(Commands.argument("player", GameProfileArgument.gameProfile())
                                 .then(Commands.argument("duration", StringArgumentType.word())
                                         .executes(ctx -> {
-                                            Date duration = SanctionConfig.getDurationAsDate(StringArgumentType.getString(ctx, "duration"));
-                                            if (duration == null) {
-                                                ctx.getSource().sendFailure(Component.literal("Invalid duration, expecting format 1d1h1m1s"));
-                                                return 1;
-                                            }
-                                            mute(ctx, null, duration);
+                                            String duration = StringArgumentType.getString(ctx, "duration");
+                                            mute(ctx, "Muted by an operator", duration);
                                             return 1;
                                         })
-                                        .then(Commands.argument("reason", StringArgumentType.greedyString())
-                                                .executes(ctx -> {
-                                                    Date duration = SanctionConfig.getDurationAsDate(StringArgumentType.getString(ctx, "duration"));
-                                                    if (duration == null) {
-                                                        ctx.getSource().sendFailure(Component.literal("Invalid duration, expecting format 1d1h1m1s"));
-                                                        return 1;
+                                        .then(Commands.argument("args", StringArgumentType.greedyString())
+                                                .suggests((ctx, builder) -> {
+                                                    String remaining = builder.getRemaining();
+                                                    if (!remaining.contains("--noappeal")) {
+                                                        builder.suggest("--noappeal");
                                                     }
-                                                    mute(ctx, StringArgumentType.getString(ctx, "reason"), duration);
+                                                    if (!remaining.contains("--delayedappeal:")) {
+                                                        builder.suggest("--delayedappeal:");
+                                                    }
+                                                    return builder.buildFuture();
+                                                })
+                                                .executes(ctx -> {
+                                                    String duration = StringArgumentType.getString(ctx, "duration");
+                                                    mute(ctx, StringArgumentType.getString(ctx, "args"), duration);
                                                     return 1;
                                                 })
                                         )
@@ -109,21 +120,49 @@ public class MuteCommand {
         );
     }
 
-    private static void mute(@NotNull CommandContext<CommandSourceStack> ctx, @Nullable String reason, @Nullable Date duration) throws CommandSyntaxException {
+    private static void mute(@NotNull CommandContext<CommandSourceStack> ctx, String args, @Nullable String duration) throws CommandSyntaxException {
         NameAndId profile = AdminCraft.getOneProfile(GameProfileArgument.getGameProfiles(ctx, "player"));
         if (profile == null) {
             ctx.getSource().sendFailure(Component.literal("No player was found").withStyle(ChatFormatting.RED));
             return;
         }
-
-        if (reason == null) {
-            reason = "Muted by an operator.";
-        }
         if (AdminCraft.mutedPlayersUUID.contains(String.valueOf(profile.id()))) {
             ctx.getSource().sendFailure(Component.literal(PlaceHolderSystem.replacePlaceholders(Config.mute_failed_already_muted, Map.of("player", profile.name()))));
             return;
         }
-        CustomSanctionSystem.mutePlayer(ctx.getSource().getServer(), profile, reason, duration);
+        Date sanctionDuration = SanctionConfig.getDurationAsDate(duration);
+        if (sanctionDuration == null) {
+            ctx.getSource().sendFailure(Component.literal("Invalid format for the sanction duration.").withStyle(ChatFormatting.RED));
+            return;
+        }
+
+        String reason;
+        boolean appealable = true;
+        Date appealDelay = null;
+        String[] splitted = args.split(" ");
+        StringBuilder builder = new StringBuilder();
+
+        for (String i: splitted) {
+            if (i.equals("--noappeal")) appealable = false;
+            else if (i.contains("--delayedappeal:")) {
+                String[] delaysplit = i.split(":");
+                if (delaysplit.length == 2) {
+                    appealDelay = SanctionConfig.getDurationAsDate(delaysplit[1]);
+                    if (appealDelay == null) {
+                        ctx.getSource().sendFailure(Component.literal("Invalid duration format for the appeal delay.").withStyle(ChatFormatting.RED));
+                        return;
+                    }
+                }
+            } else builder.append(" ").append(i);
+        }
+        if (!builder.isEmpty()) {
+            builder.delete(0, 0);
+            reason = builder.toString();
+        }
+        else {
+            reason = "Muted by an operator";
+        }
+        CustomSanctionSystem.mutePlayer(ctx.getSource().getServer(), profile, reason, sanctionDuration, appealable, appealDelay);
 
         String msgToOperator = PlaceHolderSystem.replacePlaceholders(Config.mute_success, Map.of("player", profile.name(), "reason", reason));
         ctx.getSource().sendSuccess(() -> Component.literal(msgToOperator), true);

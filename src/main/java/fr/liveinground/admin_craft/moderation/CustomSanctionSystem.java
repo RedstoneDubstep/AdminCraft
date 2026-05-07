@@ -11,7 +11,6 @@ import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
 import fr.liveinground.admin_craft.PlaceHolderSystem;
 import fr.liveinground.admin_craft.storage.SanctionDatabase;
-import fr.liveinground.admin_craft.storage.types.PlayerMuteData;
 import fr.liveinground.admin_craft.storage.types.sanction.Sanction;
 import fr.liveinground.admin_craft.storage.types.sanction.SanctionData;
 import net.minecraft.ChatFormatting;
@@ -50,7 +49,7 @@ public class CustomSanctionSystem {
                 banMessage.append(Component.literal(expiresOn + "\n").withStyle(ChatFormatting.YELLOW));
             }
 
-            serverPlayer.connection.disconnect(banMessage);
+            //serverPlayer.connection.disconnect(banMessage);
 
         }
         return SanctionDatabase.registerSanction(player.id().toString(), player.name(), new SanctionData(Sanction.BAN, reason, new Date(), expiresOn), appealable, appealDelay);
