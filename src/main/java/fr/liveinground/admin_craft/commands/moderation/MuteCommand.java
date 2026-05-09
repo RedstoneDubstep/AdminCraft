@@ -63,23 +63,17 @@ public class MuteCommand {
                             if (!profiles.isEmpty()) {
 
                                 NameAndId targetProfile = profiles.iterator().next();
-                                ServerPlayer playerToUnmute = ctx.getSource().getServer().getPlayerList().getPlayer(targetProfile.id());
 
-                                if (playerToUnmute == null) {
-                                    ctx.getSource().sendFailure(Component.literal("No player with this username was found."));
-                                    return 1;
-                                }
-
-                                if (!AdminCraft.mutedPlayersUUID.contains(playerToUnmute.getStringUUID())) {
-                                    String msg = PlaceHolderSystem.replacePlaceholders(Config.unmute_failed_not_muted, Map.of("player", playerToUnmute.getName().getString()));
+                                if (!AdminCraft.mutedPlayersUUID.contains(targetProfile.id().toString())) {
+                                    String msg = PlaceHolderSystem.replacePlaceholders(Config.unmute_failed_not_muted, Map.of("player", targetProfile.name()));
                                     Component messageToOperator = Component.literal(msg);
                                     ctx.getSource().sendFailure(messageToOperator);
                                     return 1;
                                 }
 
-                                CustomSanctionSystem.unMutePlayer(playerToUnmute);
+                                CustomSanctionSystem.unMutePlayer(targetProfile);
 
-                                String msg = PlaceHolderSystem.replacePlaceholders(Config.unmute_success, Map.of("player", playerToUnmute.getName().getString()));
+                                String msg = PlaceHolderSystem.replacePlaceholders(Config.unmute_success, Map.of("player", targetProfile.name()));
                                 Component messageToOperator = Component.literal(msg);
                                 ctx.getSource().sendSuccess(() -> messageToOperator, true);
                             } else {

@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
 import fr.liveinground.admin_craft.PlaceHolderSystem;
+import fr.liveinground.admin_craft.ServerHolder;
 import fr.liveinground.admin_craft.storage.SanctionDatabase;
 import fr.liveinground.admin_craft.storage.types.PlayerMuteData;
 import fr.liveinground.admin_craft.storage.types.sanction.Sanction;
@@ -98,11 +99,19 @@ public class CustomSanctionSystem {
         return SanctionDatabase.registerSanction(player.id().toString(), player.name(), new SanctionData(Sanction.MUTE, reason, new Date(), expiresOn), appealable, appealDelay);
     }
 
-    public static void unMutePlayer(ServerPlayer player) {
-        if (AdminCraft.mutedPlayersUUID.contains(player.getStringUUID())) {
-            AdminCraft.playerDataManager.removeMuteEntry(AdminCraft.playerDataManager.getPlayerMuteDataByUUID(player.getStringUUID()));
-            Component messageComponent = Component.literal(Config.unmute_message).withStyle(ChatFormatting.GREEN);
-            player.sendSystemMessage(messageComponent);
+    public static void unMutePlayer(NameAndId player) {
+        if (AdminCraft.mutedPlayersUUID.contains(player.id().toString())) {
+            AdminCraft.playerDataManager.removeMuteEntry(AdminCraft.playerDataManager.getPlayerMuteDataByUUID(player.id().toString()));
+            try {
+                ServerPlayer serverPlayer = ServerHolder.getServer().getPlayerList().getPlayer(player.id());
+
+                if (serverPlayer != null) {
+                    Component messageComponent = Component.literal(Config.unmute_message).withStyle(ChatFormatting.GREEN);
+                    serverPlayer.sendSystemMessage(messageComponent);
+                }
+            } catch (IllegalStateException e) {
+                AdminCraft.LOGGER.error("Failed to display a message to the unmuted player {}", player.name(), e);
+            }
         }
     }
 

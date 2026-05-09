@@ -124,7 +124,7 @@ public class MuteEventsHandler {
             Date now = new Date();
             PlayerMuteData data = playerDataManager.getPlayerMuteDataByUUID(e.getEntity().getStringUUID());
             if (data != null && data.expiresOn != null && data.expiresOn.before(now)) {
-                CustomSanctionSystem.unMutePlayer((ServerPlayer) e.getEntity());
+                CustomSanctionSystem.unMutePlayer(e.getEntity().nameAndId());
             }
         }
     }
