@@ -11,6 +11,7 @@ import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
 import fr.liveinground.admin_craft.PlaceHolderSystem;
 import fr.liveinground.admin_craft.storage.SanctionDatabase;
+import fr.liveinground.admin_craft.storage.types.PlayerMuteData;
 import fr.liveinground.admin_craft.storage.types.sanction.Sanction;
 import fr.liveinground.admin_craft.storage.types.sanction.SanctionData;
 import net.minecraft.ChatFormatting;
@@ -55,7 +56,7 @@ public class CustomSanctionSystem {
         return SanctionDatabase.registerSanction(player.id().toString(), player.name(), new SanctionData(Sanction.BAN, reason, new Date(), expiresOn), appealable, appealDelay);
         //AdminCraft.playerDataManager.addSanction(String.valueOf(player.id()), Sanction.BAN, reason, expiresOn);
     }
-
+    /*
     public static String banPlayer(MinecraftServer server, String source, Collection<NameAndId> player, String reason, @Nullable Date expiresOn, boolean appealable, @Nullable Date appealDelay) {
         PlayerList playerList = server.getPlayerList();
         UserBanList banList = playerList.getBans();
@@ -70,7 +71,7 @@ public class CustomSanctionSystem {
             //AdminCraft.playerDataManager.addSanction(profile.id().toString(), Sanction.BAN, reason, expiresOn);
         }
         return null;
-    }
+    }*/
 
     public static void kickPlayer(ServerPlayer player, String reason) {
         player.connection.disconnect(Component.literal(reason).withStyle(ChatFormatting.RED));
@@ -87,35 +88,14 @@ public class CustomSanctionSystem {
                 String msg = PlaceHolderSystem.replacePlaceholders(Config.mute_message, Map.of("reason", reason));
                 serverPlayer.sendSystemMessage(Component.literal(msg).withStyle(ChatFormatting.RED));
 
-
                 if (expiresOn != null) {
-                    long diff = expiresOn.getTime() - System.currentTimeMillis();
-                    long days = TimeUnit.MILLISECONDS.toDays(diff);
-                    diff -= TimeUnit.DAYS.toMillis(days);
-
-                    long hours = TimeUnit.MILLISECONDS.toHours(diff);
-                    diff -= TimeUnit.HOURS.toMillis(hours);
-
-                    long minutes = TimeUnit.MILLISECONDS.toMinutes(diff);
-
-                    String daysStr = String.valueOf(days);
-                    String hoursStr = String.valueOf(hours);
-                    String minutesStr = String.valueOf(minutes);
-
-                    String timeMsg = PlaceHolderSystem.replacePlaceholders(
-                            Config.time_remaining,
-                            Map.of(
-                                    "days", daysStr,
-                                    "hours", hoursStr,
-                                    "minutes", minutesStr
-                            )
-                    );
+                    String timeMsg = SanctionConfig.getDurationAsStringFromDate(expiresOn);
                     serverPlayer.sendSystemMessage(Component.literal(timeMsg).withStyle(ChatFormatting.YELLOW));
                 }
             }
-            return SanctionDatabase.registerSanction(player.id().toString(), player.name(), new SanctionData(Sanction.MUTE, reason, new Date(), expiresOn), appealable, appealDelay);
         }
-        return null;
+        AdminCraft.playerDataManager.addMuteEntry(new PlayerMuteData(player.name(), player.id().toString(), reason, expiresOn));
+        return SanctionDatabase.registerSanction(player.id().toString(), player.name(), new SanctionData(Sanction.MUTE, reason, new Date(), expiresOn), appealable, appealDelay);
     }
 
     public static void unMutePlayer(ServerPlayer player) {
@@ -128,7 +108,7 @@ public class CustomSanctionSystem {
 
     public static void warnPlayer(ServerPlayer player, @Nullable String reason, @Nullable String operator) {
         if (operator == null) {
-            operator = "The Great Server (TGS)";
+            operator = "The Great Server";
         }
         if (reason == null) {
             reason = "Warned by an operator";

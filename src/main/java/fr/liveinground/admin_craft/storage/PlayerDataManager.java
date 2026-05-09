@@ -32,13 +32,11 @@ public class PlayerDataManager {
     private static final String MUTE_FILE_NAME = "mutes.json";
     private static final String IPS_FILE_NAME = "ips.json";
     // private static final String STAFF_MODE_DATA = "staff_mode.json";
-    private static final String SANCTION_HISTORY = "sanction_history.json";
     // private static final String WORLD_CHANGES_DATABASE_FILE = "world_changes.db";
     private static final String REPORTS = "reports.json";
 
     private final Path mute_data_file;
     private final Path ips_data_file;
-    private final Path sanction_history_file;
     // private final Path staff_mode_data_file;
     private final Path reports_data_file;
 
@@ -58,12 +56,10 @@ public class PlayerDataManager {
         this.mute_data_file = worldPath.resolve(ROOT).resolve(MUTE_FILE_NAME);
         this.ips_data_file = worldPath.resolve(ROOT).resolve(IPS_FILE_NAME);
         // this.staff_mode_data_file = worldPath.resolve(ROOT).resolve(STAFF_MODE_DATA);
-        this.sanction_history_file = worldPath.resolve(ROOT).resolve(SANCTION_HISTORY);
         this.reports_data_file = worldPath.resolve(ROOT).resolve(REPORTS);
 
         createIfAbsent(mute_data_file);
         createIfAbsent(ips_data_file);
-        createIfAbsent(sanction_history_file);
         createIfAbsent(reports_data_file);
 
         load();
@@ -112,13 +108,7 @@ public class PlayerDataManager {
     }
 
     public void addMuteEntry(PlayerMuteData entry) {
-        Sanction s;
-        if (entry.expiresOn == null) {
-            s = Sanction.MUTE;
-        } else {
-            s = Sanction.TEMPMUTE;
-        }
-        addSanction(entry.uuid, s, entry.reason, entry.expiresOn);
+        //addSanction(entry.uuid, Sanction.MUTE, entry.reason, entry.expiresOn);
         muteEntries.add(entry);
         AdminCraft.mutedPlayersUUID.add(entry.uuid);
     }
@@ -155,18 +145,6 @@ public class PlayerDataManager {
             }
         } catch (IOException e) {
             System.err.println("Failed to load IPS datas: " + e.getMessage());
-        }
-
-        // sanctions system
-        try (Reader reader = Files.newBufferedReader(sanction_history_file)) {
-            Type type = new TypeToken<List<PlayerHistoryData>>(){}.getType();
-            List<PlayerHistoryData> loaded = GSON.fromJson(reader, type);
-            if (loaded != null) {
-                historyEntries.clear();
-                historyEntries.addAll(loaded);
-            }
-        } catch (IOException e) {
-            System.err.println("Failed to load history datas: " + e.getMessage());
         }
 
         // report system
@@ -275,9 +253,6 @@ public class PlayerDataManager {
             try (Writer writer = Files.newBufferedWriter(ips_data_file)) {
                 GSON.toJson(ipsEntries, writer);
             }
-            try (Writer writer = Files.newBufferedWriter(sanction_history_file)) {
-                GSON.toJson(historyEntries, writer);
-            }
             try (Writer writer = Files.newBufferedWriter(reports_data_file)) {
                 GSON.toJson(reportsEntries, writer);
             }
@@ -285,9 +260,6 @@ public class PlayerDataManager {
             System.err.println("Failed to save datas: " + e.getMessage());
         }
     }
-
-    // todo: ips storage (alt accounts easy detection)
-
 
     // todo: staff mode data storage
 
