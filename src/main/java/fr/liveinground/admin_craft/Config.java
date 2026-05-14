@@ -1,5 +1,6 @@
 package fr.liveinground.admin_craft;
 
+import fr.liveinground.admin_craft.lang.LangManager;
 import fr.liveinground.admin_craft.storage.types.sanction.Sanction;
 import fr.liveinground.admin_craft.storage.types.sanction.SanctionTemplate;
 import net.minecraft.core.Holder;
@@ -12,8 +13,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.config.ModConfigEvent;
+import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,6 +39,9 @@ public class Config {
 
     private static final ModConfigSpec.ConfigValue<String> _CONFIG_VERSION;
     public static String _config_version;
+
+    private static final ModConfigSpec.ConfigValue<String> LOCALE;
+    public static String locale;
 
     // --------------------------
     // -- Commands permissions --
@@ -177,70 +183,6 @@ public class Config {
     private static final ModConfigSpec.ConfigValue<String> STAFF_ROLE_ID;
     public static String staff_role_id;
 
-    // --------------
-    // -- Messages --
-    // --------------
-
-    private static final ModConfigSpec.ConfigValue<String> SPAWN_PROTECTION_ENTER;
-    public static String sp_enter_msg;
-
-    private static final ModConfigSpec.ConfigValue<String> SPAWN_PROTECTION_LEAVE;
-    public static String sp_leave_msg;
-
-    private static final ModConfigSpec.ConfigValue<String> TIME_REMAINING;
-    public static String time_remaining;
-
-    private static final ModConfigSpec.ConfigValue<String> TIME_REMAINING_SHORT;
-    public static String time_remaining_short;
-
-    private static final ModConfigSpec.ConfigValue<String> MUTE_MESSAGE;
-    public static String mute_message;
-
-    private static final ModConfigSpec.ConfigValue<String> MUTE_MESSAGE_NO_REASON;
-    public static String mute_message_no_reason;
-
-    private static final ModConfigSpec.ConfigValue<String> MUTE_SUCCESS;
-    public static String mute_success;
-
-    private static final ModConfigSpec.ConfigValue<String> MUTE_FAILED_ALREADY_MUTED;
-    public static String mute_failed_already_muted;
-
-    private static final ModConfigSpec.ConfigValue<String> MUTE_MESSAGE_CANCELLED;
-    public static String mute_message_cancelled;
-
-    private static final ModConfigSpec.ConfigValue<String> CANCEL_LOG_FORMAT;
-    public static String cancel_log_format;
-
-    private static final ModConfigSpec.ConfigValue<String> UNMUTE_MESSAGE;
-    public static String unmute_message;
-
-    private static final ModConfigSpec.ConfigValue<String> UNMUTE_SUCCESS;
-    public static String unmute_success;
-
-    private static final ModConfigSpec.ConfigValue<String> UNMUTE_FAILED_NOT_MUTED;
-    public static String unmute_failed_not_muted;
-
-    private static final ModConfigSpec.ConfigValue<String> WARN_TITLE;
-    public static String warn_title;
-
-    private static final ModConfigSpec.ConfigValue<String> WARN_MESSAGE;
-    public static String warn_message;
-
-    private static final ModConfigSpec.ConfigValue<String> REPORT_SUCCESS;
-    public static String report_success;
-
-    private static final ModConfigSpec.ConfigValue<String> REPORT_WEBHOOK_ISSUE;
-    public static String webhook_issue_message;
-
-    private static final ModConfigSpec.ConfigValue<String> REPORT_FAILED_SELF;
-    public static String report_failed_self;
-
-    private static final ModConfigSpec.ConfigValue<String> FREEZE_START;
-    public static String freeze_start;
-
-    private static final ModConfigSpec.ConfigValue<String> FREEZE_STOP;
-    public static String freeze_stop;
-
     static {
         BUILDER.push("misc");
 
@@ -248,6 +190,7 @@ public class Config {
         _CONFIG_VERSION = BUILDER
                 .comment("This setting corresponds to the mod version, to check if the config is up to date. Change it when you update the mod, in order to disable the join message.")
                 .define("configVersion", AdminCraft._VERSION);
+        LOCALE = BUILDER.comment("The lang file the mod should use. Can be one of the supported languages: en_us, fr_fr.").worldRestart().define("locale", "en_us");
 
         BUILDER.pop();
     }
@@ -352,44 +295,6 @@ public class Config {
         BUILDER.pop();
     }
 
-    static {
-        BUILDER.push("messages");
-
-        SPAWN_PROTECTION_ENTER = BUILDER.comment("Message when entering spawn protection")
-                .define("enter", "You are now in the spawn protection");
-
-        SPAWN_PROTECTION_LEAVE = BUILDER.comment("Message when leaving spawn protection")
-                .define("leave", "You are no longer in the spawn protection");
-
-        TIME_REMAINING = BUILDER.comment("Message for displaying a sanction duration. Available placeholders: %days%, %hours%, and %minutes%")
-                .define("timeRemainingMessage", "Time remaining: %days% days, %hours%, and %minutes% minutes");
-        TIME_REMAINING_SHORT = BUILDER.comment("Message for displaying shortly a sanction duration. Available placeholders: %days%, %hours%, and %minutes%")
-                .define("timeRemainingMessageShort", "Time remaining: %days%d %hours%h %minutes%m");
-
-        MUTE_MESSAGE = BUILDER.comment("Message sent to players when they are muted. Available placeholder: %reason%").define("muteMessage", "You were muted by an operator. Reason: %reason%");
-        MUTE_MESSAGE_NO_REASON = BUILDER.comment("Message sent to players when they are muted without a specified reason").define("muteMessageNoReason", "You were muted by an operator.");
-        MUTE_SUCCESS = BUILDER.comment("Message sent to the moderator once the player is successfully muted. Available placeholders: %player% and %reason%").define("muteSuccess", "%player% was muted: %reason%");
-        MUTE_FAILED_ALREADY_MUTED = BUILDER.comment("Message sent to the moderator if the player is already muted. Available placeholders: %player%").define("alreadyMuted", "%player% is already muted");
-        MUTE_MESSAGE_CANCELLED = BUILDER.comment("Message sent to muted players when they attempt sending a message in chat").define("cancelChatMessage", "You can't send messages while muted!");
-        CANCEL_LOG_FORMAT = BUILDER.comment("The log message sent to operators and console when a muted player's event is cancelled. Available placeholders: %player%, and %message%").define("logFormat", "[CANCELED] <%player% (muted)> %message%");
-
-        UNMUTE_MESSAGE = BUILDER.comment("Message sent to players when they are unmuted").define("unMuteMessage", "You are now unmuted!");
-        UNMUTE_SUCCESS = BUILDER.comment("Message sent to the moderator once the player is unmuted. Available placeholder: %player%").define("unMuteSuccess", "%player% was unmuted");
-        UNMUTE_FAILED_NOT_MUTED = BUILDER.comment("Message sent to the moderator if the player is not muted. Available placeholder: %player%").define("notMuted", "%player% is not muted");
-
-        WARN_TITLE = BUILDER.comment("The title of the warn message shown to sanctioned players").define("warnTitle", "YOU'VE BEEN WARNED!");
-        WARN_MESSAGE = BUILDER.comment("The text under the title in the warn message. Available placeholders: %operator% and %reason%").define("warnMessage", "You've been warned by %operator%: %reason%. Please check the rules!");
-
-        REPORT_SUCCESS = BUILDER.comment("The message sent to the player once his report is issued").define("reportSuccess", "Report successfully submitted. Thank you for your vigilance.");
-        REPORT_WEBHOOK_ISSUE = BUILDER.comment("The message sent to the player if an issue occurred with webhook").define("webhookIssue", "An issue may have occurred during your report. Don't hesitate to contact the staff if no operator is online.");
-        REPORT_FAILED_SELF = BUILDER.comment("The message sent to a player trying to report himself").define("selfReport", "You can't report yourself!");
-
-        FREEZE_START = BUILDER.comment("The message sent to the player when he is frozen").define("freezeStartMessage", "You have been frozen by an operator. Please wait for instructions and don't log out.");
-        FREEZE_STOP = BUILDER.comment("The message sent to the player when he is unfrozen").define("freezeStopMessage", "You are no longer frozen. You can continue playing normally.");
-
-        BUILDER.pop();
-    }
-
     static final ModConfigSpec SPEC = BUILDER.build();
 
     private static boolean validateBlockName(final Object obj) {
@@ -469,6 +374,16 @@ public class Config {
 
         readme = README.get();
         _config_version = _CONFIG_VERSION.get();
+        locale = LOCALE.get();
+
+        LangManager.setLanguage(locale);
+        Path langDir = FMLPaths.CONFIGDIR.get()
+                .resolve(AdminCraft.MODID)
+                .resolve("lang");
+
+        AdminCraft.ensureLangFilesExist();
+
+        LangManager.reload(langDir);
 
         // --------------------------
         // -- Commands permissions --
@@ -601,38 +516,6 @@ public class Config {
         guild_id = GUID_ID.get();
         invite_link = INVITE_LINK.get();
         staff_role_id = STAFF_ROLE_ID.get();
-
-        // --------------
-        // -- Messages --
-        // --------------
-
-        sp_enter_msg = SPAWN_PROTECTION_ENTER.get();
-        sp_leave_msg = SPAWN_PROTECTION_LEAVE.get();
-
-        time_remaining = TIME_REMAINING.get();
-        time_remaining_short = TIME_REMAINING_SHORT.get();
-
-        mute_message = MUTE_MESSAGE.get();
-        mute_message_no_reason = MUTE_MESSAGE_NO_REASON.get();
-        mute_success = MUTE_SUCCESS.get();
-        mute_failed_already_muted = MUTE_FAILED_ALREADY_MUTED.get();
-
-        mute_message_cancelled = MUTE_MESSAGE_CANCELLED.get();
-        cancel_log_format = CANCEL_LOG_FORMAT.get();
-
-        unmute_message = UNMUTE_MESSAGE.get();
-        unmute_success = UNMUTE_SUCCESS.get();
-        unmute_failed_not_muted = UNMUTE_FAILED_NOT_MUTED.get();
-
-        warn_title = WARN_TITLE.get();
-        warn_message = WARN_MESSAGE.get();
-
-        report_success = REPORT_SUCCESS.get();
-        webhook_issue_message = REPORT_WEBHOOK_ISSUE.get();
-        report_failed_self = REPORT_FAILED_SELF.get();
-
-        freeze_start = FREEZE_START.get();
-        freeze_stop = FREEZE_STOP.get();
     }
 
     public static Set<Holder<MobEffect>> loadEffects(Level level) {

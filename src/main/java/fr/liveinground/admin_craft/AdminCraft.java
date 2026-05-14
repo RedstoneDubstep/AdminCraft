@@ -14,6 +14,8 @@ import fr.liveinground.admin_craft.commands.tools.EchestCommand;
 import fr.liveinground.admin_craft.commands.tools.InvseeCommand;
 import fr.liveinground.admin_craft.commands.tools.OfflineTagCommand;
 import fr.liveinground.admin_craft.commands.tools.OfflineTeleportCommand;
+import fr.liveinground.admin_craft.lang.LangManager;
+import fr.liveinground.admin_craft.lang.TrKeys;
 import fr.liveinground.admin_craft.moderation.SanctionConfig;
 import fr.liveinground.admin_craft.mutes.MuteEventsHandler;
 import fr.liveinground.admin_craft.storage.PlayerDataManager;
@@ -44,6 +46,7 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
@@ -57,6 +60,10 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -247,7 +254,7 @@ public class AdminCraft {
                 player.addEffect(new MobEffectInstance(holder, Integer.MAX_VALUE, 255, false, false));            }
             if (!player.getTags().contains(SP_TAG)) {
                 player.addTag(SP_TAG);
-                serverPlayer.displayClientMessage(Component.literal(Config.sp_enter_msg).withStyle(ChatFormatting.GREEN), true);
+                serverPlayer.displayClientMessage(Component.literal(LangManager.tr(TrKeys.SPAWN_ENTER)).withStyle(ChatFormatting.GREEN), true);
             }
         } else {
             if (player.getTags().contains(SP_TAG)) {
@@ -255,7 +262,7 @@ public class AdminCraft {
                 for (Holder<MobEffect> holder : Config.loadEffects(player.level())) {
                     player.removeEffect(holder);
                 }
-                serverPlayer.displayClientMessage(Component.literal(Config.sp_leave_msg).withStyle(ChatFormatting.RED), true);
+                serverPlayer.displayClientMessage(Component.literal(LangManager.tr(TrKeys.SPAWN_LEAVE)).withStyle(ChatFormatting.RED), true);
             }
         }
     }
@@ -277,7 +284,7 @@ public class AdminCraft {
         }
         if (player.hasPermissions(1) && !Config._config_version.equals(AdminCraft._VERSION)) {
             player.sendSystemMessage(Component.literal("AdminCraft was recently updated to a new version (" + AdminCraft._VERSION + ").").withStyle(ChatFormatting.YELLOW));
-            player.sendSystemMessage(Component.literal("It strongly recommended to check the configuration file to check there is no issue with it."));
+            player.sendSystemMessage(Component.literal("It strongly recommended to check the configuration file to ensure there is no issue with it."));
             player.sendSystemMessage(Component.literal("You can disable this message by changing the 'configVersion' key to " + AdminCraft._VERSION + " in the configuration."));
         }
     }
@@ -333,5 +340,35 @@ public class AdminCraft {
             message.append(Component.literal("\nYou can appeal on " + Config.invite_link).withStyle(ChatFormatting.YELLOW));
         }
         event.getConnection().disconnect(message);
+    }
+
+    public static void ensureLangFilesExist() {
+        Path dir = FMLPaths.CONFIGDIR.get()
+                .resolve(MODID)
+                .resolve("lang");
+
+        try {
+            Files.createDirectories(dir);
+
+            copyDefault("en_us.json", dir);
+            copyDefault("fr_fr.json", dir);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void copyDefault(String file, Path dir) throws IOException {
+        Path target = dir.resolve(file);
+
+        if (Files.exists(target)) return;
+
+        try (InputStream in = AdminCraft.class.getResourceAsStream(
+                "/assets/" + MODID + "/lang/" + file)) {
+
+            if (in != null) {
+                Files.copy(in, target);
+            }
+        }
     }
 }
