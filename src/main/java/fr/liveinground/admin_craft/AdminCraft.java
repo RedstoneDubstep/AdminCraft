@@ -1,37 +1,35 @@
 package fr.liveinground.admin_craft;
 
-import java.util.*;
-
 import com.mojang.authlib.GameProfile;
-import fr.liveinground.admin_craft.commands.tools.*;
-import fr.liveinground.admin_craft.storage.types.sanction.AppealStatus;
-import fr.liveinground.admin_craft.storage.types.sanction.DatabaseSanctionData;
-import fr.liveinground.admin_craft.storage.types.sanction.Sanction;
-import fr.liveinground.admin_craft.storage.SanctionDatabase;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.server.players.NameAndId;
-import net.neoforged.neoforge.event.entity.player.PlayerNegotiationEvent;
-import org.slf4j.Logger;
-
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.logging.LogUtils;
-
 import fr.liveinground.admin_craft.commands.moderation.FreezeCommand;
 import fr.liveinground.admin_craft.commands.moderation.MuteCommand;
 import fr.liveinground.admin_craft.commands.moderation.ReportCommand;
 import fr.liveinground.admin_craft.commands.moderation.SanctionCommand;
 import fr.liveinground.admin_craft.commands.moderation.TempBanCommand;
 import fr.liveinground.admin_craft.commands.moderation.WarnCommand;
+import fr.liveinground.admin_craft.commands.tools.AltCommand;
+import fr.liveinground.admin_craft.commands.tools.EchestCommand;
+import fr.liveinground.admin_craft.commands.tools.InvseeCommand;
+import fr.liveinground.admin_craft.commands.tools.OfflineTagCommand;
+import fr.liveinground.admin_craft.commands.tools.OfflineTeleportCommand;
 import fr.liveinground.admin_craft.moderation.SanctionConfig;
 import fr.liveinground.admin_craft.mutes.MuteEventsHandler;
 import fr.liveinground.admin_craft.storage.PlayerDataManager;
+import fr.liveinground.admin_craft.storage.SanctionDatabase;
+import fr.liveinground.admin_craft.storage.types.sanction.AppealStatus;
+import fr.liveinground.admin_craft.storage.types.sanction.DatabaseSanctionData;
+import fr.liveinground.admin_craft.storage.types.sanction.Sanction;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -51,12 +49,17 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerNegotiationEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.ExplosionEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Mod(AdminCraft.MODID)
 public class AdminCraft {

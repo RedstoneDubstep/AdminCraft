@@ -9,9 +9,16 @@ import net.neoforged.fml.loading.FMLPaths;
 
 import javax.annotation.Nullable;
 import java.security.SecureRandom;
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class SanctionDatabase {
 

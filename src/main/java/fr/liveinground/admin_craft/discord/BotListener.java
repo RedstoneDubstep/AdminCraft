@@ -25,9 +25,13 @@ import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 
-import java.awt.*;
-import java.util.*;
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 public class BotListener extends ListenerAdapter {
 
@@ -40,12 +44,12 @@ public class BotListener extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-        if (!event.isFromGuild() && event.getGuild().getId().equals(Config.guild_id)) {
+        if (!event.isFromGuild() && Objects.requireNonNull(event.getGuild()).getId().equals(Config.guild_id)) {
             return;
         }
         if (event.getName().equals("status")) {
 
-            String target = event.getOption("target").getAsString();
+            String target = Objects.requireNonNull(event.getOption("target")).getAsString();
             if (target.equals("appeals")) {
                 if (DiscordBot.enabled) {
                     event.reply("Appeal system is enabled.").queue();
@@ -59,18 +63,18 @@ public class BotListener extends ListenerAdapter {
             }
         }
         else if (event.getName().equals("post_embed")) {
-            if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+            if (!Objects.requireNonNull(event.getMember()).hasPermission(Permission.ADMINISTRATOR)) {
                 event.reply("You don't have the permission to run this command. Required node: **Administrator**.").setEphemeral(true).queue();
                 return;
             }
 
-            String title = event.getOption("title").getAsString();
-            String description = event.getOption("description").getAsString();
-            String emojiName = event.getOption("emoji").getAsString();
+            String title = Objects.requireNonNull(event.getOption("title")).getAsString();
+            String description = Objects.requireNonNull(event.getOption("description")).getAsString();
+            String emojiName = Objects.requireNonNull(event.getOption("emoji")).getAsString();
 
             Emoji emoji = Emoji.fromFormatted(emojiName);
 
-            String label = event.getOption("label").getAsString();
+            String label = Objects.requireNonNull(event.getOption("label")).getAsString();
 
             EmbedBuilder builder = new EmbedBuilder();
             builder.setTitle(title);
@@ -84,34 +88,34 @@ public class BotListener extends ListenerAdapter {
 
     @Override
     public void onButtonInteraction(ButtonInteractionEvent event) {
-        if (!event.isFromGuild() && event.getGuild().getId().equals(Config.guild_id)) {
+        if (!event.isFromGuild() && Objects.requireNonNull(event.getGuild()).getId().equals(Config.guild_id)) {
             return;
         }
         Guild guild = event.getGuild();
-        if (event.getButton().getId().equals(DiscordBot.INFO_BUTTON_ID)) {
+        if (Objects.equals(event.getButton().getId(), DiscordBot.INFO_BUTTON_ID)) {
             Modal modal = Modal.create(DiscordBot.INFO_MODAL_ID, "Sanction data")
-                    .addActionRow(TextInput.create("id", "Sanction ID", TextInputStyle.SHORT).setPlaceholder("e.g. ").setRequired(true).build()) //todo: placeholder and min-max
+                    .addActionRow(TextInput.create("id", "Sanction ID", TextInputStyle.SHORT).setPlaceholder("e.g. #A1B2C3D4").setRequired(true).setMinLength(9).setMaxLength(9).build())
                     .addActionRow(TextInput.create("ign", "Minecraft username", TextInputStyle.SHORT).setPlaceholder("e.g. Steve").setRequired(true).setMinLength(3).setMaxLength(16).build())
                     .build();
             event.replyModal(modal).queue();
-        } else if (event.getButton().getId().equals(DiscordBot.APPEAL_BUTTON_ID)) {
+        } else if (Objects.equals(event.getButton().getId(), DiscordBot.APPEAL_BUTTON_ID)) {
             Modal modal = Modal.create(DiscordBot.APPEAL_MODAL_ID, "Appeal form")
                     .addActionRow(TextInput.create("reason", "Appeal reason", TextInputStyle.PARAGRAPH).setPlaceholder("Why do you want to appeal your sanction ?").setRequired(true).build())
                     .build();
             event.replyModal(modal).queue();
         }
-        String[] splitted = event.getButton().getId().split("_");
+        String[] splitted = Objects.requireNonNull(event.getButton().getId()).split("_");
         if (splitted.length == 3) {
             String memberID = splitted[0];
             String buttonID = "_" + splitted[1] + "_";
             String id = splitted[2];
-            Member member = guild.getMemberById(memberID);
+            Member member = Objects.requireNonNull(guild).getMemberById(memberID);
             if (member == null) {
                 event.reply("Error: The member who submitted the appeal is no longer in the guild, or doesn't exists.").queue();
                 return;
             }
             if (buttonID.equals(DiscordBot.REFUSE_APPEAL_BUTTON_ID)) {
-                if (event.getMember().getRoles().stream().anyMatch(role -> role.getId().equals(Config.staff_role_id))) {
+                if (Objects.requireNonNull(event.getMember()).getRoles().stream().anyMatch(role -> role.getId().equals(Config.staff_role_id))) {
                     event.replyModal(Modal.create(memberID + DiscordBot.STAFF_REASON_MODAL_ID + id, "Closing appeal")
                                     .addActionRow(TextInput.create("reason", "Deny reason (optional)", TextInputStyle.PARAGRAPH)
                                             .setPlaceholder("Why is this appeal denied ?")
@@ -123,7 +127,7 @@ public class BotListener extends ListenerAdapter {
                 }
             }
             if (buttonID.equals(DiscordBot.ACCEPT_TOTAL_APPEAL_BUTTON_ID)) {
-                if (event.getMember().getRoles().stream().anyMatch(role -> role.getId().equals(Config.staff_role_id))) {
+                if (Objects.requireNonNull(event.getMember()).getRoles().stream().anyMatch(role -> role.getId().equals(Config.staff_role_id))) {
                     DatabaseSanctionData dataset = SanctionDatabase.getSanctionData(id);
                     if (dataset == null) {
                         event.reply("Failure: no data found with associated ID " + id).setEphemeral(true).queue();
@@ -148,7 +152,7 @@ public class BotListener extends ListenerAdapter {
                 }
             }
             if (buttonID.equals(DiscordBot.ACCEPT_LIGHT_APPEAL_BUTTON_ID)) {
-                if (event.getMember().getRoles().stream().anyMatch(role -> role.getId().equals(Config.staff_role_id))) {
+                if (Objects.requireNonNull(event.getMember()).getRoles().stream().anyMatch(role -> role.getId().equals(Config.staff_role_id))) {
                     event.replyModal(Modal.create(memberID + DiscordBot.STAFF_DURATION_MODAL_ID + id, "Approvation details")
                             .addActionRow(TextInput.create("duration", "New duration", TextInputStyle.SHORT).setRequired(true).build()).build()).queue();
                     return;
@@ -159,7 +163,7 @@ public class BotListener extends ListenerAdapter {
 
     @Override
     public void onModalInteraction(ModalInteractionEvent event) {
-        if (!event.isFromGuild() && event.getGuild().getId().equals(Config.guild_id)) {
+        if (!event.isFromGuild() && Objects.requireNonNull(event.getGuild()).getId().equals(Config.guild_id)) {
             return;
         }
         Guild guild = event.getGuild();
@@ -168,8 +172,8 @@ public class BotListener extends ListenerAdapter {
             return;
         }
         if (event.getId().equals(DiscordBot.INFO_MODAL_ID)) {
-            String id = event.getValue("id").getAsString();
-            String ign = event.getValue("ign").getAsString();
+            String id = Objects.requireNonNull(event.getValue("id")).getAsString();
+            String ign = Objects.requireNonNull(event.getValue("ign")).getAsString();
             if (SanctionDatabase.sanctionDoesntExists(id, ign)) {
                 event.reply("No sanction matches this id and this player. Please check your input and try again").setEphemeral(true).queue();
                 return;
@@ -229,7 +233,7 @@ public class BotListener extends ListenerAdapter {
             cache.add(id);
             cache.add(uuid.toString());
             cache.add(ign);
-            DiscordBot.playerCache.put(event.getMember().getId(), cache);
+            DiscordBot.playerCache.put(Objects.requireNonNull(event.getMember()).getId(), cache);
 
         } else if (event.getId().equals(DiscordBot.APPEAL_MODAL_ID)) {
             Member member = event.getMember();
@@ -245,7 +249,7 @@ public class BotListener extends ListenerAdapter {
                 event.reply("AdminCraft cache was reset. Please submit your sanction id again.").setEphemeral(true).queue();
                 return;
             }
-            String appealReason = event.getInteraction().getValue("reason").getAsString();
+            String appealReason = Objects.requireNonNull(event.getInteraction().getValue("reason")).getAsString();
 
             DatabaseSanctionData data = SanctionDatabase.getSanctionData(id, ign);
             if (data == null) {
@@ -337,7 +341,7 @@ public class BotListener extends ListenerAdapter {
                     event.reply("Failure: no data found with associated ID " + id).setEphemeral(true).queue();
                     return;
                 }
-                String duration = event.getValue("duration").getAsString();
+                String duration = Objects.requireNonNull(event.getValue("duration")).getAsString();
                 Date dateFromNow = SanctionConfig.getDurationAsDateSince(duration, data.date());
                 if (dateFromNow == null) {
                     event.reply("Failure: Invalid duration format.").setEphemeral(true).queue();
@@ -359,8 +363,6 @@ public class BotListener extends ListenerAdapter {
                         return;
                     }
                 } else {
-                    //todo: change duration
-
                     if (CustomSanctionSystem.changeDuration(data, dateFromNow)) {
                         member.getUser().openPrivateChannel().queue(channel -> channel.sendMessage(
                                 "Hello,\n\n" +

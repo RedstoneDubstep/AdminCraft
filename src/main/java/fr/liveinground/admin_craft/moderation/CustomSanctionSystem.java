@@ -1,12 +1,5 @@
 package fr.liveinground.admin_craft.moderation;
 
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-
-import javax.annotation.Nullable;
-
 import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
 import fr.liveinground.admin_craft.PlaceHolderSystem;
@@ -27,6 +20,12 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.UserBanList;
 import net.minecraft.server.players.UserBanListEntry;
 import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nullable;
+import java.util.Date;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 public class CustomSanctionSystem {
     public static String banPlayer(MinecraftServer server, String source, NameAndId player, String reason, @Nullable Date expiresOn, boolean appealable, @Nullable Date appealDelay) {
