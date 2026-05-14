@@ -1,6 +1,5 @@
 package fr.liveinground.admin_craft.commands.moderation;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -15,21 +14,15 @@ import fr.liveinground.admin_craft.Config;
 import fr.liveinground.admin_craft.PlaceHolderSystem;
 import fr.liveinground.admin_craft.moderation.CustomSanctionSystem;
 import fr.liveinground.admin_craft.moderation.SanctionConfig;
-import fr.liveinground.admin_craft.storage.types.reports.PlayerReportsData;
-import fr.liveinground.admin_craft.storage.types.reports.ReportData;
 import fr.liveinground.admin_craft.storage.types.sanction.SanctionData;
 import fr.liveinground.admin_craft.storage.types.sanction.SanctionTemplate;
 import fr.liveinground.admin_craft.storage.types.tools.PlayerHistoryData;
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.players.NameAndId;
 
 public class SanctionCommand {
 

@@ -1,9 +1,9 @@
 package fr.liveinground.admin_craft.moderation;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.util.Objects;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -13,6 +13,8 @@ import fr.liveinground.admin_craft.PlaceHolderSystem;
 import fr.liveinground.admin_craft.ServerHolder;
 import fr.liveinground.admin_craft.storage.SanctionDatabase;
 import fr.liveinground.admin_craft.storage.types.PlayerMuteData;
+import fr.liveinground.admin_craft.storage.types.sanction.AppealStatus;
+import fr.liveinground.admin_craft.storage.types.sanction.DatabaseSanctionData;
 import fr.liveinground.admin_craft.storage.types.sanction.Sanction;
 import fr.liveinground.admin_craft.storage.types.sanction.SanctionData;
 import net.minecraft.ChatFormatting;
@@ -24,9 +26,7 @@ import net.minecraft.server.players.NameAndId;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.UserBanList;
 import net.minecraft.server.players.UserBanListEntry;
-
-//todo: remove unused blocks
-//todo: check mute method (what if player offline...?)
+import org.jetbrains.annotations.NotNull;
 
 public class CustomSanctionSystem {
     public static String banPlayer(MinecraftServer server, String source, NameAndId player, String reason, @Nullable Date expiresOn, boolean appealable, @Nullable Date appealDelay) {
@@ -134,5 +134,55 @@ public class CustomSanctionSystem {
 
         SanctionDatabase.registerSanction(player.getStringUUID(), player.getPlainTextName(), new SanctionData(Sanction.WARN, reason, new Date(), null), false, null);
         //AdminCraft.playerDataManager.addSanction(player.getStringUUID(), Sanction.WARN, reason, null);
+    }
+
+    public static boolean applyAppealToSanction(DatabaseSanctionData data, AppealStatus status) {
+        if (SanctionDatabase.changeAppealStatus(data.id(), status)) {
+            NameAndId nameAndId = new NameAndId(UUID.fromString(data.uuid()), data.ign());
+            switch (data.type()) {
+                case MUTE -> unMutePlayer(nameAndId);
+                case BAN -> ServerHolder.getServer().getPlayerList().getBans().remove(nameAndId);
+                default -> AdminCraft.LOGGER.warn("An appeal was made for a non-appealable sanction type (sanction {}). Skipping appeal success procedure...", data.id());
+            }
+            return true;
+        } else {
+            AdminCraft.LOGGER.error("Failed to update appeal status for sanction id {} to {} in the database", data.id(), status.toString());
+            return false;
+        }
+    }
+
+    public static boolean changeDuration(@NotNull DatabaseSanctionData data, @NotNull Date newExpires) {
+        NameAndId nameAndId = new NameAndId(UUID.fromString(data.id()), data.ign());
+        if (SanctionDatabase.changeAppealStatus(data.id(), AppealStatus.REDUCED)) {
+            switch (data.type()) {
+                case MUTE -> changeMuteDuration(nameAndId, newExpires);
+                case BAN -> changeBanDuration(nameAndId, newExpires);
+                default -> AdminCraft.LOGGER.warn("An appeal was made for a non-appealable sanction type (sanction {}). Skipping sanction reducing procedure...", data.id());
+            }
+            return true;
+        }
+        AdminCraft.LOGGER.error("Failed to update appeal status for sanction id {} to REDUCED in the database", data.id());
+        return false;
+    }
+
+    public static void changeMuteDuration(@NotNull NameAndId player, @NotNull Date newExpires) {
+        if (AdminCraft.mutedPlayersUUID.contains(player.id().toString())) {
+            PlayerMuteData oldData = AdminCraft.playerDataManager.getPlayerMuteDataByUUID(player.id().toString());
+            AdminCraft.playerDataManager.removeMuteEntry(oldData);
+            AdminCraft.playerDataManager.addMuteEntry(new PlayerMuteData(player.name(), player.id().toString(), Objects.requireNonNull(oldData).reason, newExpires));
+            ServerPlayer serverPlayer = ServerHolder.getServer().getPlayerList().getPlayer(player.id());
+            if (serverPlayer != null) {
+                serverPlayer.sendSystemMessage(Component.literal("Your mute duration has been changed. It will now expire in " + SanctionConfig.getDurationAsStringFromDate(newExpires)).withStyle(ChatFormatting.GREEN));
+            }
+        }
+    }
+
+    public static void changeBanDuration(NameAndId player, Date newExpires) {
+        PlayerList list = ServerHolder.getServer().getPlayerList();
+        if (list.getBans().isBanned(player)) {
+            UserBanListEntry old = Objects.requireNonNull(list.getBans().get(player));
+            list.getBans().remove(player);
+            list.getBans().add(new UserBanListEntry(player, old.getCreated(), old.getSource(), newExpires, old.getReason()));
+        }
     }
 }

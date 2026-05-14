@@ -67,8 +67,8 @@ public class AdminCraft {
     private static final String SP_TAG = "inSpawnProtection";
     public static SanctionConfig sanctionConfig;
 
-    public static List<String> mutedPlayersUUID = new ArrayList<>();
-    public static List<String> frozenPlayersUUID = new ArrayList<>();
+    public static final List<String> mutedPlayersUUID = new ArrayList<>();
+    public static final List<String> frozenPlayersUUID = new ArrayList<>();
     public static PlayerDataManager playerDataManager;
 
     public AdminCraft(IEventBus modEventBus, ModContainer modContainer) {

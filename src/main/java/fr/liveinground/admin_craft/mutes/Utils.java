@@ -7,25 +7,24 @@ import java.util.stream.Collectors;
 import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
 import fr.liveinground.admin_craft.PlaceHolderSystem;
+import fr.liveinground.admin_craft.ServerHolder;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.ServerOpList;
 import net.minecraft.server.players.ServerOpListEntry;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 public class Utils {
     public static List<ServerPlayer> getOnlineOperators() {
-        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        PlayerList pl = ServerHolder.getServer().getPlayerList();
+        List<ServerPlayer> onlinePlayers = pl.getPlayers();
 
-        List<ServerPlayer> onlinePlayers = server.getPlayerList().getPlayers();
-
-        ServerOpList opList = server.getPlayerList().getOps();
+        ServerOpList opList = pl.getOps();
 
         return onlinePlayers.stream()
                 .filter(player -> {
                     ServerOpListEntry entry = opList.get(player.nameAndId());
-                    return entry != null && entry.getLevel() >= 1; // niveau OP ≥ 1
+                    return entry != null && entry.getLevel() >= 1;
                 })
                 .collect(Collectors.toList());
     }

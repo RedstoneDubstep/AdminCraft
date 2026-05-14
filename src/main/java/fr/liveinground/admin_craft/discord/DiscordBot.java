@@ -31,7 +31,7 @@ public class DiscordBot {
     public static final String STAFF_REASON_MODAL_ID = "_reason_";
     public static final String STAFF_DURATION_MODAL_ID = "_duration_";
 
-    public static Map<String, List<String>> playerCache = new HashMap<>();
+    public static final Map<String, List<String>> playerCache = new HashMap<>();
 
     public static void start() {
         AdminCraft.LOGGER.info("Starting appeal bot...");

@@ -112,7 +112,7 @@ public class SanctionDatabase {
     private static Exception post(String sql) {
         try (
                 Connection connection = SanctionDatabase.connect();
-                Statement statement = connection.createStatement();
+                Statement statement = connection.createStatement()
         ) {
             statement.execute(sql);
             return null;
@@ -201,9 +201,7 @@ public class SanctionDatabase {
         AppealStatus status = getAppealStatus(id);
         if (status == null || !status.equals(AppealStatus.DELAYED)) return null;
         DatabaseSanctionData data = query("SELECT appealDelay FROM sanctions WHERE id = ?;",
-                stmt -> {
-            stmt.setString(1, id);
-                }).stream().findFirst().orElse(null);
+                stmt -> stmt.setString(1, id)).stream().findFirst().orElse(null);
         if (data == null) return null;
         return data.appealDelay();
     }
@@ -228,9 +226,7 @@ public class SanctionDatabase {
     @Nullable
     public static DatabaseSanctionData getSanctionData(String id) {
         return query("SELECT * FROM sanctions WHERE id = ?;",
-                stmt -> {
-                    stmt.setString(1, id);
-                }).stream().findFirst().orElse(null);
+                stmt -> stmt.setString(1, id)).stream().findFirst().orElse(null);
     }
 
     public static List<DatabaseSanctionData> getCurrentSanctions(String uuid) {

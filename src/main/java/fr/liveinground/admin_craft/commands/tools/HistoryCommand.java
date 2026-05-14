@@ -47,7 +47,7 @@ public class HistoryCommand {
                                     if (expiresOn.after(new Date())) {
                                         addField(message, "Expires on", expiresOn.toString());
                                     } else {
-                                        addField(message, "Expires on", expiresOn.toString() + " (EXPIRED)");
+                                        addField(message, "Expires on", expiresOn + " (EXPIRED)");
                                     }
                                 } else {
                                     addField(message, "Expires on", "never");

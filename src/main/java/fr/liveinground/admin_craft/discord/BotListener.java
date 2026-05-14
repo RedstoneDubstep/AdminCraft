@@ -2,11 +2,11 @@ package fr.liveinground.admin_craft.discord;
 
 import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
+import fr.liveinground.admin_craft.moderation.CustomSanctionSystem;
 import fr.liveinground.admin_craft.moderation.SanctionConfig;
 import fr.liveinground.admin_craft.storage.SanctionDatabase;
 import fr.liveinground.admin_craft.storage.types.sanction.AppealStatus;
 import fr.liveinground.admin_craft.storage.types.sanction.DatabaseSanctionData;
-import fr.liveinground.admin_craft.storage.types.sanction.SanctionData;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -129,33 +129,20 @@ public class BotListener extends ListenerAdapter {
                         event.reply("Failure: no data found with associated ID " + id).setEphemeral(true).queue();
                         return;
                     }
-                    if (SanctionDatabase.changeAppealStatus(id, AppealStatus.ACCEPTED)) {
-                        switch (dataset.type()) {
-                            case MUTE:
-                                //todo
-                                break;
-                            case BAN:
-                                //todo
-                                break;
-                            default:
-                                AdminCraft.LOGGER.warn("An appeal was made for a non-appealable sanction type (sanction {}). Skipping appeal success procedure...", id);
-                                break;
-                        }
+                    if (CustomSanctionSystem.applyAppealToSanction(dataset, AppealStatus.ACCEPTED)) {
                         event.getChannel().asTextChannel().upsertPermissionOverride(member).setDenied(EnumSet.of(Permission.VIEW_CHANNEL)).queue();
-                        member.getUser().openPrivateChannel().queue(channel -> {
-                            channel.sendMessage(
-                                    "Hello,\n\n" +
-                                            "Your appeal regarding sanction " + id + " on **" + guild.getName() + "** has been reviewed and approved by the staff team.\n\n" +
-                                            "The following action has been taken:\n" +
-                                            "- The sanction has been removed\n\n" +
-                                            "Thank you for your understanding.\n\n" +
-                                            "-# Powered by AdminCraft • Please do not reply to this automated message."
-                            ).queue();
-                        });
+                        member.getUser().openPrivateChannel().queue(channel -> channel.sendMessage(
+                                "Hello,\n\n" +
+                                        "Your appeal regarding sanction " + id + " on **" + guild.getName() + "** has been reviewed and approved by the staff team.\n\n" +
+                                        "The following action has been taken:\n" +
+                                        "- The sanction has been removed\n\n" +
+                                        "Thank you for your understanding.\n\n" +
+                                        "-# Powered by AdminCraft • Please do not reply to this automated message."
+                        ).queue());
                         event.reply("Appeal successfully approved").queue();
                         AdminCraft.LOGGER.info("Appeal for sanction {} has been approved.", id);
                     } else {
-                        event.reply("Failure: issue while updating the database.").setEphemeral(true).queue();
+                        event.reply("Failure: failed to accept appeal.").setEphemeral(true).queue();
                         return;
                     }
                 }
@@ -328,17 +315,15 @@ public class BotListener extends ListenerAdapter {
                     reason = reasonMapping.getAsString();
                 }
                 if (SanctionDatabase.changeAppealStatus(id, AppealStatus.REFUSED)) {
-                    member.getUser().openPrivateChannel().queue(channel -> {
-                        channel.sendMessage(
-                                "Hello,\n\n" +
-                                        "Your appeal regarding sanction " + id + " on **" + guild.getName() + "** has been reviewed and denied by the staff team.\n\n" +
-                                        "## Staff Response\n" +
-                                        reason + "\n\n" +
-                                        "If this sanction is temporary, its expiration date remains unchanged.\n\n" +
-                                        "Thank you for your understanding.\n" +
-                                        "-# Powered by AdminCraft • Please do not reply to this automated message."
-                        ).queue();
-                    });
+                    member.getUser().openPrivateChannel().queue(channel -> channel.sendMessage(
+                            "Hello,\n\n" +
+                                    "Your appeal regarding sanction " + id + " on **" + guild.getName() + "** has been reviewed and denied by the staff team.\n\n" +
+                                    "## Staff Response\n" +
+                                    reason + "\n\n" +
+                                    "If this sanction is temporary, its expiration date remains unchanged.\n\n" +
+                                    "Thank you for your understanding.\n" +
+                                    "-# Powered by AdminCraft • Please do not reply to this automated message."
+                    ).queue());
                     event.getChannel().asTextChannel().upsertPermissionOverride(member).setDenied(EnumSet.of(Permission.VIEW_CHANNEL)).queue();
                     event.reply("Appeal successfully denied.").queue();
                     AdminCraft.LOGGER.info("Appeal for sanction {} has been denied.", id);
@@ -359,38 +344,33 @@ public class BotListener extends ListenerAdapter {
                     return;
                 }
                 if (dateFromNow.before(new Date())) {
-                    //todo: cancel sanction
 
-                    if (SanctionDatabase.changeAppealStatus(id, AppealStatus.REDUCED)) {
-                        member.getUser().openPrivateChannel().queue(channel -> {
-                            channel.sendMessage(
-                                    "Hello,\n\n" +
-                                            "Your appeal regarding sanction " + id + " on **" + guild.getName() + "** has been reviewed and approved by the staff team.\n\n" +
-                                            "The following action has been taken:\n" +
-                                            "- The sanction duration has been changed\n\n" +
-                                            "Thank you for your understanding.\n\n" +
-                                            "-# Powered by AdminCraft • Please do not reply to this automated message."
-                            ).queue();
-                        });
+                    if (CustomSanctionSystem.applyAppealToSanction(data, AppealStatus.REDUCED)) {
+                        member.getUser().openPrivateChannel().queue(channel -> channel.sendMessage(
+                                "Hello,\n\n" +
+                                        "Your appeal regarding sanction " + id + " on **" + guild.getName() + "** has been reviewed and approved by the staff team.\n\n" +
+                                        "The following action has been taken:\n" +
+                                        "- The sanction duration has been changed\n\n" +
+                                        "Thank you for your understanding.\n\n" +
+                                        "-# Powered by AdminCraft • Please do not reply to this automated message."
+                        ).queue());
                     } else {
-                        event.reply("Failure: Failed to update database.").setEphemeral(true).queue();
+                        event.reply("Failure: Failed to accept appeal.").setEphemeral(true).queue();
                         return;
                     }
                 } else {
                     //todo: change duration
 
-                    if (SanctionDatabase.changeAppealStatus(id, AppealStatus.REDUCED)) {
-                        member.getUser().openPrivateChannel().queue(channel -> {
-                            channel.sendMessage(
-                                    "Hello,\n\n" +
-                                            "Your appeal regarding sanction " + id + " on **" + guild.getName() + "** has been reviewed and approved by the staff team.\n\n" +
-                                            "The following action has been taken:\n" +
-                                            "- The sanction duration has been changed\n" +
-                                            "- The sanction has been removed because the expires date is reached.\n\n" +
-                                            "Thank you for your understanding.\n\n" +
-                                            "-# Powered by AdminCraft • Please do not reply to this automated message."
-                            ).queue();
-                        });
+                    if (CustomSanctionSystem.changeDuration(data, dateFromNow)) {
+                        member.getUser().openPrivateChannel().queue(channel -> channel.sendMessage(
+                                "Hello,\n\n" +
+                                        "Your appeal regarding sanction " + id + " on **" + guild.getName() + "** has been reviewed and approved by the staff team.\n\n" +
+                                        "The following action has been taken:\n" +
+                                        "- The sanction duration has been changed, and will expire on " + dateFromNow + "\n" +
+                                        "- The sanction has been removed because the expires date is reached.\n\n" +
+                                        "Thank you for your understanding.\n\n" +
+                                        "-# Powered by AdminCraft • Please do not reply to this automated message."
+                        ).queue());
                     } else {
                         event.reply("Failure: Failed to update database.").setEphemeral(true).queue();
                         return;
@@ -399,7 +379,6 @@ public class BotListener extends ListenerAdapter {
                 event.getChannel().asTextChannel().upsertPermissionOverride(member).setDenied(EnumSet.of(Permission.VIEW_CHANNEL)).queue();
                 event.reply("Successfully approved appeal and reduced the sanction.").queue();
                 AdminCraft.LOGGER.info("Appeal for sanction {} successfully approved and sanction is reduced.", id);
-                return;
             }
         }
     }

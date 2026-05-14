@@ -11,7 +11,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.Vec3;
 
-import java.io.DataOutput;
 import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
