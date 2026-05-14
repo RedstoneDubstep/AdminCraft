@@ -10,14 +10,19 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Config {
 
@@ -268,11 +273,11 @@ public class Config {
     static {
         BUILDER.push("presetSanctions");
 
-        SANCTION_TEMPLATES = BUILDER.comment("The sanction presets for the /sanction command. Must follow the format 'displayName@used reason@level->type:duration(if required)@level@...'.")
-                .comment("Exemple: 'Cheating@Using cheats to get unfair advantages@1->warn@2->tempban:5d@5:ban'")
+        SANCTION_TEMPLATES = BUILDER.comment("The sanction presets for the /sanction command. Must follow the format 'displayName@used reason@level->type:durationOrPerm@level@...'.")
+                .comment("Exemple: 'Cheating@Using cheats to get unfair advantages@1->warn@2->ban:5d@5->ban:perm'")
                 .comment("This config key will be updated in hte future to be more intuitive, stay tuned!")
                 .defineListAllowEmpty("sanctions", Arrays.asList("Cheating@Unfair advantage@1->tempban:1d@2->tempban:30d@3->ban",
-                        "spam@Spamming@1->warn@3->kick@4->tempmute:1d@5->mute"), () -> "", Config::validateSanction);
+                        "spam@Spamming@1->warn@3->kick@4->mute:1d@5->mute:perm"), () -> "", Config::validateSanction);
 
         BUILDER.pop();
     }
@@ -519,6 +524,7 @@ public class Config {
                             continue;
                         }
                         duration = actSplit[1].trim();
+                        if (duration.equals("perm")) duration = null;
                     } else {
                         try {
                             type = Sanction.valueOf(action.trim().toUpperCase());
@@ -638,15 +644,4 @@ public class Config {
                 )
                 .collect(Collectors.toSet());
     }
-
-    public static Set<Holder<Block>> loadBlocks(Level level) {
-        return SP_EFFECTS.get().stream()
-                .map(ResourceLocation::tryParse)
-                .map(loc -> level.registryAccess()
-                        .lookupOrThrow(Registries.BLOCK)
-                        .getOrThrow(ResourceKey.create(Registries.BLOCK, loc))
-                )
-                .collect(Collectors.toSet());
-    }
-
 }

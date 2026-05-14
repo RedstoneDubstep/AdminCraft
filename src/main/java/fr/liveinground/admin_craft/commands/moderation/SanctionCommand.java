@@ -1,14 +1,8 @@
 package fr.liveinground.admin_craft.commands.moderation;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-
 import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
 import fr.liveinground.admin_craft.PlaceHolderSystem;
@@ -23,6 +17,10 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class SanctionCommand {
 
@@ -80,11 +78,7 @@ public class SanctionCommand {
                                             reason = template.sanctionMessage();
                                             switch (template.type()) {
                                                 case BAN:
-                                                    CustomSanctionSystem.banPlayer(ctx.getSource().getServer(), ctx.getSource().toString(), sanctionedPlayer.nameAndId(), reason, null);
-                                                    break;
-                                                case TEMPBAN:
-                                                    Date banExpiresOn = SanctionConfig.getDurationAsDate(template.duration());
-                                                    CustomSanctionSystem.banPlayer(ctx.getSource().getServer(), ctx.getSource().toString(), sanctionedPlayer.nameAndId(), reason, banExpiresOn);
+                                                    CustomSanctionSystem.banPlayer(ctx.getSource().getServer(), ctx.getSource().toString(), sanctionedPlayer.nameAndId(), reason, SanctionConfig.getDurationAsDate(template.duration()), true, null);
                                                     break;
                                                 case KICK:
                                                     CustomSanctionSystem.kickPlayer(sanctionedPlayer, reason);
@@ -94,15 +88,7 @@ public class SanctionCommand {
                                                         ctx.getSource().sendFailure(Component.literal(DUPLICATE_SANCTION));
                                                         return 1;
                                                     }
-                                                    CustomSanctionSystem.mutePlayer(ctx.getSource().getServer(), sanctionedPlayer.nameAndId(), reason, null);
-                                                    break;
-                                                case TEMPMUTE:
-                                                    if (AdminCraft.mutedPlayersUUID.contains(sanctionedPlayer.getStringUUID())) {
-                                                        ctx.getSource().sendFailure(Component.literal(DUPLICATE_SANCTION));
-                                                        return 1;
-                                                    }
-                                                    Date muteExpiresOn = SanctionConfig.getDurationAsDate(template.duration());
-                                                    CustomSanctionSystem.mutePlayer(ctx.getSource().getServer(), sanctionedPlayer.nameAndId(), reason, muteExpiresOn);
+                                                    CustomSanctionSystem.mutePlayer(ctx.getSource().getServer(), sanctionedPlayer.nameAndId(), reason, SanctionConfig.getDurationAsDate(template.duration()), true, null);
                                                     break;
                                                 case WARN:
                                                     CustomSanctionSystem.warnPlayer(sanctionedPlayer, reason, ctx.getSource().getDisplayName().getString());
