@@ -1,8 +1,8 @@
 {
   "command.mute.fail.already_muted": "%player% is already muted",
-  "command.mute.success": "%player% was muted: %reason%",
+  "command.mute.success": "%player% a été rendu muet : %reason%",
   "command.report.failed.self": "You can't report yourself!",
-  "command.report.failed.webhook": "An issue may have occurred during your report. Don't hesitate to contact the staff if no operator is online.",
+  "command.report.failed.webhook": "Un problème est survenu pendant votre signalement. N'hésitez pas à contacter l'équipe si aucun opérateur n'est en ligne.",
   "command.report.success": "Report successfully submitted. Thank you for your vigilance.",
   "command.unmute.failed.not_muted": "%player% is not muted",
   "command.unmute.success": "%player% was unmuted",
@@ -14,7 +14,7 @@
   "disconnect.banned.reason": "Reason: ",
   "disconnect.banned.title": "You are banned on this server",
   "freeze.begins": "You have been frozen by an operator. Please wait for instructions and don't log out.",
-  "freeze.ends": "You are no longer frozen. You can continue playing normally.",
+  "freeze.ends": "Vous n'êtes plus gelé. Vous pouvez continuer à jouer normalement.",
   "misc.time_remaining": "Time remaining: %days% days, %hours% hours, and %minutes% minutes",
   "misc.time_remaining.short": "Time remaining: %days%d %hours%h %minutes%m",
   "mute.begins": "You were muted by an operator.",
@@ -25,5 +25,5 @@
   "spawn.enter": "You are now in the spawn protection",
   "spawn.leave": "You are no longer in the spawn protection",
   "warn.message": "You've been warned by %operator%: %reason%. Please check the rules!",
-  "warn.title": "YOU'VE BEEN WARNED!"
-  }
+  "warn.title": "VOUS AVEZ RECU UN AVERTISSEMENT !"
+}
