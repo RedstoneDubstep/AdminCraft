@@ -1,12 +1,15 @@
 package fr.liveinground.admin_craft.moderation;
 
-import fr.liveinground.admin_craft.Config;
-import fr.liveinground.admin_craft.PlaceHolderSystem;
+import fr.liveinground.admin_craft.lang.LangManager;
+import fr.liveinground.admin_craft.lang.TrKeys;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -87,10 +90,10 @@ public class SanctionConfig {
             String daysStr = String.valueOf(days);
             String hoursStr = String.valueOf(hours);
             String minutesStr = String.valueOf(minutes);
-            return PlaceHolderSystem.replacePlaceholders(Config.time_remaining_short,
-                    Map.of("days", daysStr,
-                            "hours", hoursStr,
-                            "minutes", minutesStr));
+            return LangManager.tr(TrKeys.TIME_REMAINING_SHORT, Map.of(
+                    "days", daysStr,
+                    "hours", hoursStr,
+                    "minutes", minutesStr));
         } else {
             return "N/A";
         }

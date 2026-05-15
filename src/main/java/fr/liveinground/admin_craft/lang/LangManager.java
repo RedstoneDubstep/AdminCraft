@@ -9,7 +9,7 @@ public class LangManager {
 
     private static final TranslationProvider PROVIDER = new TranslationProvider();
 
-    private static String language = "en_us";
+    private static String language = "en_US";
 
     private LangManager() {}
 

@@ -1,22 +1,12 @@
 package fr.liveinground.admin_craft.commands.moderation;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
-
 import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
 import fr.liveinground.admin_craft.PlaceHolderSystem;
+import fr.liveinground.admin_craft.lang.LangManager;
+import fr.liveinground.admin_craft.lang.TrKeys;
 import fr.liveinground.admin_craft.mutes.Utils;
 import fr.liveinground.admin_craft.storage.types.reports.PlayerReportsData;
 import fr.liveinground.admin_craft.storage.types.reports.ReportData;
@@ -29,6 +19,17 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.NameAndId;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class ReportCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -44,7 +45,7 @@ public class ReportCommand {
                                         String reason = StringArgumentType.getString(ctx, "reason");
 
                                         if (player.equals(reportedPlayer)) {
-                                            ctx.getSource().sendFailure(Component.literal(Config.report_failed_self));
+                                            ctx.getSource().sendFailure(Component.literal(LangManager.tr(TrKeys.REPORT_FAILED_SELF)));
                                             return 1;
                                         }
 
@@ -63,11 +64,11 @@ public class ReportCommand {
                                                     sendWebhookMessage(reportedPlayer, player, reason);
                                                 } catch (Exception e) {
                                                     AdminCraft.LOGGER.error("An error occurred while posting a report into Discord Webhooks:", e);
-                                                    player.sendSystemMessage(Component.literal(Config.webhook_issue_message).withStyle(ChatFormatting.YELLOW));
+                                                    player.sendSystemMessage(Component.literal(LangManager.tr(TrKeys.REPORT_FAILED_WEBHOOK)).withStyle(ChatFormatting.YELLOW));
                                                 }
                                             });
                                         }
-                                        ctx.getSource().sendSuccess(() -> Component.literal(Config.report_success).withStyle(ChatFormatting.GREEN), true);
+                                        ctx.getSource().sendSuccess(() -> Component.literal(LangManager.tr(TrKeys.REPORT_SUCCESS)).withStyle(ChatFormatting.GREEN), true);
                                         return 1;
                                     } else {
                                         ctx.getSource().sendFailure(Component.literal("This command can only be run by players."));

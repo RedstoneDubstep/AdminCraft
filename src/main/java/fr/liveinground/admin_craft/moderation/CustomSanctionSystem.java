@@ -1,9 +1,9 @@
 package fr.liveinground.admin_craft.moderation;
 
 import fr.liveinground.admin_craft.AdminCraft;
-import fr.liveinground.admin_craft.Config;
-import fr.liveinground.admin_craft.PlaceHolderSystem;
 import fr.liveinground.admin_craft.ServerHolder;
+import fr.liveinground.admin_craft.lang.LangManager;
+import fr.liveinground.admin_craft.lang.TrKeys;
 import fr.liveinground.admin_craft.storage.SanctionDatabase;
 import fr.liveinground.admin_craft.storage.types.PlayerMuteData;
 import fr.liveinground.admin_craft.storage.types.sanction.AppealStatus;
@@ -85,7 +85,7 @@ public class CustomSanctionSystem {
 
             ServerPlayer serverPlayer = AdminCraft.getOnlinePlayer(server, player);
             if (serverPlayer != null) {
-                String msg = PlaceHolderSystem.replacePlaceholders(Config.mute_message, Map.of("reason", reason));
+                String msg = LangManager.tr(TrKeys.MUTE_BEGINS_REASON, Map.of("reason", reason));
                 serverPlayer.sendSystemMessage(Component.literal(msg).withStyle(ChatFormatting.RED));
 
                 if (expiresOn != null) {
@@ -105,7 +105,7 @@ public class CustomSanctionSystem {
                 ServerPlayer serverPlayer = ServerHolder.getServer().getPlayerList().getPlayer(player.id());
 
                 if (serverPlayer != null) {
-                    Component messageComponent = Component.literal(Config.unmute_message).withStyle(ChatFormatting.GREEN);
+                    Component messageComponent = Component.literal(LangManager.tr(TrKeys.MUTE_ENDS)).withStyle(ChatFormatting.GREEN);
                     serverPlayer.sendSystemMessage(messageComponent);
                 }
             } catch (IllegalStateException e) {
@@ -121,10 +121,9 @@ public class CustomSanctionSystem {
         if (reason == null) {
             reason = "Warned by an operator";
         }
-        Component title = Component.literal(Config.warn_title).withStyle(ChatFormatting.RED, ChatFormatting.BOLD);
-        Component message = Component.literal(PlaceHolderSystem.replacePlaceholders(Config.warn_message,
-                Map.of("operator", operator,
-                        "reason", reason))).withStyle(ChatFormatting.YELLOW);
+        Component title = Component.literal(LangManager.tr(TrKeys.WARN_TITLE)).withStyle(ChatFormatting.RED, ChatFormatting.BOLD);
+        Component message = Component.literal(LangManager.tr(TrKeys.WARN_MESSAGE, Map.of("operator", operator, "reason", reason)))
+                .withStyle(ChatFormatting.YELLOW);
 
         player.sendSystemMessage(Component.literal("---------------------------------------------").withStyle(ChatFormatting.DARK_RED));
         player.sendSystemMessage(title);

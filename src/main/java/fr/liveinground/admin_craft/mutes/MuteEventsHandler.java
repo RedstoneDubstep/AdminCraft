@@ -3,8 +3,10 @@ package fr.liveinground.admin_craft.mutes;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
-import fr.liveinground.admin_craft.storage.PlayerDataManager;
+import fr.liveinground.admin_craft.lang.LangManager;
+import fr.liveinground.admin_craft.lang.TrKeys;
 import fr.liveinground.admin_craft.moderation.CustomSanctionSystem;
+import fr.liveinground.admin_craft.storage.PlayerDataManager;
 import fr.liveinground.admin_craft.storage.types.PlayerMuteData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -35,7 +37,7 @@ public class MuteEventsHandler {
         ServerPlayer player = event.getPlayer();
 
         if (AdminCraft.mutedPlayersUUID.contains(player.getStringUUID())) {
-            Component messageComponent = Component.literal(Config.mute_message_cancelled).withStyle(ChatFormatting.RED);
+            Component messageComponent = Component.literal(LangManager.tr(TrKeys.MUTE_MESSAGE_CANCELLED)).withStyle(ChatFormatting.RED);
             player.sendSystemMessage(messageComponent);
             Utils.logCancelledMessage(player, event.getRawText());
             event.setCanceled(true);
@@ -70,7 +72,7 @@ public class MuteEventsHandler {
                         }
                         Utils.logCancelledMessage(sender, String.join(" ", Arrays.copyOfRange(args, 2, args.length)));
                         event.setCanceled(true);
-                        Component messageComponent = Component.literal(Config.mute_message_cancelled).withStyle(ChatFormatting.RED);
+                        Component messageComponent = Component.literal(LangManager.tr(TrKeys.MUTE_MESSAGE_CANCELLED)).withStyle(ChatFormatting.RED);
                         sender.sendSystemMessage(messageComponent);
 
                     }

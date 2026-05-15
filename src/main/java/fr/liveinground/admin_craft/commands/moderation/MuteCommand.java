@@ -1,21 +1,13 @@
 package fr.liveinground.admin_craft.commands.moderation;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-
-import org.jetbrains.annotations.NotNull;
-
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-
 import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
-import fr.liveinground.admin_craft.PlaceHolderSystem;
+import fr.liveinground.admin_craft.lang.LangManager;
+import fr.liveinground.admin_craft.lang.TrKeys;
 import fr.liveinground.admin_craft.moderation.CustomSanctionSystem;
 import fr.liveinground.admin_craft.moderation.SanctionConfig;
 import net.minecraft.ChatFormatting;
@@ -24,6 +16,12 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.players.NameAndId;
+import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
 
 public class MuteCommand {
 
@@ -64,7 +62,7 @@ public class MuteCommand {
                                 NameAndId targetProfile = profiles.iterator().next();
 
                                 if (!AdminCraft.mutedPlayersUUID.contains(targetProfile.id().toString())) {
-                                    String msg = PlaceHolderSystem.replacePlaceholders(Config.unmute_failed_not_muted, Map.of("player", targetProfile.name()));
+                                    String msg = LangManager.tr(TrKeys.COMMAND_UNMUTE_FAILED_NOT_MUTED, Map.of("player", targetProfile.name()));
                                     Component messageToOperator = Component.literal(msg);
                                     ctx.getSource().sendFailure(messageToOperator);
                                     return 1;
@@ -72,7 +70,7 @@ public class MuteCommand {
 
                                 CustomSanctionSystem.unMutePlayer(targetProfile);
 
-                                String msg = PlaceHolderSystem.replacePlaceholders(Config.unmute_success, Map.of("player", targetProfile.name()));
+                                String msg = LangManager.tr(TrKeys.COMMAND_UNMUTE_SUCCESS, Map.of("player", targetProfile.name()));
                                 Component messageToOperator = Component.literal(msg);
                                 ctx.getSource().sendSuccess(() -> messageToOperator, true);
                             } else {
@@ -120,7 +118,7 @@ public class MuteCommand {
             return;
         }
         if (AdminCraft.mutedPlayersUUID.contains(String.valueOf(profile.id()))) {
-            ctx.getSource().sendFailure(Component.literal(PlaceHolderSystem.replacePlaceholders(Config.mute_failed_already_muted, Map.of("player", profile.name()))));
+            ctx.getSource().sendFailure(Component.literal(LangManager.tr(TrKeys.COMMAND_MUTE_FAIL_ALREADY_MUTED, Map.of("player", profile.name()))));
             return;
         }
         Date sanctionDuration = SanctionConfig.getDurationAsDate(duration);
@@ -157,7 +155,7 @@ public class MuteCommand {
         }
         CustomSanctionSystem.mutePlayer(ctx.getSource().getServer(), profile, reason, sanctionDuration, appealable, appealDelay);
 
-        String msgToOperator = PlaceHolderSystem.replacePlaceholders(Config.mute_success, Map.of("player", profile.name(), "reason", reason));
+        String msgToOperator = LangManager.tr(TrKeys.COMMAND_MUTE_SUCCESS, Map.of("player", profile.name(), "reason", reason));
         ctx.getSource().sendSuccess(() -> Component.literal(msgToOperator), true);
     }
 }

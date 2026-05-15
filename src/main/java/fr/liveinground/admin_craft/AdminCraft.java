@@ -67,6 +67,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 @Mod(AdminCraft.MODID)
 public class AdminCraft {
@@ -325,19 +326,19 @@ public class AdminCraft {
         if (sanction == null) return;
 
         MutableComponent message = Component.literal("")
-                .append(Component.literal("You are banned on this server.\n").withStyle(ChatFormatting.RED))
-                .append(Component.literal("Sanction ID: " + sanction.id()).withStyle(ChatFormatting.GOLD))
-                .append(Component.literal("Reason: ").withStyle(ChatFormatting.RED))
+                .append(Component.literal(LangManager.tr(TrKeys.DISCONNECT_BANNED_TITLE)).withStyle(ChatFormatting.RED))
+            .append(Component.literal(LangManager.tr(TrKeys.DISCONNECT_BANNED_ID) + sanction.id()).withStyle(ChatFormatting.GOLD))
+                .append(Component.literal(LangManager.tr(TrKeys.DISCONNECT_BANNED_REASON)).withStyle(ChatFormatting.RED))
                 .append(Component.literal(sanction.reason()).withStyle(ChatFormatting.YELLOW));
         if (sanction.expiresOn() == null) {
-            message.append(Component.literal("\nThis sanction is permanent.").withStyle(ChatFormatting.RED));
+            message.append(Component.literal("\n" + LangManager.tr(TrKeys.DISCONNECT_BANNED_DURATION_PERMANENT)).withStyle(ChatFormatting.RED));
         } else {
-            message.append(Component.literal("\nThis sanction will expire in " + SanctionConfig.getDurationAsStringFromDate(sanction.expiresOn())).withStyle(ChatFormatting.RED));
+            message.append(Component.literal("\n" + LangManager.tr(TrKeys.DISCONNECT_BANNED_DURATION_EXPIRES_IN, Map.of("duration", SanctionConfig.getDurationAsStringFromDate(sanction.expiresOn())))).withStyle(ChatFormatting.RED));
         }
         if (sanction.status().equals(AppealStatus.NOT_ALLOWED)) {
-            message.append(Component.literal("\nThis sanction is not appealable.").withStyle(ChatFormatting.YELLOW));
+            message.append(Component.literal("\n" + LangManager.tr(TrKeys.DISCONNECT_BANNED_APPEAL_NOT_ALLOWED)).withStyle(ChatFormatting.YELLOW));
         } else {
-            message.append(Component.literal("\nYou can appeal on " + Config.invite_link).withStyle(ChatFormatting.YELLOW));
+            message.append(Component.literal("\n" + LangManager.tr(TrKeys.DISCONNECT_BANNED_APPEAL_LINK, Map.of("link", Config.invite_link))).withStyle(ChatFormatting.YELLOW));
         }
         event.getConnection().disconnect(message);
     }
