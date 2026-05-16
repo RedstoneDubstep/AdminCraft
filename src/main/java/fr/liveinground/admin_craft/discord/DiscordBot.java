@@ -2,10 +2,10 @@ package fr.liveinground.admin_craft.discord;
 
 import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
-
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
@@ -17,6 +17,7 @@ public class DiscordBot {
     public static JDA jda;
     public static boolean enabled;
     public static Guild guild;
+    public static Role staff;
 
     public static final String INFO_BUTTON_ID = "info_button";
     public static final String APPEAL_BUTTON_ID = "appeal_button";
@@ -39,6 +40,18 @@ public class DiscordBot {
             JDABuilder builder = JDABuilder.createDefault(Config.bot_token);
             builder.addEventListeners(new BotListener());
             jda = builder.build();
+            guild = jda.getGuildById(Config.guild_id);
+            if (guild == null) {
+                enabled = false;
+                AdminCraft.LOGGER.error("Could not retrieve guild from ID {}: is the bot in the guild?", Config.guild_id);
+                return;
+            }
+            staff = guild.getRoleById(Config.staff_role_id);
+            if (staff == null) {
+                enabled = false;
+                AdminCraft.LOGGER.error("Could not retrieve staff role from ID {}: is the role in the guild?", Config.guild_id);
+                return;
+            }
             register_commands();
             try {
                 jda.awaitReady();

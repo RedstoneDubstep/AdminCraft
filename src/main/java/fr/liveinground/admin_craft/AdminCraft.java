@@ -14,6 +14,7 @@ import fr.liveinground.admin_craft.commands.tools.EchestCommand;
 import fr.liveinground.admin_craft.commands.tools.InvseeCommand;
 import fr.liveinground.admin_craft.commands.tools.OfflineTagCommand;
 import fr.liveinground.admin_craft.commands.tools.OfflineTeleportCommand;
+import fr.liveinground.admin_craft.discord.DiscordBot;
 import fr.liveinground.admin_craft.lang.LangManager;
 import fr.liveinground.admin_craft.lang.TrKeys;
 import fr.liveinground.admin_craft.moderation.SanctionConfig;
@@ -94,6 +95,9 @@ public class AdminCraft {
         NeoForge.EVENT_BUS.register(MuteEventsHandler.class);
         NeoForge.EVENT_BUS.register(FreezeEventListener.class);
         SanctionDatabase.start();
+        if (Config.enable_appeals) {
+            DiscordBot.start();
+        }
     }
 
     /*
