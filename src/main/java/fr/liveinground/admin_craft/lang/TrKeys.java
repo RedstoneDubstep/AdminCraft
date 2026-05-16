@@ -108,29 +108,73 @@ public class TrKeys {
 
     public static final String DISCORD_STAFF_BUTTON_DELETE = "discord.staff.button.delete";
 
+    public static final String DISCORD_STAFF_BUTTON_DENY_FAILURE_INVALID_DURATION = "discord.staff.button.deny.failure.invalid_duration";
+    public static final String DISCORD_STAFF_BUTTON_DENY_FAILURE_STATUS_UPDATE = "discord.staff.button.deny.failure.status_update";
+    public static final String DISCORD_STAFF_BUTTON_DENY_SUCCESS = "discord.staff.button.deny.success";
+
+    public static final String DISCORD_STAFF_BUTTON_DISCUSS_LABEL = "discord.staff.button.discuss.label";
+
+    public static final String DISCORD_STAFF_BUTTON_ACCEPT_LABEL = "discord.staff.button.accept.label";
+
+    public static final String DISCORD_STAFF_BUTTON_REDUCE_LABEL = "discord.staff.button.reduce.label";
+
+    public static final String DISCORD_STAFF_BUTTON_REDUCE_SUCCESS = "discord.staff.button.reduce.success";
+
+    public static final String DISCORD_STAFF_BUTTON_REFUSE_LABEL = "discord.staff.button.refuse.label";
+
     // =========================
     // Discord embeds
     // =========================
     public static final String DISCORD_EMBED_INFO_TITLE = "discord.embed.info.title";
     public static final String DISCORD_EMBED_INFO_DESCRIPTION = "discord.embed.info.description";
-
     public static final String DISCORD_EMBED_INFO_IGN = "discord.embed.info.ign";
     public static final String DISCORD_EMBED_INFO_UUID = "discord.embed.info.uuid";
     public static final String DISCORD_EMBED_INFO_ID = "discord.embed.info.id";
     public static final String DISCORD_EMBED_INFO_TYPE = "discord.embed.info.type";
     public static final String DISCORD_EMBED_INFO_REASON = "discord.embed.info.reason";
     public static final String DISCORD_EMBED_INFO_DATE = "discord.embed.info.date";
-
     public static final String DISCORD_EMBED_INFO_EXPIRES = "discord.embed.info.expires";
     public static final String DISCORD_EMBED_INFO_EXPIRES_EXPIRED = "discord.embed.info.expires.expired";
+    public static final String DISCORD_EMBED_INFO_APPEAL_DELAY = "discord.embed.info.appeal.delay";
+    public static final String DISCORD_EMBED_INFO_APPEAL_DELAY_CONTENT = "discord.embed.info.appeal.delay.content";
+    public static final String DISCORD_EMBED_INFO_APPEAL_STATUS = "discord.embed.info.appeal.status";
+
+    public static final String DISCORD_EMBED_APPEAL_TITLE = "discord.embed.appeal.title";
+    public static final String DISCORD_EMBED_APPEAL_DESCRIPTION = "discord.embed.appeal.description";
+    public static final String DISCORD_EMBED_APPEAL_DATE = "discord.embed.appeal.date";
+    public static final String DISCORD_EMBED_APPEAL_DISCORD_USER = "discord.embed.appeal.discord_user";
+    public static final String DISCORD_EMBED_APPEAL_EXPIRES = "discord.embed.appeal.expires";
+    public static final String DISCORD_EMBED_APPEAL_ID = "discord.embed.appeal.id";
+    public static final String DISCORD_EMBED_APPEAL_IGN = "discord.embed.appeal.ign";
+    public static final String DISCORD_EMBED_APPEAL_PLAYER_MESSAGE = "discord.embed.appeal.player_message";
+    public static final String DISCORD_EMBED_APPEAL_REASON = "discord.embed.appeal.reason";
+    public static final String DISCORD_EMBED_APPEAL_TYPE = "discord.embed.appeal.type";
+    public static final String DISCORD_EMBED_APPEAL_UUID = "discord.embed.appeal.uuid";
 
     // =========================
     // Discord direct messages
     // =========================
     public static final String DISCORD_DM_APPEAL_ACCEPTED = "discord.dm.appeal.accepted";
+    public static final String DISCORD_DM_APPEAL_DENIED = "discord.dm.appeal.denied";
+    public static final String DISCORD_DM_APPEAL_REDUCED_EXPIRED = "discord.dm.appeal.reduced.expired";
+    public static final String DISCORD_DM_APPEAL_REDUCED_NORMAL = "discord.dm.appeal.reduced.normal";
+
+    // =========================
+    // Discord buttons
+    // =========================
+    public static final String DISCORD_BUTTON_APPEAL_LABEL = "discord.button.appeal.label";
 
     // =========================
     // Generic discord errors
     // =========================
     public static final String DISCORD_FAILURE = "discord.failure";
+    public static final String DISCORD_FAILURE_CACHE = "discord.failure.cache";
+    public static final String DISCORD_FAILURE_GETMEMBER_IS_NULL = "discord.failure.getmember_is_null";
+    public static final String DISCORD_FAILURE_NODATA = "discord.failure.nodata";
+
+    // =========================
+    // Discord misc
+    // =========================
+    public static final String DISCORD_REASON_NULL = "discord.reason.null";
+    public static final String DISCORD_APPEAL_SUCCESS = "discord.appeal.success";
 }

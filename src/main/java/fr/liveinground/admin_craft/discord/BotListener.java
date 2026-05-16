@@ -238,11 +238,11 @@ public class BotListener extends ListenerAdapter {
                     SanctionDatabase.changeAppealStatus(id, status);
                 }
             }
-            embed.addField("Appeal status", status.status(), true);
+            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_APPEAL_STATUS), status.status(), true);
             if (delay != null && status.equals(AppealStatus.DELAYED)) {
-                embed.addField("Appeal delay", "You will be able to appeal after this date: " + delay, true);
+                embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_APPEAL_DELAY), LangManager.tr(TrKeys.DISCORD_EMBED_INFO_APPEAL_DELAY_CONTENT, Map.of("delay", delay.toString())), true);
             }
-            event.replyEmbeds(embed.build()).addActionRow(Button.success(DiscordBot.APPEAL_BUTTON_ID, "Appeal").withDisabled(!status.equals(AppealStatus.NOT_REQUESTED) || expired)).setEphemeral(true).queue();
+            event.replyEmbeds(embed.build()).addActionRow(Button.success(DiscordBot.APPEAL_BUTTON_ID, LangManager.tr(TrKeys.DISCORD_BUTTON_APPEAL_LABEL)).withDisabled(!status.equals(AppealStatus.NOT_REQUESTED) || expired)).setEphemeral(true).queue();
             List<String> cache = new ArrayList<>();
             cache.add(id);
             cache.add(uuid.toString());
@@ -253,41 +253,41 @@ public class BotListener extends ListenerAdapter {
             Member member = event.getMember();
             if (member == null) {
                 AdminCraft.LOGGER.error("An interaction failed, because event.getMember() is null.");
-                event.reply("An issue occurred.").setEphemeral(true).queue();
+                event.reply(LangManager.tr(TrKeys.DISCORD_FAILURE_GETMEMBER_IS_NULL)).setEphemeral(true).queue();
                 return;
             }
             String id = DiscordBot.playerCache.get(member.getId()).getFirst();
             String uuidStr = DiscordBot.playerCache.get(member.getId()).get(1);
             String ign = DiscordBot.playerCache.get(member.getId()).get(2);
             if (id == null) {
-                event.reply("AdminCraft cache was reset. Please submit your sanction id again.").setEphemeral(true).queue();
+                event.reply(LangManager.tr(TrKeys.DISCORD_FAILURE_CACHE)).setEphemeral(true).queue();
                 return;
             }
             String appealReason = Objects.requireNonNull(event.getInteraction().getValue("reason")).getAsString();
 
             DatabaseSanctionData data = SanctionDatabase.getSanctionData(id, ign);
             if (data == null) {
-                event.reply("Could not get sanction information. Try again later.").setEphemeral(true).queue();
+                event.reply(LangManager.tr(TrKeys.DISCORD_FAILURE_NODATA)).setEphemeral(true).queue();
                 return;
             }
             UUID uuid=UUID.fromString(uuidStr);
 
             EmbedBuilder embed = new EmbedBuilder();
-            embed.setTitle("New appeal");
-            embed.setDescription("A new appeal was submitted for review.");
+            embed.setTitle(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_TITLE));
+            embed.setDescription(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_DESCRIPTION));
             embed.setColor(Color.RED);
 
-            embed.addField("IGN", ign, true);
-            embed.addField("UUID", uuid.toString(), true);
-            embed.addField("Sanction ID", id, true);
-            embed.addField("Sanction type", data.type().toString(), true);
-            embed.addField("Reason", data.reason(), true);
-            embed.addField("Date", data.date().toString(), true);
+            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_IGN), ign, true);
+            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_UUID), uuid.toString(), true);
+            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_ID), id, true);
+            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_TYPE), data.type().toString(), true);
+            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_REASON), data.reason(), true);
+            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_DATE), data.date().toString(), true);
             if (data.expiresOn() != null) {
-                embed.addField("Expires on", data.expiresOn().toString(), true);
+                embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_EXPIRES), data.expiresOn().toString(), true);
             }
-            embed.addField("Player's message", appealReason, true);
-            embed.addField("Discord user", member.getAsMention() + " (" + member.getEffectiveName() + ")", true);
+            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_PLAYER_MESSAGE), appealReason, true);
+            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_DISCORD_USER), member.getAsMention() + " (" + member.getEffectiveName() + ")", true);
 
             TextChannel appealChannel = guild.createTextChannel("appeal-" + id, event.getChannel().asTextChannel().getParentCategory())
                     .addPermissionOverride(guild.getPublicRole(), null, EnumSet.of(Permission.VIEW_CHANNEL))
@@ -298,13 +298,13 @@ public class BotListener extends ListenerAdapter {
                     .complete();
             appealChannel.sendMessage(staff.getAsMention()).queue();
             appealChannel.sendMessageEmbeds(embed.build()).setActionRow(
-                    Button.secondary(member.getId() + DiscordBot.OPEN_DISCUSSION_APPEAL_BUTTON_ID + id, "Discuss with the player"),
-                    Button.success(member.getId() + DiscordBot.ACCEPT_TOTAL_APPEAL_BUTTON_ID + id, "Remove sanction"),
-                    Button.success(member.getId() + DiscordBot.ACCEPT_LIGHT_APPEAL_BUTTON_ID + id, "Reduce duration"),
-                    Button.danger(member.getId() + DiscordBot.REFUSE_APPEAL_BUTTON_ID + id, "Refuse appeal")
+                    Button.secondary(member.getId() + DiscordBot.OPEN_DISCUSSION_APPEAL_BUTTON_ID + id, LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DISCUSS_LABEL)),
+                    Button.success(member.getId() + DiscordBot.ACCEPT_TOTAL_APPEAL_BUTTON_ID + id, LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ACCEPT_LABEL)),
+                    Button.success(member.getId() + DiscordBot.ACCEPT_LIGHT_APPEAL_BUTTON_ID + id, LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_REDUCE_LABEL)),
+                    Button.danger(member.getId() + DiscordBot.REFUSE_APPEAL_BUTTON_ID + id, LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_REFUSE_LABEL))
             ).queue();
             SanctionDatabase.changeAppealStatus(id, AppealStatus.IN_PROGRESS);
-            event.reply("Your appeal was submitted successfully.").setEphemeral(true).queue();
+            event.reply(LangManager.tr(TrKeys.DISCORD_APPEAL_SUCCESS)).setEphemeral(true).queue();
         }
         String[] splitted = event.getModalId().split("_");
         if (splitted.length == 3) {
@@ -314,7 +314,7 @@ public class BotListener extends ListenerAdapter {
 
             Member member = guild.getMemberById(memberID);
             if (member == null) {
-                event.reply("Error: The member who submitted the appeal is no longer in the guild, or doesn't exists.").queue();
+                event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ERROR_MEMBER_NOT_FOUND)).queue();
                 return;
             }
 
@@ -322,72 +322,70 @@ public class BotListener extends ListenerAdapter {
                 ModalMapping reasonMapping = event.getValue("reason");
                 String reason;
                 if (reasonMapping == null) {
-                    reason = "No reason provided";
+                    reason = LangManager.tr(TrKeys.DISCORD_REASON_NULL);
                 } else {
                     reason = reasonMapping.getAsString();
                 }
                 if (SanctionDatabase.changeAppealStatus(id, AppealStatus.REFUSED)) {
                     member.getUser().openPrivateChannel().queue(channel -> channel.sendMessage(
-                            "Hello,\n\n" +
-                                    "Your appeal regarding sanction " + id + " on **" + guild.getName() + "** has been reviewed and denied by the staff team.\n\n" +
-                                    "## Staff Response\n" +
-                                    reason + "\n\n" +
-                                    "If this sanction is temporary, its expiration date remains unchanged.\n\n" +
-                                    "Thank you for your understanding.\n" +
-                                    "-# Powered by AdminCraft • Please do not reply to this automated message."
+                            LangManager.tr(TrKeys.DISCORD_DM_APPEAL_DENIED, Map.of(
+                                    "mention", member.getAsMention(),
+                                    "id", id,
+                                    "guid", guild.getName(),
+                                    "reason", reason
+                            ))
                     ).queue());
                     event.getChannel().asTextChannel().upsertPermissionOverride(member).setDenied(EnumSet.of(Permission.VIEW_CHANNEL)).queue();
-                    event.reply("Appeal successfully denied.").queue();
+                    event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DENY_SUCCESS)).queue();
                     AdminCraft.LOGGER.info("Appeal for sanction {} has been denied.", id);
                 } else {
-                    event.reply("An issue occurred: failed to update appeal status.").setEphemeral(true).queue();
+                    event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DENY_FAILURE_STATUS_UPDATE)).setEphemeral(true).queue();
                 }
             }
             if (modalID.equals(DiscordBot.STAFF_DURATION_MODAL_ID)) {
                 DatabaseSanctionData data = SanctionDatabase.getSanctionData(id);
                 if (data == null) {
-                    event.reply("Failure: no data found with associated ID " + id).setEphemeral(true).queue();
+                    event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ERROR_SANCTION_NOT_FOUND, Map.of("id", id))).setEphemeral(true).queue();
                     return;
                 }
                 String duration = Objects.requireNonNull(event.getValue("duration")).getAsString();
                 Date dateFromNow = SanctionConfig.getDurationAsDateSince(duration, data.date());
                 if (dateFromNow == null) {
-                    event.reply("Failure: Invalid duration format.").setEphemeral(true).queue();
+                    event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DENY_FAILURE_INVALID_DURATION)).setEphemeral(true).queue();
                     return;
                 }
                 if (dateFromNow.before(new Date())) {
 
                     if (CustomSanctionSystem.applyAppealToSanction(data, AppealStatus.REDUCED)) {
                         member.getUser().openPrivateChannel().queue(channel -> channel.sendMessage(
-                                "Hello,\n\n" +
-                                        "Your appeal regarding sanction " + id + " on **" + guild.getName() + "** has been reviewed and approved by the staff team.\n\n" +
-                                        "The following action has been taken:\n" +
-                                        "- The sanction duration has been changed\n\n" +
-                                        "Thank you for your understanding.\n\n" +
-                                        "-# Powered by AdminCraft • Please do not reply to this automated message."
+                                LangManager.tr(TrKeys.DISCORD_DM_APPEAL_REDUCED_EXPIRED, Map.of(
+                                        "mention", member.getAsMention(),
+                                        "id", id,
+                                        "guid", guild.getName(),
+                                        "expires", dateFromNow.toString()
+                                ))
                         ).queue());
                     } else {
-                        event.reply("Failure: Failed to accept appeal.").setEphemeral(true).queue();
+                        event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ACCEPT_FAILURE)).setEphemeral(true).queue();
                         return;
                     }
                 } else {
                     if (CustomSanctionSystem.changeDuration(data, dateFromNow)) {
                         member.getUser().openPrivateChannel().queue(channel -> channel.sendMessage(
-                                "Hello,\n\n" +
-                                        "Your appeal regarding sanction " + id + " on **" + guild.getName() + "** has been reviewed and approved by the staff team.\n\n" +
-                                        "The following action has been taken:\n" +
-                                        "- The sanction duration has been changed, and will expire on " + dateFromNow + "\n" +
-                                        "- The sanction has been removed because the expires date is reached.\n\n" +
-                                        "Thank you for your understanding.\n\n" +
-                                        "-# Powered by AdminCraft • Please do not reply to this automated message."
+                                LangManager.tr(TrKeys.DISCORD_DM_APPEAL_REDUCED_NORMAL, Map.of(
+                                        "mention", member.getAsMention(),
+                                        "id", id,
+                                        "guid", guild.getName(),
+                                        "expires", dateFromNow.toString()
+                                ))
                         ).queue());
                     } else {
-                        event.reply("Failure: Failed to update database.").setEphemeral(true).queue();
+                        event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ACCEPT_FAILURE)).setEphemeral(true).queue();
                         return;
                     }
                 }
                 event.getChannel().asTextChannel().upsertPermissionOverride(member).setDenied(EnumSet.of(Permission.VIEW_CHANNEL)).queue();
-                event.reply("Successfully approved appeal and reduced the sanction.").queue();
+                event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_REDUCE_SUCCESS)).queue();
                 AdminCraft.LOGGER.info("Appeal for sanction {} successfully approved and sanction is reduced.", id);
             }
         }
