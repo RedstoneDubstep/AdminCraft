@@ -66,6 +66,7 @@
   "discord.staff.button.accept.label": "Remove sanction",
   "discord.staff.button.accept.success": "Appeal successfully approved.",
   "discord.staff.button.delete": "Delete ticket",
+  "discord.staff.button.delete.success": "This channel will be deleted in 5 seconds...",
   "discord.staff.button.deny.failure.invalid_duration": "Invalid duration format",
   "discord.staff.button.deny.failure.status_update": "Failure: failed to update appeal status.",
   "discord.staff.button.deny.success": "Appeal successfully denied.",

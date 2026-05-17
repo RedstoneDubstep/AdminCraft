@@ -107,6 +107,7 @@ public class TrKeys {
     public static final String DISCORD_STAFF_BUTTON_ACCEPT_FAILURE = "discord.staff.button.accept.failure";
 
     public static final String DISCORD_STAFF_BUTTON_DELETE = "discord.staff.button.delete";
+    public static final String DISCORD_STAFF_BUTTON_DELETE_SUCCESS = "discord.staff.button.delete.success";
 
     public static final String DISCORD_STAFF_BUTTON_DENY_FAILURE_INVALID_DURATION = "discord.staff.button.deny.failure.invalid_duration";
     public static final String DISCORD_STAFF_BUTTON_DENY_FAILURE_STATUS_UPDATE = "discord.staff.button.deny.failure.status_update";

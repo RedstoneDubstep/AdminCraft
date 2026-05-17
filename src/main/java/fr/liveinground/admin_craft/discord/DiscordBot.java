@@ -28,6 +28,7 @@ public class DiscordBot {
     public static final String OPEN_DISCUSSION_APPEAL_BUTTON_ID = "_discuss_button_";
     public static final String ACCEPT_LIGHT_APPEAL_BUTTON_ID = "_accept-light_button_";
     public static final String ACCEPT_TOTAL_APPEAL_BUTTON_ID = "_accept-total_button_";
+    public static final String DELETE_TICKET_BUTTON_ID = "delete";
 
     public static final String STAFF_REASON_MODAL_ID = "_reason_";
     public static final String STAFF_DURATION_MODAL_ID = "_duration_";

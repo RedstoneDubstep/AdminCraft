@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static fr.liveinground.admin_craft.discord.DiscordBot.guild;
 import static fr.liveinground.admin_craft.discord.DiscordBot.staff;
@@ -120,6 +121,12 @@ public class BotListener extends ListenerAdapter {
                             .build())
                     .build();
             event.replyModal(modal).queue();
+        } else if (Objects.equals(event.getButton().getId(), DiscordBot.DELETE_TICKET_BUTTON_ID)) {
+            event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DELETE_SUCCESS))
+                    .queue(success ->
+                            event.getChannel().delete().queueAfter(5, TimeUnit.SECONDS)
+                    );
+            return;
         }
         String[] splitted = Objects.requireNonNull(event.getButton().getId()).split("_");
 
@@ -162,7 +169,9 @@ public class BotListener extends ListenerAdapter {
                                         "guild", guild.getName()
                                 ))
                         ).queue());
-                        event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ACCEPT_SUCCESS)).queue();
+                        event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ACCEPT_SUCCESS))
+                                .addActionRow(Button.danger(DiscordBot.DELETE_TICKET_BUTTON_ID, LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DELETE)))
+                                .queue();
                         AdminCraft.LOGGER.info("Appeal for sanction {} has been approved.", id);
                     } else {
                         event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ACCEPT_FAILURE)).setEphemeral(true).queue();
@@ -336,7 +345,9 @@ public class BotListener extends ListenerAdapter {
                             ))
                     ).queue());
                     event.getChannel().asTextChannel().upsertPermissionOverride(member).setDenied(EnumSet.of(Permission.VIEW_CHANNEL)).queue();
-                    event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DENY_SUCCESS)).queue();
+                    event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DENY_SUCCESS))
+                            .addActionRow(Button.danger(DiscordBot.DELETE_TICKET_BUTTON_ID, LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DELETE)))
+                            .queue();
                     AdminCraft.LOGGER.info("Appeal for sanction {} has been denied.", id);
                 } else {
                     event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DENY_FAILURE_STATUS_UPDATE)).setEphemeral(true).queue();
@@ -385,7 +396,9 @@ public class BotListener extends ListenerAdapter {
                     }
                 }
                 event.getChannel().asTextChannel().upsertPermissionOverride(member).setDenied(EnumSet.of(Permission.VIEW_CHANNEL)).queue();
-                event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_REDUCE_SUCCESS)).queue();
+                event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_REDUCE_SUCCESS))
+                        .addActionRow(Button.danger(DiscordBot.DELETE_TICKET_BUTTON_ID, LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DELETE)))
+                        .queue();
                 AdminCraft.LOGGER.info("Appeal for sanction {} successfully approved and sanction is reduced.", id);
             }
         }
