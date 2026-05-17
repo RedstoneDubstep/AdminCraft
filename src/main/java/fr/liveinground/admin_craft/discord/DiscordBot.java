@@ -4,6 +4,7 @@ import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -56,6 +57,11 @@ public class DiscordBot {
             register_commands();
             try {
                 jda.awaitReady();
+                if (!guild.getSelfMember().hasPermission(Permission.ADMINISTRATOR) && !guild.getSelfMember().hasPermission(Permission.MANAGE_CHANNEL, Permission.MESSAGE_SEND)) {
+                    enabled = false;
+                    AdminCraft.LOGGER.error("Could not enable the bot, because he doesn't have the MANAGE_CHANNEL and MESSAGE_SEND permission. Please add these permission to his role and restart the server.");
+                    return;
+                }
                 AdminCraft.LOGGER.info("Appeal system enabled!");
                 enabled = true;
             } catch (InterruptedException e) {
