@@ -73,6 +73,7 @@
   "discord.staff.button.discuss.label": "Discuss with the player",
   "discord.staff.button.error.member_not_found": "Error: The member who submitted the appeal is no longer in the guild, or doesn't exists.",
   "discord.staff.button.error.sanction_not_found": "Failure: no data found with associated ID %id%",
+  "discord.staff.button.failure.not_staff": "You can't interact with this button, because you don't have the appeal management role (%staff_role%).",
   "discord.staff.button.reduce.label": "Reduce duration",
   "discord.staff.button.reduce.success": "Successfully approved the appeal and reduced the sanction.",
   "discord.staff.button.refuse.label": "Refuse appeal",

@@ -123,6 +123,8 @@ public class TrKeys {
 
     public static final String DISCORD_STAFF_BUTTON_REFUSE_LABEL = "discord.staff.button.refuse.label";
 
+    public static final String DISCORD_STAFF_BUTTON_FAILURE_NOT_STAFF = "discord.staff.button.failure.not_staff";
+
     // =========================
     // Discord embeds
     // =========================

@@ -1,7 +1,6 @@
 package fr.liveinground.admin_craft.discord;
 
 import fr.liveinground.admin_craft.AdminCraft;
-import fr.liveinground.admin_craft.Config;
 import fr.liveinground.admin_craft.lang.LangManager;
 import fr.liveinground.admin_craft.lang.TrKeys;
 import fr.liveinground.admin_craft.moderation.CustomSanctionSystem;
@@ -122,6 +121,12 @@ public class BotListener extends ListenerAdapter {
                     .build();
             event.replyModal(modal).queue();
         } else if (Objects.equals(event.getButton().getId(), DiscordBot.DELETE_TICKET_BUTTON_ID)) {
+            if (!Objects.requireNonNull(event.getMember()).getRoles().contains(staff)) {
+                event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_FAILURE_NOT_STAFF, Map.of("staff_role", DiscordBot.staff.getAsMention())))
+                        .setEphemeral(true)
+                        .queue();
+                return;
+            }
             event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DELETE_SUCCESS))
                     .queue(success ->
                             event.getChannel().delete().queueAfter(5, TimeUnit.SECONDS)
@@ -142,49 +147,61 @@ public class BotListener extends ListenerAdapter {
                 return;
             }
             if (buttonID.equals(DiscordBot.REFUSE_APPEAL_BUTTON_ID)) {
-                if (Objects.requireNonNull(event.getMember()).getRoles().stream().anyMatch(role -> role.getId().equals(Config.staff_role_id))) {
-                    event.replyModal(Modal.create(memberID + DiscordBot.STAFF_REASON_MODAL_ID + id, LangManager.tr(TrKeys.DISCORD_STAFF_MODAL_REFUSE_TITLE))
-                                    .addActionRow(TextInput.create("reason", LangManager.tr(TrKeys.DISCORD_STAFF_MODAL_REFUSE_REASON), TextInputStyle.PARAGRAPH)
-                                            .setPlaceholder(LangManager.tr(TrKeys.DISCORD_STAFF_MODAL_REFUSE_REASON_PLACEHOLDER))
-                                            .setRequired(false)
-                                            .build())
-                                    .build())
+                if (!Objects.requireNonNull(event.getMember()).getRoles().contains(staff)) {
+                    event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_FAILURE_NOT_STAFF, Map.of("staff_role", DiscordBot.staff.getAsMention())))
+                            .setEphemeral(true)
                             .queue();
                     return;
                 }
+                event.replyModal(Modal.create(memberID + DiscordBot.STAFF_REASON_MODAL_ID + id, LangManager.tr(TrKeys.DISCORD_STAFF_MODAL_REFUSE_TITLE))
+                                .addActionRow(TextInput.create("reason", LangManager.tr(TrKeys.DISCORD_STAFF_MODAL_REFUSE_REASON), TextInputStyle.PARAGRAPH)
+                                        .setPlaceholder(LangManager.tr(TrKeys.DISCORD_STAFF_MODAL_REFUSE_REASON_PLACEHOLDER))
+                                        .setRequired(false)
+                                        .build())
+                                .build())
+                        .queue();
+                return;
             }
             if (buttonID.equals(DiscordBot.ACCEPT_TOTAL_APPEAL_BUTTON_ID)) {
-                if (Objects.requireNonNull(event.getMember()).getRoles().stream().anyMatch(role -> role.getId().equals(Config.staff_role_id))) {
-                    DatabaseSanctionData dataset = SanctionDatabase.getSanctionData(id);
-                    if (dataset == null) {
-                        event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ERROR_SANCTION_NOT_FOUND, Map.of("id", id))).setEphemeral(true).queue();
-                        return;
-                    }
-                    if (CustomSanctionSystem.applyAppealToSanction(dataset, AppealStatus.ACCEPTED)) {
-                        event.getChannel().asTextChannel().upsertPermissionOverride(member).setDenied(EnumSet.of(Permission.VIEW_CHANNEL)).queue();
-                        member.getUser().openPrivateChannel().queue(channel -> channel.sendMessage(
-                                LangManager.tr(TrKeys.DISCORD_DM_APPEAL_ACCEPTED, Map.of(
-                                        "mention", member.getAsMention(),
-                                        "id", id,
-                                        "guild", guild.getName()
-                                ))
-                        ).queue());
-                        event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ACCEPT_SUCCESS))
-                                .addActionRow(Button.danger(DiscordBot.DELETE_TICKET_BUTTON_ID, LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DELETE)))
-                                .queue();
-                        AdminCraft.LOGGER.info("Appeal for sanction {} has been approved.", id);
-                    } else {
-                        event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ACCEPT_FAILURE)).setEphemeral(true).queue();
-                        return;
-                    }
+                if (!Objects.requireNonNull(event.getMember()).getRoles().contains(staff)) {
+                    event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_FAILURE_NOT_STAFF, Map.of("staff_role", DiscordBot.staff.getAsMention())))
+                            .setEphemeral(true)
+                            .queue();
+                    return;
+                }
+                DatabaseSanctionData dataset = SanctionDatabase.getSanctionData(id);
+                if (dataset == null) {
+                    event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ERROR_SANCTION_NOT_FOUND, Map.of("id", id))).setEphemeral(true).queue();
+                    return;
+                }
+                if (CustomSanctionSystem.applyAppealToSanction(dataset, AppealStatus.ACCEPTED)) {
+                    event.getChannel().asTextChannel().upsertPermissionOverride(member).setDenied(EnumSet.of(Permission.VIEW_CHANNEL)).queue();
+                    member.getUser().openPrivateChannel().queue(channel -> channel.sendMessage(
+                            LangManager.tr(TrKeys.DISCORD_DM_APPEAL_ACCEPTED, Map.of(
+                                    "mention", member.getAsMention(),
+                                    "id", id,
+                                    "guild", guild.getName()
+                            ))
+                    ).queue());
+                    event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ACCEPT_SUCCESS))
+                            .addActionRow(Button.danger(DiscordBot.DELETE_TICKET_BUTTON_ID, LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DELETE)))
+                            .queue();
+                    AdminCraft.LOGGER.info("Appeal for sanction {} has been approved.", id);
+                } else {
+                    event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ACCEPT_FAILURE)).setEphemeral(true).queue();
+                    return;
                 }
             }
             if (buttonID.equals(DiscordBot.ACCEPT_LIGHT_APPEAL_BUTTON_ID)) {
-                if (Objects.requireNonNull(event.getMember()).getRoles().stream().anyMatch(role -> role.getId().equals(Config.staff_role_id))) {
-                    event.replyModal(Modal.create(memberID + DiscordBot.STAFF_DURATION_MODAL_ID + id, LangManager.tr(TrKeys.DISCORD_STAFF_MODAL_DURATION_TITLE))
-                            .addActionRow(TextInput.create("duration", LangManager.tr(TrKeys.DISCORD_STAFF_MODAL_DURATION_DURATION), TextInputStyle.SHORT).setRequired(true).build()).build()).queue();
+                if (!Objects.requireNonNull(event.getMember()).getRoles().contains(staff)) {
+                    event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_FAILURE_NOT_STAFF, Map.of("staff_role", DiscordBot.staff.getAsMention())))
+                            .setEphemeral(true)
+                            .queue();
                     return;
                 }
+                event.replyModal(Modal.create(memberID + DiscordBot.STAFF_DURATION_MODAL_ID + id, LangManager.tr(TrKeys.DISCORD_STAFF_MODAL_DURATION_TITLE))
+                        .addActionRow(TextInput.create("duration", LangManager.tr(TrKeys.DISCORD_STAFF_MODAL_DURATION_DURATION), TextInputStyle.SHORT).setRequired(true).build()).build()).queue();
+                return;
             }
         }
     }
