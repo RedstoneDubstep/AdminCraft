@@ -1,7 +1,9 @@
 package fr.liveinground.admin_craft.moderation;
 
 import fr.liveinground.admin_craft.AdminCraft;
+import fr.liveinground.admin_craft.Config;
 import fr.liveinground.admin_craft.ServerHolder;
+import fr.liveinground.admin_craft.discord.DiscordBot;
 import fr.liveinground.admin_craft.lang.LangManager;
 import fr.liveinground.admin_craft.lang.TrKeys;
 import fr.liveinground.admin_craft.storage.SanctionDatabase;
@@ -82,10 +84,16 @@ public class CustomSanctionSystem {
     public static String mutePlayer(MinecraftServer server, NameAndId player, String reason, @Nullable Date expiresOn, boolean appealable, @Nullable Date appealDelay) {
         if (!AdminCraft.mutedPlayersUUID.contains(String.valueOf(player))) {
             //AdminCraft.playerDataManager.addMuteEntry(new PlayerMuteData(player.name(), player.id().toString(), reason, expiresOn));
-
+            String id = SanctionDatabase.registerSanction(player.id().toString(), player.name(), new SanctionData(Sanction.MUTE, reason, new Date(), expiresOn), appealable, appealDelay);
+            if (id == null) return null;
             ServerPlayer serverPlayer = AdminCraft.getOnlinePlayer(server, player);
             if (serverPlayer != null) {
-                String msg = LangManager.tr(TrKeys.MUTE_BEGINS_REASON, Map.of("reason", reason));
+                String msg;
+                if (DiscordBot.enabled) {
+                    msg = LangManager.tr(TrKeys.MUTE_BEGINS_REASON, Map.of("reason", reason, "id", id, "link", Config.invite_link));
+                } else {
+                    msg = LangManager.tr(TrKeys.MUTE_BEGINS_REASON_NOAPPEAL, Map.of("reason", reason));
+                }
                 serverPlayer.sendSystemMessage(Component.literal(msg).withStyle(ChatFormatting.RED));
 
                 if (expiresOn != null) {
@@ -93,9 +101,10 @@ public class CustomSanctionSystem {
                     serverPlayer.sendSystemMessage(Component.literal(timeMsg).withStyle(ChatFormatting.YELLOW));
                 }
             }
+            AdminCraft.playerDataManager.addMuteEntry(new PlayerMuteData(player.name(), player.id().toString(), reason, expiresOn));
+            return id;
         }
-        AdminCraft.playerDataManager.addMuteEntry(new PlayerMuteData(player.name(), player.id().toString(), reason, expiresOn));
-        return SanctionDatabase.registerSanction(player.id().toString(), player.name(), new SanctionData(Sanction.MUTE, reason, new Date(), expiresOn), appealable, appealDelay);
+        return null;
     }
 
     public static void unMutePlayer(NameAndId player) {

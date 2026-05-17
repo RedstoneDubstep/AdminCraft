@@ -1,11 +1,8 @@
 package fr.liveinground.admin_craft.commands.moderation;
 
-import java.util.Date;
-
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-
 import fr.liveinground.admin_craft.AdminCraft;
 import fr.liveinground.admin_craft.Config;
 import fr.liveinground.admin_craft.moderation.CustomSanctionSystem;
@@ -16,6 +13,8 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.players.NameAndId;
+
+import java.util.Date;
 
 
 public class TempBanCommand {
@@ -67,8 +66,8 @@ public class TempBanCommand {
         }
 
         String reason;
-        boolean appealable = true;
-        Date appealDelay = null;
+        boolean appealable = Config.default_can_appeal;
+        Date appealDelay = SanctionConfig.getDurationAsDate(Config.default_appeal_delay);
         String[] splitted = args.split(" ");
         StringBuilder builder = new StringBuilder();
 

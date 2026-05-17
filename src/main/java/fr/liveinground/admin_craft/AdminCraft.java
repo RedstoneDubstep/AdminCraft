@@ -2,7 +2,10 @@ package fr.liveinground.admin_craft;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.brigadier.tree.RootCommandNode;
 import com.mojang.logging.LogUtils;
+import fr.liveinground.admin_craft.commands.moderation.BanCommand;
 import fr.liveinground.admin_craft.commands.moderation.FreezeCommand;
 import fr.liveinground.admin_craft.commands.moderation.MuteCommand;
 import fr.liveinground.admin_craft.commands.moderation.ReportCommand;
@@ -63,6 +66,7 @@ import org.slf4j.Logger;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -122,6 +126,29 @@ public class AdminCraft {
         EchestCommand.register(dispatcher);
         OfflineTeleportCommand.register(dispatcher);
         OfflineTagCommand.register(dispatcher);
+
+        if (Config.enable_ban_override) {
+            RootCommandNode<CommandSourceStack> root = dispatcher.getRoot();
+
+            try {
+                Field childrenField = CommandNode.class.getDeclaredField("children");
+                childrenField.setAccessible(true);
+
+                Field literalsField = CommandNode.class.getDeclaredField("literals");
+                literalsField.setAccessible(true);
+
+                Field argumentsField = CommandNode.class.getDeclaredField("arguments");
+                argumentsField.setAccessible(true);
+
+                ((Map<?, ?>) childrenField.get(root)).remove("ban");
+                ((Map<?, ?>) literalsField.get(root)).remove("ban");
+                ((Map<?, ?>) argumentsField.get(root)).remove("ban");
+                BanCommand.register(dispatcher, true);
+
+            } catch (Exception e) {
+                LOGGER.error("Failed to override vanilla /ban command: ", e);
+            }
+        } else BanCommand.register(dispatcher, false);
         // StaffModeCommand.register(dispatcher);
     }
 
@@ -339,7 +366,7 @@ public class AdminCraft {
         } else {
             message.append(Component.literal("\n" + LangManager.tr(TrKeys.DISCONNECT_BANNED_DURATION_EXPIRES_IN, Map.of("duration", SanctionConfig.getDurationAsStringFromDate(sanction.expiresOn())))).withStyle(ChatFormatting.RED));
         }
-        if (sanction.status().equals(AppealStatus.NOT_ALLOWED)) {
+        if (sanction.status().equals(AppealStatus.NOT_ALLOWED) || !DiscordBot.enabled) {
             message.append(Component.literal("\n" + LangManager.tr(TrKeys.DISCONNECT_BANNED_APPEAL_NOT_ALLOWED)).withStyle(ChatFormatting.YELLOW));
         } else {
             message.append(Component.literal("\n" + LangManager.tr(TrKeys.DISCONNECT_BANNED_APPEAL_LINK, Map.of("link", Config.invite_link))).withStyle(ChatFormatting.YELLOW));

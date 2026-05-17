@@ -19,6 +19,7 @@ public class TrKeys {
     // Mute system
     // =========================
     public static final String MUTE_BEGINS_REASON = "mute.begins";
+    public static final String MUTE_BEGINS_REASON_NOAPPEAL = "mute.begins.noappeal";
 
     public static final String MUTE_MESSAGE_CANCELLED = "mute.message_cancelled";
     public static final String MUTE_MESSAGE_CANCELLED_LOG = "mute.message_cancelled_log";

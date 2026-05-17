@@ -1,6 +1,7 @@
 package fr.liveinground.admin_craft;
 
 import fr.liveinground.admin_craft.lang.LangManager;
+import fr.liveinground.admin_craft.moderation.SanctionConfig;
 import fr.liveinground.admin_craft.storage.types.sanction.Sanction;
 import fr.liveinground.admin_craft.storage.types.sanction.SanctionTemplate;
 import net.minecraft.core.Holder;
@@ -43,6 +44,9 @@ public class Config {
     private static final ModConfigSpec.ConfigValue<String> LOCALE;
     public static String locale;
 
+    private static final ModConfigSpec.BooleanValue ENABLE_BAN_OVERRIDE;
+    public static boolean enable_ban_override;
+
     // --------------------------
     // -- Commands permissions --
     // --------------------------
@@ -67,6 +71,9 @@ public class Config {
 
     private static final ModConfigSpec.IntValue TEMPBAN_LEVEL;
     public static int tempban_level;
+
+    private static final ModConfigSpec.IntValue BAN_LEVEL;
+    public static int ban_level;
 
     private static final ModConfigSpec.IntValue INVSEE_LEVEL;
     public static int invsee_level;
@@ -183,6 +190,12 @@ public class Config {
     private static final ModConfigSpec.ConfigValue<String> STAFF_ROLE_ID;
     public static String staff_role_id;
 
+    private static final ModConfigSpec.BooleanValue DEFAULT_CAN_APPEAL;
+    public static boolean default_can_appeal;
+
+    private static final ModConfigSpec.ConfigValue<String> DEFAULT_APPEAL_DELAY;
+    public static String default_appeal_delay;
+
     static {
         BUILDER.push("misc");
 
@@ -191,6 +204,8 @@ public class Config {
                 .comment("This setting corresponds to the mod version, to check if the config is up to date. Change it when you update the mod, in order to disable the join message.")
                 .define("configVersion", AdminCraft._VERSION);
         LOCALE = BUILDER.comment("The lang file the mod should use. Can be one of the supported languages: en_US, fr_FR.").worldRestart().define("locale", "en_US");
+
+        ENABLE_BAN_OVERRIDE = BUILDER.comment("Should AdminCraft override the vanilla /ban command with its own syntax and ban parsing (including history and appeal management)").worldRestart().define("overrideBanCommand", true);
 
         BUILDER.pop();
     }
@@ -205,6 +220,7 @@ public class Config {
         WARN_LEVEL = BUILDER.comment("The OP level required to run the /warn command").worldRestart().defineInRange("warn", 3, 0, 4);
         REPORTS_LEVEL = BUILDER.comment("The OP level required to run the /reports command").worldRestart().defineInRange("reports", 3, 0, 4);
         TEMPBAN_LEVEL = BUILDER.comment("The OP level required to run the /tempban command").worldRestart().defineInRange("tempban", 3, 0,4);
+        BAN_LEVEL = BUILDER.comment("The OP level required to run the /ban command").worldRestart().defineInRange("ban", 3, 0, 4);
         INVSEE_LEVEL = BUILDER.comment("The OP level required to run the /invsee and /echest commands").worldRestart().defineInRange("invsee", 2, 0,4);
         OTP_LEVEL = BUILDER.comment("The OP level required to run the /otp command").worldRestart().defineInRange("otp", 2, 0, 4);
         OTAG_LEVEL = BUILDER.comment("The OP level required to run the /otag command").worldRestart().defineInRange("otp", 2, 0, 4);
@@ -284,13 +300,15 @@ public class Config {
     }
 
     static {
-        BUILDER.push("discordAppeals");
+        BUILDER.push("discordAppeals").comment("Warning: If something went wrong with the bot, banned and muted players won't see the appeal link!");
 
         ENABLE_APPEALS = BUILDER.comment("Enable the discord appeal system").worldRestart().define("enable", false);
         BOT_TOKEN = BUILDER.comment("The discord bot token for the appeal system").worldRestart().define("discordToken", "configthisplease");
         GUID_ID = BUILDER.comment("The Guild ID where the appeal system should work").worldRestart().define("guildID", "configthisplease");
         INVITE_LINK = BUILDER.comment("The invite link to the appeal server, displayed on sanction messages").worldRestart().define("invite", "https://discord.com/invite/yourinvite");
         STAFF_ROLE_ID = BUILDER.comment("The role id allowing to manage appeal tickers").worldRestart().define("staffRoleID", "configthisplease");
+        DEFAULT_CAN_APPEAL = BUILDER.comment("Should players be able to appeal if nothing is provided in the command?").worldRestart().define("defaultCanAppeal", true);
+        DEFAULT_APPEAL_DELAY = BUILDER.comment("The default appeal delay if nothing is provided in the command").comment("Can be a duration or 'null'").worldRestart().define("defaultAppealDelay", "null");
 
         BUILDER.pop();
     }
@@ -375,6 +393,7 @@ public class Config {
         readme = README.get();
         _config_version = _CONFIG_VERSION.get();
         locale = LOCALE.get();
+        enable_ban_override = ENABLE_BAN_OVERRIDE.get();
 
         LangManager.setLanguage(locale);
         Path langDir = FMLPaths.CONFIGDIR.get()
@@ -396,6 +415,7 @@ public class Config {
         warn_level = WARN_LEVEL.get();
         reports_level = REPORTS_LEVEL.get();
         tempban_level = TEMPBAN_LEVEL.get();
+        ban_level = BAN_LEVEL.get();
         invsee_level = INVSEE_LEVEL.get();
         otag_level = OTAG_LEVEL.get();
         otp_level = OTP_LEVEL.get();
@@ -516,6 +536,11 @@ public class Config {
         guild_id = GUID_ID.get();
         invite_link = INVITE_LINK.get();
         staff_role_id = STAFF_ROLE_ID.get();
+        default_can_appeal = DEFAULT_CAN_APPEAL.get();
+        default_appeal_delay = DEFAULT_APPEAL_DELAY.get();
+        if (!default_appeal_delay.equals("null") && SanctionConfig.getDurationAsDate(default_appeal_delay) == null) {
+            AdminCraft.LOGGER.warn("The configured default appeal delay is invalid, so no delay will be applied. Please set a correct duration or set 'null' to disable this warning.");
+        }
     }
 
     public static Set<Holder<MobEffect>> loadEffects(Level level) {

@@ -128,8 +128,8 @@ public class MuteCommand {
         }
 
         String reason;
-        boolean appealable = true;
-        Date appealDelay = null;
+        boolean appealable = Config.default_can_appeal;
+        Date appealDelay = SanctionConfig.getDurationAsDate(Config.default_appeal_delay);
         String[] splitted = args.split(" ");
         StringBuilder builder = new StringBuilder();
 
@@ -153,7 +153,10 @@ public class MuteCommand {
         else {
             reason = "Muted by an operator";
         }
-        CustomSanctionSystem.mutePlayer(ctx.getSource().getServer(), profile, reason, sanctionDuration, appealable, appealDelay);
+        if (CustomSanctionSystem.mutePlayer(ctx.getSource().getServer(), profile, reason, sanctionDuration, appealable, appealDelay) == null) {
+            ctx.getSource().sendFailure(Component.literal("Something went wrong.").withStyle(ChatFormatting.RED));
+            return;
+        }
 
         String msgToOperator = LangManager.tr(TrKeys.COMMAND_MUTE_SUCCESS, Map.of("player", profile.name(), "reason", reason));
         ctx.getSource().sendSuccess(() -> Component.literal(msgToOperator), true);
