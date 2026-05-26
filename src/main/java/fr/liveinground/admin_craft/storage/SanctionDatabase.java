@@ -49,11 +49,11 @@ public class SanctionDatabase {
     }
 
     @FunctionalInterface
-    public interface StatementPreparer {
+    private interface StatementPreparer {
         void prepare(PreparedStatement stmt) throws SQLException;
     }
 
-    public static List<DatabaseSanctionData> query(String sql, StatementPreparer preparer) {
+    private static List<DatabaseSanctionData> query(String sql, StatementPreparer preparer) {
         List<DatabaseSanctionData> results = new ArrayList<>();
         try (
                 Connection conn = connect();
@@ -99,7 +99,7 @@ public class SanctionDatabase {
         return results;
     }
 
-    public static boolean update(String sql, StatementPreparer preparer) {
+    private static boolean update(String sql, StatementPreparer preparer) {
 
         try (
                 Connection conn = connect();
@@ -250,5 +250,16 @@ public class SanctionDatabase {
                 "SELECT * FROM sanctions WHERE uuid = ?;",
                 stmt -> stmt.setString(1, uuid)
         );
+    }
+
+    public static boolean editDuration(String id, @Nullable Date newDuration) {
+        return update("UPDATE sanctions SET expires = ? WHERE id = ?", stmt -> {
+            if (newDuration == null) {
+                stmt.setNull(1, Types.BIGINT);
+            } else {
+                stmt.setLong(1, newDuration.getTime());
+            }
+            stmt.setString(2, id);
+        });
     }
 }

@@ -87,6 +87,12 @@ public class Config {
     private static final ModConfigSpec.IntValue HISTORY_LEVEL;
     public static int history_level;
 
+    private static final ModConfigSpec.IntValue EDITDURATION_LEVEL;
+    public static int editduration_level;
+
+    private static final ModConfigSpec.IntValue EDITAPPEAL_LEVEL;
+    public static int editappeal_level;
+
     // ---------------
     // -- Sanctions --
     // ---------------
@@ -225,6 +231,9 @@ public class Config {
         OTP_LEVEL = BUILDER.comment("The OP level required to run the /otp command").worldRestart().defineInRange("otp", 2, 0, 4);
         OTAG_LEVEL = BUILDER.comment("The OP level required to run the /otag command").worldRestart().defineInRange("otp", 2, 0, 4);
         HISTORY_LEVEL = BUILDER.comment("The OP level required to run the /history command").worldRestart().defineInRange("history", 2, 0, 4);
+        EDITDURATION_LEVEL = BUILDER.comment("The OP level required to run the /editduration command").worldRestart().defineInRange("editduration", 3, 0, 4);
+        EDITAPPEAL_LEVEL = BUILDER.comment("The OP level required to run the /editappeal command").worldRestart().defineInRange("editappeal", 3, 0, 4);
+
 
         BUILDER.pop();
     }
@@ -420,6 +429,8 @@ public class Config {
         otag_level = OTAG_LEVEL.get();
         otp_level = OTP_LEVEL.get();
         history_level = HISTORY_LEVEL.get();
+        editduration_level = EDITDURATION_LEVEL.get();
+        editappeal_level = EDITAPPEAL_LEVEL.get();
 
         // ---------------
         // -- Sanctions --

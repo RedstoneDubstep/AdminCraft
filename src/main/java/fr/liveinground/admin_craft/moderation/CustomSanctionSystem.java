@@ -158,7 +158,7 @@ public class CustomSanctionSystem {
         }
     }
 
-    public static boolean changeDuration(@NotNull DatabaseSanctionData data, @NotNull Date newExpires) {
+    public static boolean changeDuration(@NotNull DatabaseSanctionData data, @Nullable Date newExpires) {
         NameAndId nameAndId = new NameAndId(UUID.fromString(data.id()), data.ign());
         if (SanctionDatabase.changeAppealStatus(data.id(), AppealStatus.REDUCED)) {
             switch (data.type()) {
@@ -166,13 +166,14 @@ public class CustomSanctionSystem {
                 case BAN -> changeBanDuration(nameAndId, newExpires);
                 default -> AdminCraft.LOGGER.warn("An appeal was made for a non-appealable sanction type (sanction {}). Skipping sanction reducing procedure...", data.id());
             }
+            if (!SanctionDatabase.editDuration(data.id(), newExpires)) AdminCraft.LOGGER.warn("Failed to edit the duration in the database. This wont impact the actual sanction.");
             return true;
         }
         AdminCraft.LOGGER.error("Failed to update appeal status for sanction id {} to REDUCED in the database", data.id());
         return false;
     }
 
-    public static void changeMuteDuration(@NotNull NameAndId player, @NotNull Date newExpires) {
+    public static void changeMuteDuration(@NotNull NameAndId player, @Nullable Date newExpires) {
         if (AdminCraft.mutedPlayersUUID.contains(player.id().toString())) {
             PlayerMuteData oldData = AdminCraft.playerDataManager.getPlayerMuteDataByUUID(player.id().toString());
             AdminCraft.playerDataManager.removeMuteEntry(oldData);
@@ -184,7 +185,7 @@ public class CustomSanctionSystem {
         }
     }
 
-    public static void changeBanDuration(NameAndId player, Date newExpires) {
+    public static void changeBanDuration(NameAndId player, @Nullable Date newExpires) {
         PlayerList list = ServerHolder.getServer().getPlayerList();
         if (list.getBans().isBanned(player)) {
             UserBanListEntry old = Objects.requireNonNull(list.getBans().get(player));
