@@ -6,6 +6,7 @@ import fr.liveinground.admin_craft.storage.types.sanction.DatabaseSanctionData;
 import fr.liveinground.admin_craft.storage.types.sanction.Sanction;
 import fr.liveinground.admin_craft.storage.types.sanction.SanctionData;
 import net.neoforged.fml.loading.FMLPaths;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.security.SecureRandom;
@@ -259,6 +260,13 @@ public class SanctionDatabase {
             } else {
                 stmt.setLong(1, newDuration.getTime());
             }
+            stmt.setString(2, id);
+        });
+    }
+
+    public static boolean editAppealDelay(String id, @NotNull Date newDelay) {
+        return update("UPDATE sanctions SET appealDate = ? WHERE id = ?", stmt -> {
+            stmt.setLong(1, newDelay.getTime());
             stmt.setString(2, id);
         });
     }

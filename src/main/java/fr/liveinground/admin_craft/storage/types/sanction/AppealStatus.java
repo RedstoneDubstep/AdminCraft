@@ -8,7 +8,7 @@ public enum AppealStatus {
     REFUSED("Refused"),
     REDUCED("Sanction reduced"),
     ACCEPTED("Accepted"),
-    UNSET("An error occurred");
+    UNSET("An error occurred");  // This should not be set unless there is no other choice, and is a last chance backup
 
     private final String label;
 

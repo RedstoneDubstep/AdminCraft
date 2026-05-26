@@ -1,4 +1,4 @@
-package fr.liveinground.admin_craft.commands.moderation;
+package fr.liveinground.admin_craft.commands.moderation.edit;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
