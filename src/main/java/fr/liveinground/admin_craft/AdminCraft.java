@@ -344,7 +344,7 @@ public class AdminCraft {
     }
 
     @SubscribeEvent
-    public static void onPlayerLogin(PlayerNegotiationEvent event) {
+    public void onPlayerLogin(PlayerNegotiationEvent event) {
         GameProfile profile = event.getProfile();
         List<DatabaseSanctionData> punishments = SanctionDatabase.getCurrentSanctions(profile.id().toString());
         if (punishments.isEmpty()) return;
