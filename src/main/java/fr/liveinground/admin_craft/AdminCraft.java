@@ -80,7 +80,7 @@ import java.util.Map;
 public class AdminCraft {
 
     public static final String MODID = "admin_craft";
-    public static final String _VERSION = "1.0.2";
+    public static final String _VERSION = "1.1.0";
     public static final Logger LOGGER = LogUtils.getLogger();
     private static final String SP_TAG = "inSpawnProtection";
     public static SanctionConfig sanctionConfig;
@@ -386,8 +386,8 @@ public class AdminCraft {
         try {
             Files.createDirectories(dir);
 
-            copyDefault("en_us.json", dir);
-            copyDefault("fr_fr.json", dir);
+            copyDefault("en_US.json", dir);
+            copyDefault("fr_FR.json", dir);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
