@@ -31,6 +31,11 @@ public class SanctionDatabase {
             .resolve("sanctions.db").toAbsolutePath();
 
     public static Connection connect() throws SQLException {
+        try {
+            Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         return DriverManager.getConnection(URL);
     }
 
