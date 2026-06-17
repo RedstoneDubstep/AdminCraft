@@ -16,6 +16,7 @@ import fr.liveinground.admin_craft.commands.moderation.edit.EditAppealCommand;
 import fr.liveinground.admin_craft.commands.moderation.edit.EditDurationCommand;
 import fr.liveinground.admin_craft.commands.tools.AltCommand;
 import fr.liveinground.admin_craft.commands.tools.EchestCommand;
+import fr.liveinground.admin_craft.commands.tools.HistoryCommand;
 import fr.liveinground.admin_craft.commands.tools.InvseeCommand;
 import fr.liveinground.admin_craft.commands.tools.OfflineTagCommand;
 import fr.liveinground.admin_craft.commands.tools.OfflineTeleportCommand;
@@ -130,6 +131,7 @@ public class AdminCraft {
         OfflineTagCommand.register(dispatcher);
         EditDurationCommand.register(dispatcher);
         EditAppealCommand.register(dispatcher);
+        HistoryCommand.register(dispatcher);
 
         if (Config.enable_ban_override) {
             RootCommandNode<CommandSourceStack> root = dispatcher.getRoot();

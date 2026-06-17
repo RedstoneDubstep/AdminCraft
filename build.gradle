@@ -3,6 +3,7 @@ plugins {
     id 'maven-publish'
     id 'net.neoforged.moddev' version '2.0.118'
     id 'idea'
+    id 'com.gradleup.shadow' version '8.3.0'
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -23,7 +24,33 @@ repositories {
 
 dependencies {
     implementation("net.dv8tion:JDA:5.0.0-beta.24")
+    shadow "org.xerial:sqlite-jdbc:3.50.3.0"
 }
+
+shadowJar {
+    archiveBaseName.set(mod_id)
+    archiveClassifier.set('')
+    mergeServiceFiles()
+
+    configurations = [project.configurations.shadow]
+}
+// Désactive le jar classique
+tasks.named('jar').configure {
+    enabled = false
+}
+tasks.withType(JavaCompile) {
+    options.compilerArgs += ['-Xdoclint:none']
+}
+tasks.withType(Javadoc) {
+    options.addStringOption('Xdoclint:none', '-quiet')
+}
+// Overide par shadowJar
+tasks.build {
+    dependsOn shadowJar
+}
+
+
+jar.finalizedBy(shadowJar)
 
 base {
     archivesName = mod_id
