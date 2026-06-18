@@ -181,4 +181,5 @@ public class TrKeys {
     // =========================
     public static final String DISCORD_REASON_NULL = "discord.reason.null";
     public static final String DISCORD_APPEAL_SUCCESS = "discord.appeal.success";
+    public static final String DISCORD_DISCUSSION_STARTS = "discord.discussion.starts";
 }

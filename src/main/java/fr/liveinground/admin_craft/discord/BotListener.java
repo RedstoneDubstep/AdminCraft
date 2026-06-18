@@ -19,6 +19,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
@@ -206,6 +207,35 @@ public class BotListener extends ListenerAdapter {
                 }
                 event.replyModal(Modal.create(memberID + DiscordBot.STAFF_DURATION_MODAL_ID + id, LangManager.tr(TrKeys.DISCORD_STAFF_MODAL_DURATION_TITLE))
                         .addActionRow(TextInput.create("duration", LangManager.tr(TrKeys.DISCORD_STAFF_MODAL_DURATION_DURATION), TextInputStyle.SHORT).setRequired(true).build()).build()).queue();
+                return;
+            }
+            if (buttonID.equals(DiscordBot.OPEN_DISCUSSION_APPEAL_BUTTON_ID)) {
+                if (!Objects.requireNonNull(event.getMember()).getRoles().contains(staff)) {
+                    event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_FAILURE_NOT_STAFF, Map.of("staff_role", DiscordBot.staff.getAsMention())))
+                            .setEphemeral(true)
+                            .queue();
+                    return;
+                }
+                event.getChannel().asTextChannel().upsertPermissionOverride(member).setAllowed(EnumSet.of(Permission.VIEW_CHANNEL, Permission.MESSAGE_HISTORY, Permission.MESSAGE_SEND)).queue();
+                event.getChannel().sendMessage(LangManager.tr(TrKeys.DISCORD_DISCUSSION_STARTS, Map.of("mention", member.getAsMention(), "id", id))).queue();
+
+                Message message = event.getMessage();
+                List<ActionRow> newRows = new ArrayList<>();
+
+                for (ActionRow row : message.getActionRows()) {
+                    List<Button> newButtons = new ArrayList<>();
+
+                    for (Button button : row.getButtons()) {
+                        if (button.getId() != null && button.getId().equals(event.getButton().getId())) {
+                            newButtons.add(button.asDisabled());
+                        } else {
+                            newButtons.add(button);
+                        }
+                    }
+                    newRows.add(ActionRow.of(newButtons));
+                }
+                message.editMessageComponents(newRows).queue();
+                event.reply("Done").setEphemeral(true).queue();
                 return;
             }
         }
