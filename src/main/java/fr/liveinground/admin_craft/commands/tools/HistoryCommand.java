@@ -65,5 +65,6 @@ public class HistoryCommand {
         component.append(Component.literal("  - ").withStyle(ChatFormatting.GOLD));
         component.append(Component.literal(name + ": ").withStyle(ChatFormatting.YELLOW));
         component.append(Component.literal(value));
+        component.append(Component.literal("\n"));
     }
 }
