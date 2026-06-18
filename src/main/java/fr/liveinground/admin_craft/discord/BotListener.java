@@ -404,7 +404,7 @@ public class BotListener extends ListenerAdapter {
                                 LangManager.tr(TrKeys.DISCORD_DM_APPEAL_REDUCED_EXPIRED, Map.of(
                                         "mention", member.getAsMention(),
                                         "id", id,
-                                        "guid", guild.getName(),
+                                        "guild", guild.getName(),
                                         "expires", dateFromNow.toString()
                                 ))
                         ).queue());
@@ -428,10 +428,10 @@ public class BotListener extends ListenerAdapter {
                     }
                 }
                 event.getChannel().asTextChannel().upsertPermissionOverride(member).setDenied(EnumSet.of(Permission.VIEW_CHANNEL)).queue();
-                event.getHook().sendMessage(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_REDUCE_SUCCESS))
+                event.getChannel().sendMessage(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_REDUCE_SUCCESS))
                         .addActionRow(Button.danger(DiscordBot.DELETE_TICKET_BUTTON_ID, LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DELETE)))
-                        .setEphemeral(false)
                         .queue();
+                event.reply("Done").setEphemeral(true).queue();
                 event.getChannel().getHistory().retrievePast(1).queue(messages -> {
                     Message firstMessage = messages.getFirst();
 
