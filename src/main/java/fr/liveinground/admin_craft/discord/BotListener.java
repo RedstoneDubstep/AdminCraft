@@ -302,9 +302,9 @@ public class BotListener extends ListenerAdapter {
                     SanctionDatabase.changeAppealStatus(id, status);
                 }
             }
-            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_APPEAL_STATUS), status.status(), true);
+            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_APPEAL_STATUS), status.status(), false);
             if (delay != null && status.equals(AppealStatus.DELAYED)) {
-                embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_APPEAL_DELAY), LangManager.tr(TrKeys.DISCORD_EMBED_INFO_APPEAL_DELAY_CONTENT, Map.of("delay", delay.toString())), true);
+                embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_APPEAL_DELAY), LangManager.tr(TrKeys.DISCORD_EMBED_INFO_APPEAL_DELAY_CONTENT, Map.of("delay", delay.toString())), false);
             }
             event.getHook().sendMessageEmbeds(embed.build()).addActionRow(Button.success(DiscordBot.APPEAL_BUTTON_ID, LangManager.tr(TrKeys.DISCORD_BUTTON_APPEAL_LABEL)).withDisabled(!status.equals(AppealStatus.NOT_REQUESTED) || expired)).setEphemeral(true).queue();
             List<String> cache = new ArrayList<>();
@@ -366,7 +366,7 @@ public class BotListener extends ListenerAdapter {
                     Button.success(member.getId() + DiscordBot.ACCEPT_TOTAL_APPEAL_BUTTON_ID + id, LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ACCEPT_LABEL)),
                     Button.success(member.getId() + DiscordBot.ACCEPT_LIGHT_APPEAL_BUTTON_ID + id, LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_REDUCE_LABEL)),
                     Button.danger(member.getId() + DiscordBot.REFUSE_APPEAL_BUTTON_ID + id, LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_REFUSE_LABEL))
-            ).queue();
+            ).queue(message -> message.pin().queue());
             SanctionDatabase.changeAppealStatus(id, AppealStatus.IN_PROGRESS);
             event.getHook().sendMessage(LangManager.tr(TrKeys.DISCORD_APPEAL_SUCCESS)).setEphemeral(true).queue();
         }
