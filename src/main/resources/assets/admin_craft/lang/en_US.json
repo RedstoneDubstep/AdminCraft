@@ -87,7 +87,7 @@
   "freeze.ends": "You are no longer frozen. You can continue playing normally.",
   "misc.time_remaining": "Time remaining: %days% days, %hours% hours, and %minutes% minutes",
   "misc.time_remaining.short": "Time remaining: %days%d %hours%h %minutes%m",
-  "mute.begins": "You were muted by an operator. Reason: %reason%. More information %link% (sanction id %id%).",
+  "mute.begins": "You were muted by an operator.\nReason: %reason%. More information and appeal on %link%.\nSanction ID: %id%).",
   "mute.begins.noappeal": "You were muted by an operator. Reason: %reason%.",
   "mute.ends": "You are no longer muted!",
   "mute.message_cancelled": "You can't send messages while muted!",
