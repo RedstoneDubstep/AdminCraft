@@ -38,11 +38,8 @@ shadowJar {
     relocate 'okio', 'fr.liveinground.admin_craft.libs.okio'
     relocate 'kotlin', 'fr.liveinground.admin_craft.libs.kotlin'
     relocate 'club', 'fr.liveinground.admin_craft.libs.club'
-    relocate 'com', 'fr.liveinground.admin_craft.libs.com'
     relocate 'gnu', 'fr.liveinground.admin_craft.libs.gnu'
     relocate 'natives', 'fr.liveinground.admin_craft.libs.natives'
-    relocate 'net', 'fr.liveinground.admin_craft.libs.net'
-    relocate 'org', 'fr.liveinground.admin_craft.libs.org'
     relocate 'tomp2p', 'fr.liveinground.admin_craft.libs.tomp2p'
 
     configurations = [project.configurations.shadow]

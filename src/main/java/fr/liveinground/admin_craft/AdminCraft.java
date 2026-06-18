@@ -62,6 +62,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerNegotiationEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.ExplosionEvent;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.slf4j.Logger;
@@ -84,7 +85,6 @@ public class AdminCraft {
     public static final String _VERSION = "1.1.0";
     public static final Logger LOGGER = LogUtils.getLogger();
     private static final String SP_TAG = "inSpawnProtection";
-    public static SanctionConfig sanctionConfig;
 
     public static final List<String> mutedPlayersUUID = new ArrayList<>();
     public static final List<String> frozenPlayersUUID = new ArrayList<>();
@@ -102,17 +102,15 @@ public class AdminCraft {
         NeoForge.EVENT_BUS.register(MuteEventsHandler.class);
         NeoForge.EVENT_BUS.register(FreezeEventListener.class);
         SanctionDatabase.start();
+    }
+
+    @SubscribeEvent
+    public void onServerStarted(ServerStartingEvent event) {
+        AdminCraft.LOGGER.info("Server is starting...");
         if (Config.enable_appeals) {
             DiscordBot.start();
         }
     }
-
-    /*
-    @SubscribeEvent
-    public void onServerStarted(ServerAboutToStartEvent event) {
-        sanctionConfig = new SanctionConfig(event.getServer().getServerDirectory().toPath().resolve("world").resolve("serverconfig"));
-        sanctionConfig.load();
-    }*/
 
     @SubscribeEvent
     public void onCommandRegister(RegisterCommandsEvent event) {
