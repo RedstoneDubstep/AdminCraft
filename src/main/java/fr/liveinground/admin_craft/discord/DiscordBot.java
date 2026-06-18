@@ -37,6 +37,9 @@ public class DiscordBot {
     public static final Map<String, List<String>> playerCache = new HashMap<>();
 
     public static void start() {
+        if (enabled) {
+            throw new RuntimeException("Attempting to start the discord bot when it is already started!");
+        }
         AdminCraft.LOGGER.info("Starting appeal bot...");
         if (Config.enable_appeals && !Config.bot_token.equals("configthisplease")) {
             JDABuilder builder = JDABuilder.createDefault(Config.bot_token);
