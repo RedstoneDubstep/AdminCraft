@@ -76,7 +76,7 @@ public class SanctionDatabase {
                     } else {
                         expiresDate = new Date(expires);
                     }
-                    Long appeal = rs.getObject("appealDate", Long.class);
+                    long appeal = rs.getLong("appealDate");
                     Date appealDate;
                     if (rs.wasNull()) {
                         appealDate = null;
