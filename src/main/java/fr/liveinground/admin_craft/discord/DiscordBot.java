@@ -21,15 +21,15 @@ public class DiscordBot {
     public static Guild guild;
     public static Role staff;
 
-    public static final String INFO_BUTTON_ID = "info_button";
-    public static final String APPEAL_BUTTON_ID = "appeal_button";
-    public static final String INFO_MODAL_ID = "info_modal";
-    public static final String APPEAL_MODAL_ID = "appeal_modal";
+    public static final String INFO_BUTTON_ID = "infoButton";
+    public static final String APPEAL_BUTTON_ID = "appealButton";
+    public static final String INFO_MODAL_ID = "infoModal";
+    public static final String APPEAL_MODAL_ID = "appealModal";
 
-    public static final String REFUSE_APPEAL_BUTTON_ID = "_refuse_button_";
-    public static final String OPEN_DISCUSSION_APPEAL_BUTTON_ID = "_discuss_button_";
-    public static final String ACCEPT_LIGHT_APPEAL_BUTTON_ID = "_accept-light_button_";
-    public static final String ACCEPT_TOTAL_APPEAL_BUTTON_ID = "_accept-total_button_";
+    public static final String REFUSE_APPEAL_BUTTON_ID = "_refuseButton_";
+    public static final String OPEN_DISCUSSION_APPEAL_BUTTON_ID = "_discussButton_";
+    public static final String ACCEPT_LIGHT_APPEAL_BUTTON_ID = "_accept-lightButton_";
+    public static final String ACCEPT_TOTAL_APPEAL_BUTTON_ID = "_accept-totalButton_";
     public static final String DELETE_TICKET_BUTTON_ID = "delete";
 
     public static final String STAFF_REASON_MODAL_ID = "_reason_";

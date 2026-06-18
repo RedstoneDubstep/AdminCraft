@@ -11,6 +11,7 @@ import fr.liveinground.admin_craft.storage.types.sanction.DatabaseSanctionData;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -96,6 +97,7 @@ public class BotListener extends ListenerAdapter {
         if (!DiscordBot.enabled || !event.isFromGuild() || !Objects.requireNonNull(event.getGuild()).equals(guild)) {
             return;
         }
+        AdminCraft.LOGGER.info("Button ID: {}", event.getButton().getId());
         if (Objects.equals(event.getButton().getId(), DiscordBot.INFO_BUTTON_ID)) {
             Modal modal = Modal.create(DiscordBot.INFO_MODAL_ID, LangManager.tr(TrKeys.DISCORD_MODAL_INFO_TITLE))
                     .addActionRow(TextInput.create("id", LangManager.tr(TrKeys.DISCORD_MODAL_INFO_ID), TextInputStyle.SHORT)
@@ -119,6 +121,7 @@ public class BotListener extends ListenerAdapter {
                             .setRequired(true)
                             .build())
                     .build();
+            event.getHook().editOriginalComponents().queue();  // Remove buttons on the message to prevent multiple appeals
             event.replyModal(modal).queue();
         } else if (Objects.equals(event.getButton().getId(), DiscordBot.DELETE_TICKET_BUTTON_ID)) {
             if (!Objects.requireNonNull(event.getMember()).getRoles().contains(staff)) {
@@ -185,7 +188,9 @@ public class BotListener extends ListenerAdapter {
                     ).queue());
                     event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ACCEPT_SUCCESS))
                             .addActionRow(Button.danger(DiscordBot.DELETE_TICKET_BUTTON_ID, LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DELETE)))
+                            .setEphemeral(false)
                             .queue();
+                    event.getMessage().editMessageComponents().queue();
                     AdminCraft.LOGGER.info("Appeal for sanction {} has been approved.", id);
                 } else {
                     event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ACCEPT_FAILURE)).setEphemeral(true).queue();
@@ -367,7 +372,14 @@ public class BotListener extends ListenerAdapter {
                     event.getChannel().asTextChannel().upsertPermissionOverride(member).setDenied(EnumSet.of(Permission.VIEW_CHANNEL)).queue();
                     event.getHook().sendMessage(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DENY_SUCCESS))
                             .addActionRow(Button.danger(DiscordBot.DELETE_TICKET_BUTTON_ID, LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DELETE)))
+                            .setEphemeral(false)
                             .queue();
+                    event.getChannel().getHistory().retrievePast(1).queue(messages -> {
+                        Message firstMessage = messages.getFirst();
+
+                        firstMessage.editMessageComponents()
+                                .queue();
+                    });
                     AdminCraft.LOGGER.info("Appeal for sanction {} has been denied.", id);
                 } else {
                     event.getHook().sendMessage(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DENY_FAILURE_STATUS_UPDATE)).setEphemeral(true).queue();
@@ -418,7 +430,14 @@ public class BotListener extends ListenerAdapter {
                 event.getChannel().asTextChannel().upsertPermissionOverride(member).setDenied(EnumSet.of(Permission.VIEW_CHANNEL)).queue();
                 event.getHook().sendMessage(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_REDUCE_SUCCESS))
                         .addActionRow(Button.danger(DiscordBot.DELETE_TICKET_BUTTON_ID, LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DELETE)))
+                        .setEphemeral(false)
                         .queue();
+                event.getChannel().getHistory().retrievePast(1).queue(messages -> {
+                    Message firstMessage = messages.getFirst();
+
+                    firstMessage.editMessageComponents()
+                            .queue();
+                });
                 AdminCraft.LOGGER.info("Appeal for sanction {} successfully approved and sanction is reduced.", id);
             }
         }

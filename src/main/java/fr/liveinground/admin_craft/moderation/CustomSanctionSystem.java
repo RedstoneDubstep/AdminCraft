@@ -159,7 +159,7 @@ public class CustomSanctionSystem {
     }
 
     public static boolean changeDuration(@NotNull DatabaseSanctionData data, @Nullable Date newExpires) {
-        NameAndId nameAndId = new NameAndId(UUID.fromString(data.id()), data.ign());
+        NameAndId nameAndId = new NameAndId(UUID.fromString(data.uuid()), data.ign());
         if (SanctionDatabase.changeAppealStatus(data.id(), AppealStatus.REDUCED)) {
             switch (data.type()) {
                 case MUTE -> changeMuteDuration(nameAndId, newExpires);
