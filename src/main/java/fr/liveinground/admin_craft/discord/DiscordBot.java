@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.requests.GatewayIntent;
 
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +45,15 @@ public class DiscordBot {
         if (Config.enable_appeals && !Config.bot_token.equals("configthisplease")) {
             JDABuilder builder = JDABuilder.createDefault(Config.bot_token);
             builder.addEventListeners(new BotListener());
+            builder.enableIntents(GatewayIntent.MESSAGE_CONTENT);
             jda = builder.build();
+            try {
+                jda.awaitReady();
+            } catch (InterruptedException e) {
+                AdminCraft.LOGGER.error("JDA starting has been interrupted, removing the appeal feature for this instance:", e);
+                enabled = false;
+                return;
+            }
             guild = jda.getGuildById(Config.guild_id);
             if (guild == null) {
                 enabled = false;
@@ -58,19 +67,13 @@ public class DiscordBot {
                 return;
             }
             register_commands();
-            try {
-                jda.awaitReady();
-                if (!guild.getSelfMember().hasPermission(Permission.ADMINISTRATOR) && !guild.getSelfMember().hasPermission(Permission.MANAGE_CHANNEL, Permission.MESSAGE_SEND)) {
-                    enabled = false;
-                    AdminCraft.LOGGER.error("Could not enable the bot, because he doesn't have the MANAGE_CHANNEL and MESSAGE_SEND permission. Please add these permission to his role and restart the server.");
-                    return;
-                }
-                AdminCraft.LOGGER.info("Appeal system enabled!");
-                enabled = true;
-            } catch (InterruptedException e) {
-                AdminCraft.LOGGER.error("Error while starting appeal bot: {}", String.valueOf(e));
+            if (!guild.getSelfMember().hasPermission(Permission.ADMINISTRATOR) && !guild.getSelfMember().hasPermission(Permission.MANAGE_CHANNEL, Permission.MESSAGE_SEND)) {
                 enabled = false;
+                AdminCraft.LOGGER.error("Could not enable the bot, because he doesn't have the MANAGE_CHANNEL and MESSAGE_SEND permission. Please add these permission to his role and restart the server.");
+                return;
             }
+            AdminCraft.LOGGER.info("Appeal system enabled!");
+            enabled = true;
 
         } else {
             if (!Config.enable_appeals) {

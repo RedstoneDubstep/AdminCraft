@@ -63,6 +63,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerNegotiationEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.ExplosionEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.slf4j.Logger;
@@ -73,6 +74,7 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -109,6 +111,23 @@ public class AdminCraft {
         AdminCraft.LOGGER.info("Server is starting...");
         if (Config.enable_appeals) {
             DiscordBot.start();
+        }
+    }
+
+    @SubscribeEvent
+    public void onServerStopping(ServerStoppingEvent event) {
+        AdminCraft.LOGGER.info("Server is stopping...");
+        if (Config.enable_appeals) {
+            DiscordBot.jda.shutdown();
+            // Allow at most 10 seconds for remaining requests to finish
+            try {
+                if (!DiscordBot.jda.awaitShutdown(Duration.ofSeconds(10))) {
+                    DiscordBot.jda.shutdownNow(); // Cancel all remaining requests
+                    DiscordBot.jda.awaitShutdown(); // Wait until shutdown is complete (indefinitely)
+                }
+            } catch (InterruptedException e) {
+                AdminCraft.LOGGER.error("An issue occurred while attempting to shutdown the discord bot:", e);
+            }
         }
     }
 
