@@ -208,19 +208,22 @@ public class BotListener extends ListenerAdapter {
 
     @Override
     public void onModalInteraction(@NotNull ModalInteractionEvent event) {
+        AdminCraft.LOGGER.info("Modal interaction (id: {})", event.getModalId());
         if (!DiscordBot.enabled || !event.isFromGuild() || !Objects.requireNonNull(event.getGuild()).equals(guild)) {
+            AdminCraft.LOGGER.info("Ignored interaction because bot is disabled or is in another guild");
             return;
         }
-        if (event.getId().equals(DiscordBot.INFO_MODAL_ID)) {
+        event.deferReply(true).queue();
+        if (event.getModalId().equals(DiscordBot.INFO_MODAL_ID)) {
             String id = Objects.requireNonNull(event.getValue("id")).getAsString();
             String ign = Objects.requireNonNull(event.getValue("ign")).getAsString();
             if (SanctionDatabase.sanctionDoesntExists(id, ign)) {
-                event.reply(LangManager.tr(TrKeys.DISCORD_MODAL_INFO_FAILURE_NOT_FOUND)).setEphemeral(true).queue();
+                event.getHook().sendMessage(LangManager.tr(TrKeys.DISCORD_MODAL_INFO_FAILURE_NOT_FOUND)).setEphemeral(true).queue();
                 return;
             }
             DatabaseSanctionData data = SanctionDatabase.getSanctionData(id, ign);
             if (data == null) {
-                event.reply(LangManager.tr(TrKeys.DISCORD_MODAL_INFO_FAILURE_NOT_FOUND)).setEphemeral(true).queue();
+                event.getHook().sendMessage(LangManager.tr(TrKeys.DISCORD_MODAL_INFO_FAILURE_NOT_FOUND)).setEphemeral(true).queue();
                 return;
             }
             UUID uuid = UUID.fromString(data.uuid());
@@ -230,25 +233,25 @@ public class BotListener extends ListenerAdapter {
             embed.setDescription(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_DESCRIPTION));
             embed.setColor(Color.RED);
 
-            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_IGN), ign, true);
-            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_UUID), uuid.toString(), true);
-            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_ID), id, true);
-            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_TYPE), data.type().toString(), true);
-            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_REASON), data.reason(), true);
-            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_DATE), data.date().toString(), true);
+            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_IGN), ign, false);
+            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_UUID), uuid.toString(), false);
+            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_ID), id, false);
+            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_TYPE), data.type().toString(), false);
+            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_REASON), data.reason(), false);
+            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_DATE), data.date().toString(), false);
             boolean expired = false;
             if (data.expiresOn() != null) {
                 if (data.expiresOn().before(new Date())) {
-                    embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_EXPIRES), data.expiresOn().toString(), true);
+                    embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_EXPIRES), data.expiresOn().toString(), false);
                 } else {
-                    embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_EXPIRES), data.expiresOn() + LangManager.tr(TrKeys.DISCORD_EMBED_INFO_EXPIRES_EXPIRED), true);
+                    embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_EXPIRES), data.expiresOn() + LangManager.tr(TrKeys.DISCORD_EMBED_INFO_EXPIRES_EXPIRED), false);
                     expired = true;
                 }
             }
             AppealStatus status = SanctionDatabase.getAppealStatus(id);
             if (status == null) {
                 AdminCraft.LOGGER.error("Couldn't get appeal status for sanction id {} getAppealStatus returned null: ", id);
-                event.reply(LangManager.tr(TrKeys.DISCORD_FAILURE)).setEphemeral(true).queue();
+                event.getHook().sendMessage(LangManager.tr(TrKeys.DISCORD_FAILURE)).setEphemeral(true).queue();
                 return;
             }
             Date delay = null;
@@ -256,7 +259,7 @@ public class BotListener extends ListenerAdapter {
                 delay = SanctionDatabase.getAppealDelay(id);
                 if (delay == null) {
                     AdminCraft.LOGGER.error("Could not get appeal delay for sanction id {}", id);
-                    event.reply(LangManager.tr(TrKeys.DISCORD_FAILURE)).setEphemeral(true).queue();
+                    event.getHook().sendMessage(LangManager.tr(TrKeys.DISCORD_FAILURE)).setEphemeral(true).queue();
                     return;
                 }
                 if (delay.before(new Date())) {
@@ -268,32 +271,32 @@ public class BotListener extends ListenerAdapter {
             if (delay != null && status.equals(AppealStatus.DELAYED)) {
                 embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_APPEAL_DELAY), LangManager.tr(TrKeys.DISCORD_EMBED_INFO_APPEAL_DELAY_CONTENT, Map.of("delay", delay.toString())), true);
             }
-            event.replyEmbeds(embed.build()).addActionRow(Button.success(DiscordBot.APPEAL_BUTTON_ID, LangManager.tr(TrKeys.DISCORD_BUTTON_APPEAL_LABEL)).withDisabled(!status.equals(AppealStatus.NOT_REQUESTED) || expired)).setEphemeral(true).queue();
+            event.getHook().sendMessageEmbeds(embed.build()).addActionRow(Button.success(DiscordBot.APPEAL_BUTTON_ID, LangManager.tr(TrKeys.DISCORD_BUTTON_APPEAL_LABEL)).withDisabled(!status.equals(AppealStatus.NOT_REQUESTED) || expired)).setEphemeral(true).queue();
             List<String> cache = new ArrayList<>();
             cache.add(id);
             cache.add(uuid.toString());
             cache.add(ign);
             DiscordBot.playerCache.put(Objects.requireNonNull(event.getMember()).getId(), cache);
 
-        } else if (event.getId().equals(DiscordBot.APPEAL_MODAL_ID)) {
+        } else if (event.getModalId().equals(DiscordBot.APPEAL_MODAL_ID)) {
             Member member = event.getMember();
             if (member == null) {
                 AdminCraft.LOGGER.error("An interaction failed, because event.getMember() is null.");
-                event.reply(LangManager.tr(TrKeys.DISCORD_FAILURE_GETMEMBER_IS_NULL)).setEphemeral(true).queue();
+                event.getHook().sendMessage(LangManager.tr(TrKeys.DISCORD_FAILURE_GETMEMBER_IS_NULL)).setEphemeral(true).queue();
                 return;
             }
             String id = DiscordBot.playerCache.get(member.getId()).getFirst();
             String uuidStr = DiscordBot.playerCache.get(member.getId()).get(1);
             String ign = DiscordBot.playerCache.get(member.getId()).get(2);
             if (id == null) {
-                event.reply(LangManager.tr(TrKeys.DISCORD_FAILURE_CACHE)).setEphemeral(true).queue();
+                event.getHook().sendMessage(LangManager.tr(TrKeys.DISCORD_FAILURE_CACHE)).setEphemeral(true).queue();
                 return;
             }
             String appealReason = Objects.requireNonNull(event.getInteraction().getValue("reason")).getAsString();
 
             DatabaseSanctionData data = SanctionDatabase.getSanctionData(id, ign);
             if (data == null) {
-                event.reply(LangManager.tr(TrKeys.DISCORD_FAILURE_NODATA)).setEphemeral(true).queue();
+                event.getHook().sendMessage(LangManager.tr(TrKeys.DISCORD_FAILURE_NODATA)).setEphemeral(true).queue();
                 return;
             }
             UUID uuid=UUID.fromString(uuidStr);
@@ -303,17 +306,17 @@ public class BotListener extends ListenerAdapter {
             embed.setDescription(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_DESCRIPTION));
             embed.setColor(Color.RED);
 
-            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_IGN), ign, true);
+            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_IGN), ign, false);
             embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_UUID), uuid.toString(), true);
-            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_ID), id, true);
-            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_TYPE), data.type().toString(), true);
-            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_REASON), data.reason(), true);
-            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_DATE), data.date().toString(), true);
+            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_ID), id, false);
+            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_TYPE), data.type().toString(), false);
+            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_REASON), data.reason(), false);
+            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_DATE), data.date().toString(), false);
             if (data.expiresOn() != null) {
-                embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_EXPIRES), data.expiresOn().toString(), true);
+                embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_EXPIRES), data.expiresOn().toString(), false);
             }
-            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_PLAYER_MESSAGE), appealReason, true);
-            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_DISCORD_USER), member.getAsMention() + " (" + member.getEffectiveName() + ")", true);
+            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_PLAYER_MESSAGE), appealReason, false);
+            embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_APPEAL_DISCORD_USER), member.getAsMention() + " (" + member.getEffectiveName() + ")", false);
 
             TextChannel appealChannel = guild.createTextChannel("appeal-" + id, event.getChannel().asTextChannel().getParentCategory())
                     .addPermissionOverride(guild.getPublicRole(), null, EnumSet.of(Permission.VIEW_CHANNEL))
@@ -330,7 +333,7 @@ public class BotListener extends ListenerAdapter {
                     Button.danger(member.getId() + DiscordBot.REFUSE_APPEAL_BUTTON_ID + id, LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_REFUSE_LABEL))
             ).queue();
             SanctionDatabase.changeAppealStatus(id, AppealStatus.IN_PROGRESS);
-            event.reply(LangManager.tr(TrKeys.DISCORD_APPEAL_SUCCESS)).setEphemeral(true).queue();
+            event.getHook().sendMessage(LangManager.tr(TrKeys.DISCORD_APPEAL_SUCCESS)).setEphemeral(true).queue();
         }
         String[] splitted = event.getModalId().split("_");
         if (splitted.length == 3) {
@@ -340,7 +343,7 @@ public class BotListener extends ListenerAdapter {
 
             Member member = guild.getMemberById(memberID);
             if (member == null) {
-                event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ERROR_MEMBER_NOT_FOUND)).queue();
+                event.getHook().sendMessage(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ERROR_MEMBER_NOT_FOUND)).queue();
                 return;
             }
 
@@ -362,24 +365,24 @@ public class BotListener extends ListenerAdapter {
                             ))
                     ).queue());
                     event.getChannel().asTextChannel().upsertPermissionOverride(member).setDenied(EnumSet.of(Permission.VIEW_CHANNEL)).queue();
-                    event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DENY_SUCCESS))
+                    event.getHook().sendMessage(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DENY_SUCCESS))
                             .addActionRow(Button.danger(DiscordBot.DELETE_TICKET_BUTTON_ID, LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DELETE)))
                             .queue();
                     AdminCraft.LOGGER.info("Appeal for sanction {} has been denied.", id);
                 } else {
-                    event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DENY_FAILURE_STATUS_UPDATE)).setEphemeral(true).queue();
+                    event.getHook().sendMessage(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DENY_FAILURE_STATUS_UPDATE)).setEphemeral(true).queue();
                 }
             }
             if (modalID.equals(DiscordBot.STAFF_DURATION_MODAL_ID)) {
                 DatabaseSanctionData data = SanctionDatabase.getSanctionData(id);
                 if (data == null) {
-                    event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ERROR_SANCTION_NOT_FOUND, Map.of("id", id))).setEphemeral(true).queue();
+                    event.getHook().sendMessage(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ERROR_SANCTION_NOT_FOUND, Map.of("id", id))).setEphemeral(true).queue();
                     return;
                 }
                 String duration = Objects.requireNonNull(event.getValue("duration")).getAsString();
                 Date dateFromNow = SanctionConfig.getDurationAsDateSince(duration, data.date());
                 if (dateFromNow == null) {
-                    event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DENY_FAILURE_INVALID_DURATION)).setEphemeral(true).queue();
+                    event.getHook().sendMessage(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DENY_FAILURE_INVALID_DURATION)).setEphemeral(true).queue();
                     return;
                 }
                 if (dateFromNow.before(new Date())) {
@@ -394,7 +397,7 @@ public class BotListener extends ListenerAdapter {
                                 ))
                         ).queue());
                     } else {
-                        event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ACCEPT_FAILURE)).setEphemeral(true).queue();
+                        event.getHook().sendMessage(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ACCEPT_FAILURE)).setEphemeral(true).queue();
                         return;
                     }
                 } else {
@@ -408,12 +411,12 @@ public class BotListener extends ListenerAdapter {
                                 ))
                         ).queue());
                     } else {
-                        event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ACCEPT_FAILURE)).setEphemeral(true).queue();
+                        event.getHook().sendMessage(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_ACCEPT_FAILURE)).setEphemeral(true).queue();
                         return;
                     }
                 }
                 event.getChannel().asTextChannel().upsertPermissionOverride(member).setDenied(EnumSet.of(Permission.VIEW_CHANNEL)).queue();
-                event.reply(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_REDUCE_SUCCESS))
+                event.getHook().sendMessage(LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_REDUCE_SUCCESS))
                         .addActionRow(Button.danger(DiscordBot.DELETE_TICKET_BUTTON_ID, LangManager.tr(TrKeys.DISCORD_STAFF_BUTTON_DELETE)))
                         .queue();
                 AdminCraft.LOGGER.info("Appeal for sanction {} successfully approved and sanction is reduced.", id);

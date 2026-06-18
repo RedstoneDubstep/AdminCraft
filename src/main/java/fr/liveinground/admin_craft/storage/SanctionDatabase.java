@@ -193,7 +193,7 @@ public class SanctionDatabase {
 
     public static boolean sanctionDoesntExists(String id, String ign) {
         return query(
-                "SELECT * FROM sanctions WHERE id = ? AND ign = ?;<",
+                "SELECT * FROM sanctions WHERE id = ? AND ign = ?;",
                 stmt -> {
                     stmt.setString(1, id);
                     stmt.setString(2, ign);
@@ -213,14 +213,14 @@ public class SanctionDatabase {
     public static Date getAppealDelay(String id) {
         AppealStatus status = getAppealStatus(id);
         if (status == null || !status.equals(AppealStatus.DELAYED)) return null;
-        DatabaseSanctionData data = query("SELECT appealDelay FROM sanctions WHERE id = ?;",
+        DatabaseSanctionData data = query("SELECT * FROM sanctions WHERE id = ?;",
                 stmt -> stmt.setString(1, id)).stream().findFirst().orElse(null);
         if (data == null) return null;
         return data.appealDelay();
     }
 
     public static boolean changeAppealStatus(String id, AppealStatus status) {
-        return update("UPDATE sanctions SET status = ? WHERE id = ?;",
+        return update("UPDATE sanctions SET appealStatus = ? WHERE id = ?;",
                 stmt -> {
             stmt.setString(1, status.toString());
             stmt.setString(2, id);
@@ -259,7 +259,7 @@ public class SanctionDatabase {
     }
 
     public static boolean editDuration(String id, @Nullable Date newDuration) {
-        return update("UPDATE sanctions SET expires = ? WHERE id = ?", stmt -> {
+        return update("UPDATE sanctions SET expires = ? WHERE id = ?;", stmt -> {
             if (newDuration == null) {
                 stmt.setNull(1, Types.BIGINT);
             } else {
@@ -270,9 +270,18 @@ public class SanctionDatabase {
     }
 
     public static boolean editAppealDelay(String id, @NotNull Date newDelay) {
-        return update("UPDATE sanctions SET appealDate = ? WHERE id = ?", stmt -> {
+        return update("UPDATE sanctions SET appealDate = ? WHERE id = ?;", stmt -> {
             stmt.setLong(1, newDelay.getTime());
             stmt.setString(2, id);
         });
+    }
+
+    public static List<String> listIDs() {
+        List<String> ids = new ArrayList<>();
+        List<DatabaseSanctionData> sd = query("SELECT * FROM sanctions;", stmt -> {});
+        for (DatabaseSanctionData d: sd) {
+            ids.add(d.id());
+        }
+        return ids;
     }
 }

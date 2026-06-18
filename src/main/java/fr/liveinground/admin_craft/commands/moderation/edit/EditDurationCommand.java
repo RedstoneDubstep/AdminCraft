@@ -25,7 +25,14 @@ public class EditDurationCommand {
 
         dispatcher.register(Commands.literal("editduration")
                 .requires(source -> source.hasPermission(Config.editduration_level))
-                .then(Commands.argument("id", StringArgumentType.word())
+                .then(Commands.argument("id", StringArgumentType.string())
+                        .suggests((ctx, builder) -> {
+                            String remaining = builder.getRemaining();
+                            for (String id: SanctionDatabase.listIDs()) {
+                                if (!remaining.contains(id)) builder.suggest('"' + id + '"');
+                            }
+                            return builder.buildFuture();
+                        })
                         .then(Commands.argument("duration", StringArgumentType.word())
                                 .executes(ctx -> {
                                     String id = StringArgumentType.getString(ctx, "id");

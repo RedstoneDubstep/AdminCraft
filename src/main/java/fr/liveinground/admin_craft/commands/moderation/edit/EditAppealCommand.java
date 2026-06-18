@@ -33,7 +33,14 @@ public class EditAppealCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("editappeal")
                 .requires(source -> source.hasPermission(Config.editappeal_level))
-                .then(Commands.argument("id", StringArgumentType.word())
+                .then(Commands.argument("id", StringArgumentType.string())
+                        .suggests((ctx, builder) -> {
+                            String remaining = builder.getRemaining();
+                            for (String id: SanctionDatabase.listIDs()) {
+                                if (!remaining.contains(id)) builder.suggest('"' + id + '"');
+                            }
+                            return builder.buildFuture();
+                        })
                         .then(Commands.literal("status")
                                 .then(Commands.argument("status", StringArgumentType.word())
                                         .suggests((ctx, builder) -> {
