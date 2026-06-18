@@ -246,7 +246,7 @@ public class BotListener extends ListenerAdapter {
             embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_DATE), data.date().toString(), false);
             boolean expired = false;
             if (data.expiresOn() != null) {
-                if (data.expiresOn().before(new Date())) {
+                if (data.expiresOn().after(new Date())) {
                     embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_EXPIRES), data.expiresOn().toString(), false);
                 } else {
                     embed.addField(LangManager.tr(TrKeys.DISCORD_EMBED_INFO_EXPIRES), data.expiresOn() + LangManager.tr(TrKeys.DISCORD_EMBED_INFO_EXPIRES_EXPIRED), false);
