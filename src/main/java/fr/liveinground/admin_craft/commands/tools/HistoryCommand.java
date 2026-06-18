@@ -31,7 +31,7 @@ public class HistoryCommand {
 
                             List<DatabaseSanctionData> history = SanctionDatabase.getHistory(targetProfile.id().toString());
                             if (history.isEmpty()) {
-                                ctx.getSource().sendSuccess(() -> Component.literal("This player was never sanctionned."), false);
+                                ctx.getSource().sendSuccess(() -> Component.literal("This player was never sanctioned."), false);
                                 return 1;
                             }
                             MutableComponent message = Component.literal("");

@@ -93,6 +93,9 @@ public class Config {
     private static final ModConfigSpec.IntValue EDITAPPEAL_LEVEL;
     public static int editappeal_level;
 
+    private static final ModConfigSpec.IntValue BANS_LEVEL;
+    public static int bans_level;
+
     // ---------------
     // -- Sanctions --
     // ---------------
@@ -233,7 +236,7 @@ public class Config {
         HISTORY_LEVEL = BUILDER.comment("The OP level required to run the /history command").worldRestart().defineInRange("history", 2, 0, 4);
         EDITDURATION_LEVEL = BUILDER.comment("The OP level required to run the /editduration command").worldRestart().defineInRange("editduration", 3, 0, 4);
         EDITAPPEAL_LEVEL = BUILDER.comment("The OP level required to run the /editappeal command").worldRestart().defineInRange("editappeal", 3, 0, 4);
-
+        BANS_LEVEL = BUILDER.comment("The OP level required to run the /bans command").worldRestart().defineInRange("bans", 3, 0, 4);
 
         BUILDER.pop();
     }
@@ -431,6 +434,7 @@ public class Config {
         history_level = HISTORY_LEVEL.get();
         editduration_level = EDITDURATION_LEVEL.get();
         editappeal_level = EDITAPPEAL_LEVEL.get();
+        bans_level = BANS_LEVEL.get();
 
         // ---------------
         // -- Sanctions --

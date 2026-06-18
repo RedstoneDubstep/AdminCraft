@@ -15,6 +15,7 @@ import fr.liveinground.admin_craft.commands.moderation.WarnCommand;
 import fr.liveinground.admin_craft.commands.moderation.edit.EditAppealCommand;
 import fr.liveinground.admin_craft.commands.moderation.edit.EditDurationCommand;
 import fr.liveinground.admin_craft.commands.tools.AltCommand;
+import fr.liveinground.admin_craft.commands.tools.BansCommand;
 import fr.liveinground.admin_craft.commands.tools.EchestCommand;
 import fr.liveinground.admin_craft.commands.tools.HistoryCommand;
 import fr.liveinground.admin_craft.commands.tools.InvseeCommand;
@@ -149,6 +150,7 @@ public class AdminCraft {
         EditDurationCommand.register(dispatcher);
         EditAppealCommand.register(dispatcher);
         HistoryCommand.register(dispatcher);
+        BansCommand.register(dispatcher);
 
         if (Config.enable_ban_override) {
             RootCommandNode<CommandSourceStack> root = dispatcher.getRoot();
