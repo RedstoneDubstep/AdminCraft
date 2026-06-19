@@ -125,11 +125,11 @@ public class ReportCommand {
         String dist;
         if (reportedPlayer.level().dimension().equals(player.level().dimension())) {
             double x1 = player.getOnPos().getX();
-            double y1 = player.getOnPos().getY();
+            double y1 = player.getOnPos().getY() + 1;
             double z1 = player.getOnPos().getZ();
 
             double x2 = reportedPlayer.getOnPos().getX();
-            double y2 = reportedPlayer.getOnPos().getY();
+            double y2 = reportedPlayer.getOnPos().getY() + 1;
             double z2 = reportedPlayer.getOnPos().getZ();
 
 
@@ -193,7 +193,7 @@ public class ReportCommand {
                         Map.entry("targetUUID", reportedPlayer.getStringUUID()),
                         Map.entry("targetLevel", reportedPlayer.level().toString()),
                         Map.entry("targetX", String.valueOf(reportedPlayer.getOnPos().getX())),
-                        Map.entry("targetY", String.valueOf(reportedPlayer.getOnPos().getY())),
+                        Map.entry("targetY", String.valueOf(reportedPlayer.getOnPos().getY() + 1)),
                         Map.entry("targetZ", String.valueOf(reportedPlayer.getOnPos().getZ())),
 
                         Map.entry("sourceName", player.getDisplayName().getString()),
@@ -201,7 +201,7 @@ public class ReportCommand {
                         Map.entry("sourceUUID", player.getStringUUID()),
                         Map.entry("sourceLevel", player.level().toString()),
                         Map.entry("sourceX", String.valueOf(player.getOnPos().getX())),
-                        Map.entry("sourceY", String.valueOf(player.getOnPos().getY())),
+                        Map.entry("sourceY", String.valueOf(player.getOnPos().getY() + 1)),
                         Map.entry("sourceZ", String.valueOf(player.getOnPos().getZ())),
 
                         Map.entry("distance", dist),

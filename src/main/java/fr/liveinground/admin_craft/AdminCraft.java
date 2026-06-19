@@ -19,8 +19,10 @@ import fr.liveinground.admin_craft.commands.tools.BansCommand;
 import fr.liveinground.admin_craft.commands.tools.EchestCommand;
 import fr.liveinground.admin_craft.commands.tools.HistoryCommand;
 import fr.liveinground.admin_craft.commands.tools.InvseeCommand;
+import fr.liveinground.admin_craft.commands.tools.MutesCommand;
 import fr.liveinground.admin_craft.commands.tools.OfflineTagCommand;
 import fr.liveinground.admin_craft.commands.tools.OfflineTeleportCommand;
+import fr.liveinground.admin_craft.commands.tools.PlayerInfoCommand;
 import fr.liveinground.admin_craft.discord.DiscordBot;
 import fr.liveinground.admin_craft.lang.LangManager;
 import fr.liveinground.admin_craft.lang.TrKeys;
@@ -151,6 +153,8 @@ public class AdminCraft {
         EditAppealCommand.register(dispatcher);
         HistoryCommand.register(dispatcher);
         BansCommand.register(dispatcher);
+        MutesCommand.register(dispatcher);
+        PlayerInfoCommand.register(dispatcher);
 
         if (Config.enable_ban_override) {
             RootCommandNode<CommandSourceStack> root = dispatcher.getRoot();

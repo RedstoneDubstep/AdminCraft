@@ -96,6 +96,12 @@ public class Config {
     private static final ModConfigSpec.IntValue BANS_LEVEL;
     public static int bans_level;
 
+    private static final ModConfigSpec.IntValue MUTES_LEVEL;
+    public static int mutes_level;
+
+    private static final ModConfigSpec.IntValue PLAYER_INFO_LEVEL;
+    public static int player_info_level;
+
     // ---------------
     // -- Sanctions --
     // ---------------
@@ -237,6 +243,8 @@ public class Config {
         EDITDURATION_LEVEL = BUILDER.comment("The OP level required to run the /editduration command").worldRestart().defineInRange("editduration", 3, 0, 4);
         EDITAPPEAL_LEVEL = BUILDER.comment("The OP level required to run the /editappeal command").worldRestart().defineInRange("editappeal", 3, 0, 4);
         BANS_LEVEL = BUILDER.comment("The OP level required to run the /bans command").worldRestart().defineInRange("bans", 3, 0, 4);
+        MUTES_LEVEL = BUILDER.comment("The OP level required to run the /mutes command").worldRestart().defineInRange("mutes", 3, 0, 4);
+        PLAYER_INFO_LEVEL = BUILDER.comment("The OP level required to run the /playerinfo command").worldRestart().defineInRange("playerinfo", 3, 0, 4);
 
         BUILDER.pop();
     }
@@ -435,6 +443,8 @@ public class Config {
         editduration_level = EDITDURATION_LEVEL.get();
         editappeal_level = EDITAPPEAL_LEVEL.get();
         bans_level = BANS_LEVEL.get();
+        mutes_level = MUTES_LEVEL.get();
+        player_info_level = PLAYER_INFO_LEVEL.get();
 
         // ---------------
         // -- Sanctions --

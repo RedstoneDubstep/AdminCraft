@@ -35,7 +35,7 @@ public class BansCommand {
                         if (expires == null) {
                             addField(message, "Expires", "forever");
                         } else {
-                            addField(message, "Expires", entry.getExpires().toString());
+                            addField(message, "Expires", expires.toString());
                         }
                     }
                     if (bans.getEntries().isEmpty()) {
