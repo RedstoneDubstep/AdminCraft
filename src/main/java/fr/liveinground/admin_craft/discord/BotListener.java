@@ -98,7 +98,6 @@ public class BotListener extends ListenerAdapter {
         if (!DiscordBot.enabled || !event.isFromGuild() || !Objects.requireNonNull(event.getGuild()).equals(guild)) {
             return;
         }
-        AdminCraft.LOGGER.info("Button ID: {}", event.getButton().getId());
         if (Objects.equals(event.getButton().getId(), DiscordBot.INFO_BUTTON_ID)) {
             Modal modal = Modal.create(DiscordBot.INFO_MODAL_ID, LangManager.tr(TrKeys.DISCORD_MODAL_INFO_TITLE))
                     .addActionRow(TextInput.create("id", LangManager.tr(TrKeys.DISCORD_MODAL_INFO_ID), TextInputStyle.SHORT)
@@ -243,7 +242,6 @@ public class BotListener extends ListenerAdapter {
 
     @Override
     public void onModalInteraction(@NotNull ModalInteractionEvent event) {
-        AdminCraft.LOGGER.info("Modal interaction (id: {})", event.getModalId());
         if (!DiscordBot.enabled || !event.isFromGuild() || !Objects.requireNonNull(event.getGuild()).equals(guild)) {
             AdminCraft.LOGGER.info("Ignored interaction because bot is disabled or is in another guild");
             return;
