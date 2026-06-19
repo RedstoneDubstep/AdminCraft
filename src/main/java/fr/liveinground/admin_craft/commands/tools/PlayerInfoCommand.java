@@ -14,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.NameAndId;
+import net.minecraft.world.level.GameType;
 
 import java.util.Map;
 import java.util.Objects;
@@ -31,7 +32,7 @@ public class PlayerInfoCommand {
                                 boolean isFrozen = AdminCraft.frozenPlayersUUID.contains(nameAndId.id().toString());
 
                                 MutableComponent message = Component.literal("");
-                                message.append(Component.literal(player.getDisplayName() + "'s informations:").withStyle(ChatFormatting.GOLD));
+                                message.append(Component.literal(nameAndId.name() + "'s informations:").withStyle(ChatFormatting.GOLD));
 
                                 Map<Boolean, Component> map = Map.of(
                                         true, Component.literal("Yes").withStyle(ChatFormatting.RED),
@@ -57,7 +58,10 @@ public class PlayerInfoCommand {
                                 }
 
                                 addField(message, "Frozen", map.get(isFrozen));
-                                addField(message, "Gamemode", player.gameMode.toString());
+                                addField(message, "Gamemode", Map.of(GameType.ADVENTURE, "Adventure",
+                                        GameType.CREATIVE, "Creative",
+                                        GameType.SPECTATOR, "Spectator",
+                                        GameType.SURVIVAL, "Survival").get(player.gameMode.getGameModeForPlayer()));
                                 BlockPos pos = player.getOnPos();
                                 addField(message, "World", player.level().toString());
                                 addField(message, "Position", PlaceHolderSystem.replacePlaceholders("%x% %y% %z%", Map.of(

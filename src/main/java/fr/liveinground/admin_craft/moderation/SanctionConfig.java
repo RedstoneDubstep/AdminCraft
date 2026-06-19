@@ -20,7 +20,10 @@ public class SanctionConfig {
         return (getDuration(input) != null);
     }
 
-    public static @Nullable List<Integer> getDuration(String input) {
+    public static @Nullable List<Integer> getDuration(@Nullable String input) {
+        if (input == null) {
+            return null;
+        }
         Pattern pattern = Pattern.compile(
                 "^(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?$"
         );

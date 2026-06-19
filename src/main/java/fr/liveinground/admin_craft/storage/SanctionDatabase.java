@@ -9,6 +9,9 @@ import net.neoforged.fml.loading.FMLPaths;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -26,14 +29,22 @@ public class SanctionDatabase {
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final SecureRandom RANDOM = new SecureRandom();
 
-    private static final String URL = "jdbc:sqlite:" + FMLPaths.GAMEDIR.get()
+    private static final Path DATABASE_PATH = FMLPaths.GAMEDIR.get()
             .resolve("AdminCraft_Storage")
-            .resolve("sanctions.db").toAbsolutePath();
+            .resolve("sanctions.db");
+
+    private static final String URL = "jdbc:sqlite:" + DATABASE_PATH.toAbsolutePath();
 
     public static Connection connect() throws SQLException {
         try {
             Class.forName("org.sqlite.JDBC");
-        } catch (ClassNotFoundException e) {
+
+            Files.createDirectories(DATABASE_PATH.getParent());
+            if (Files.notExists(DATABASE_PATH)) {
+                Files.createFile(DATABASE_PATH);
+            }
+
+        } catch (ClassNotFoundException | IOException e) {
             throw new RuntimeException(e);
         }
         return DriverManager.getConnection(URL);
