@@ -63,7 +63,7 @@ public class PlayerInfoCommand {
                                         GameType.SPECTATOR, "Spectator",
                                         GameType.SURVIVAL, "Survival").get(player.gameMode.getGameModeForPlayer()));
                                 BlockPos pos = player.getOnPos();
-                                addField(message, "World", player.level().toString());
+                                addField(message, "World", player.level().dimension().location().getPath());
                                 addField(message, "Position", PlaceHolderSystem.replacePlaceholders("%x% %y% %z%", Map.of(
                                         "x", String.valueOf(pos.getX()),
                                         "y", String.valueOf(pos.getY() + 1),
