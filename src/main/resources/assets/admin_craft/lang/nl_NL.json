@@ -95,5 +95,6 @@
   "spawn.enter": "You are now in the spawn protection",
   "spawn.leave": "You are no longer in the spawn protection",
   "warn.message": "You've been warned by %operator%: %reason%. Please check the rules!",
-  "warn.title": "YOU'VE BEEN WARNED!"
+  "warn.title": "YOU'VE BEEN WARNED!",
+  "discord.discussion.starts": "Hello %mention%,\nThis channel has been created to discuss of your appeal about sanction %id% with the staff. Feel free to give as much details as possible."
 }
