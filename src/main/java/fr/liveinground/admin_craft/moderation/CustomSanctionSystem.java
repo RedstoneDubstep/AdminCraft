@@ -41,7 +41,28 @@ public class CustomSanctionSystem {
         banList.add(banEntry);
 
         ServerPlayer serverPlayer = AdminCraft.getOnlinePlayer(server, player);
+        String id = SanctionDatabase.registerSanction(player.id().toString(), player.name(), new SanctionData(Sanction.BAN, reason, new Date(), expiresOn), appealable, appealDelay);
+        if (id == null) {
+            id = LangManager.tr(TrKeys.BAN_ID_ERROR);
+        }
         if (serverPlayer != null) {
+            MutableComponent message = Component.literal("")
+                    .append(Component.literal(LangManager.tr(TrKeys.DISCONNECT_BANNED_TITLE) + "\n").withStyle(ChatFormatting.RED))
+                    .append(Component.literal(LangManager.tr(TrKeys.DISCONNECT_BANNED_ID)).withStyle(ChatFormatting.RED))
+                    .append(Component.literal(id + "\n").withStyle(ChatFormatting.YELLOW))
+                    .append(Component.literal(LangManager.tr(TrKeys.DISCONNECT_BANNED_REASON)).withStyle(ChatFormatting.RED))
+                    .append(Component.literal(reason).withStyle(ChatFormatting.YELLOW));
+            if (expiresOn == null) {
+                message.append(Component.literal("\n" + LangManager.tr(TrKeys.DISCONNECT_BANNED_DURATION_PERMANENT)).withStyle(ChatFormatting.RED));
+            } else {
+                message.append(Component.literal("\n" + LangManager.tr(TrKeys.DISCONNECT_BANNED_DURATION_EXPIRES_IN, Map.of("duration", SanctionConfig.getDurationAsStringFromDate(expiresOn)))).withStyle(ChatFormatting.RED));
+            }
+            if (!appealable || !DiscordBot.enabled) {
+                message.append(Component.literal("\n" + LangManager.tr(TrKeys.DISCONNECT_BANNED_APPEAL_NOT_ALLOWED)).withStyle(ChatFormatting.YELLOW));
+            } else {
+                message.append(Component.literal("\n" + LangManager.tr(TrKeys.DISCONNECT_BANNED_APPEAL_LINK, Map.of("link", Config.invite_link))).withStyle(ChatFormatting.YELLOW));
+            }
+
             serverPlayer.connection.disconnect(Component.translatable("multiplayer.disconnect.banned"));
             MutableComponent banMessage = Component.literal("");
             banMessage.append(Component.literal("You are now banned on this server.\nReason » ").withStyle(ChatFormatting.RED));
@@ -56,7 +77,7 @@ public class CustomSanctionSystem {
             //serverPlayer.connection.disconnect(banMessage);
 
         }
-        return SanctionDatabase.registerSanction(player.id().toString(), player.name(), new SanctionData(Sanction.BAN, reason, new Date(), expiresOn), appealable, appealDelay);
+        return id;
         //AdminCraft.playerDataManager.addSanction(String.valueOf(player.id()), Sanction.BAN, reason, expiresOn);
     }
     /*

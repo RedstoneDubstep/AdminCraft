@@ -1,4 +1,5 @@
 {
+  "ban.id.error": "Internal error, please contact an admin for a manual appeal.",
   "command.mute.fail.already_muted": "%player% is already muted",
   "command.mute.success": "%player% was muted: %reason%",
   "command.report.failed.self": "You can't report yourself!",
@@ -6,7 +7,7 @@
   "command.report.success": "Report successfully submitted. Thank you for your vigilance.",
   "command.unmute.failed.not_muted": "%player% is not muted",
   "command.unmute.success": "%player% was unmuted",
-  "disconnect.banned.appeal_link": "You can appeal on %link%",
+  "disconnect.banned.appeal_link": "Discord appeal: %link%",
   "disconnect.banned.appeal_not_allowed": "This sanction can't be appealed",
   "disconnect.banned.duration.expires_in": "This sanction will expire in %duration%",
   "disconnect.banned.duration.permanent": "This sanction is permanent",
@@ -20,6 +21,7 @@
   "discord.command.status.appeal.enabled": "Appeal system is enabled.",
   "discord.command.status.failure.argument": "'target' argument has to be either 'appeals' or 'server'.",
   "discord.command.status.server.online": "Server is online.",
+  "discord.discussion.starts": "Hello %mention%,\nThis channel has been created to discuss of your appeal about sanction %id% with the staff. Feel free to give as much details as possible.",
   "discord.dm.appeal.accepted": "Hello %mention%,\n\nYour appeal regarding sanction %id% on **%guild%** has been reviewed and approved by the staff team.\n\nThe following action has been taken:\n- The sanction has been removed\n\nThank you for your understanding.\n-# Powered by AdminCraft • Please do not reply to this automated message.",
   "discord.dm.appeal.denied": "Hello %mention%,\n\nYour appeal regarding sanction %id% on **%guild%** has been reviewed and denied by the staff team.\n\n## Staff response\n%reason%\n\nIf this sanction is temporary, its expiration date remains unchanged.\nPlease notice than you will not be able to appeal this sanction again.\n\nThank you for your understanding.\n-# Powered by AdminCraft • Please do not reply to this automated message.",
   "discord.dm.appeal.reduced.expired": "Hello %mention%,\n\nYour appeal regarding sanction %id% on **%guild%** has been reviewed and approved by the staff team.\n\nThe following action has been taken:\n- The sanction duration has been changed and will now expire on %expires%\n- The sanction has been removed because the expiration date is reached\n\nThank you for your understanding.\n-# Powered by AdminCraft • Please do not reply to this automated message.",
@@ -95,6 +97,5 @@
   "spawn.enter": "You are now in the spawn protection",
   "spawn.leave": "You are no longer in the spawn protection",
   "warn.message": "You've been warned by %operator%: %reason%. Please check the rules!",
-  "warn.title": "YOU'VE BEEN WARNED!",
-  "discord.discussion.starts": "Hello %mention%,\nThis channel has been created to discuss of your appeal about sanction %id% with the staff. Feel free to give as much details as possible."
+  "warn.title": "YOU'VE BEEN WARNED!"
 }

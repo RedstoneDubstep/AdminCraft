@@ -43,8 +43,9 @@ public class LoginMixin {
 
             if (sanction != null) {
                 MutableComponent message = Component.literal("")
-                        .append(Component.literal(LangManager.tr(TrKeys.DISCONNECT_BANNED_TITLE)).withStyle(ChatFormatting.RED))
-                        .append(Component.literal(LangManager.tr(TrKeys.DISCONNECT_BANNED_ID) + sanction.id()).withStyle(ChatFormatting.GOLD))
+                        .append(Component.literal(LangManager.tr(TrKeys.DISCONNECT_BANNED_TITLE) + "\n").withStyle(ChatFormatting.RED))
+                        .append(Component.literal(LangManager.tr(TrKeys.DISCONNECT_BANNED_ID)).withStyle(ChatFormatting.RED))
+                        .append(Component.literal(sanction.id() + "\n").withStyle(ChatFormatting.YELLOW))
                         .append(Component.literal(LangManager.tr(TrKeys.DISCONNECT_BANNED_REASON)).withStyle(ChatFormatting.RED))
                         .append(Component.literal(sanction.reason()).withStyle(ChatFormatting.YELLOW));
                 if (sanction.expiresOn() == null) {
