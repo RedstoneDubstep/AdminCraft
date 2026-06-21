@@ -12,10 +12,14 @@ public record DatabaseSanctionData(
         Date date,
         @Nullable Date expiresOn,
         AppealStatus status,
-        @Nullable Date appealDelay
+        @Nullable Date appealDelay,
+        boolean removed
 ) {
-
-    public boolean appealable() {
+    public boolean canBeAppealed() {
         return status == AppealStatus.NOT_REQUESTED;
+    }
+
+    public boolean hasExpired(Date now) {
+        return expiresOn != null && expiresOn.after(now);
     }
 }

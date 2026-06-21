@@ -4,7 +4,10 @@
   "package": "fr.liveinground.admin_craft.mixins",
   "compatibilityLevel": "JAVA_21",
   "refmap": "mixins.admin_craft.refmap.json",
-  "mixins": [],
+  "mixins": [
+    "LoginMixin",
+    "PardonMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }

@@ -27,6 +27,7 @@ import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 public class CustomSanctionSystem {
@@ -110,6 +111,18 @@ public class CustomSanctionSystem {
     public static void unMutePlayer(NameAndId player) {
         if (AdminCraft.mutedPlayersUUID.contains(player.id().toString())) {
             AdminCraft.playerDataManager.removeMuteEntry(AdminCraft.playerDataManager.getPlayerMuteDataByUUID(player.id().toString()));
+            Date now = new Date();
+            Optional<DatabaseSanctionData> muteData = SanctionDatabase.getCurrentSanctions(player.id().toString()).stream().filter(
+                    data -> data.type().equals(Sanction.MUTE)
+                            && !data.removed()
+                            && (data.expiresOn() == null || data.expiresOn().after(now)
+                    )
+            ).findFirst();
+            if (muteData.isEmpty()) {
+                AdminCraft.LOGGER.warn("Couldn't find any suitable sanction in the database corresponding to {}'s mute, skipping database change while unmuting.", player.name());
+            } else {
+                SanctionDatabase.removeSanction(muteData.get().id());
+            }
             try {
                 ServerPlayer serverPlayer = ServerHolder.getServer().getPlayerList().getPlayer(player.id());
 

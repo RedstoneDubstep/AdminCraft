@@ -104,7 +104,8 @@ public class SanctionDatabase {
                             new Date(rs.getLong("date")),
                             expiresDate,
                             AppealStatus.valueOf(rs.getString("appealStatus")),
-                            appealDate
+                            appealDate,
+                            rs.getBoolean("removed")
                     );
                     results.add(data);
                 }
@@ -156,7 +157,8 @@ public class SanctionDatabase {
                     date BIGINT NOT NULL,
                     expires BIGINT,
                     appealStatus TEXT NOT NULL,
-                    appealDate BIGINT
+                    appealDate BIGINT,
+                    removed INTEGER NOT NULL DEFAULT 0
                     );""";
         Exception ans = post(init);
         if (ans == null) {
@@ -294,5 +296,11 @@ public class SanctionDatabase {
             ids.add(d.id());
         }
         return ids;
+    }
+
+    public static boolean removeSanction(String id) {
+        return update("UPDATE sanctions SET removed = 1 WHERE id = ?;", stmt -> {
+            stmt.setString(1, id);
+        });
     }
 }

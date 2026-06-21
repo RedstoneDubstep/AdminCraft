@@ -39,7 +39,11 @@ public class HistoryCommand {
                             for (DatabaseSanctionData sanction: history) {
                                 Date expiresOn = sanction.expiresOn();
                                 message.append(Component.literal("* ").withStyle(ChatFormatting.GRAY));
-                                message.append(Component.literal(sanction.id() + "\n").withStyle(ChatFormatting.DARK_RED));
+                                if (sanction.removed()) {
+                                    message.append(Component.literal(sanction.id() + "\n").withStyle(ChatFormatting.GRAY, ChatFormatting.STRIKETHROUGH));
+                                } else {
+                                    message.append(Component.literal(sanction.id() + "\n").withStyle(ChatFormatting.DARK_RED));
+                                }
                                 addField(message, "Date", sanction.date().toString());
                                 addField(message, "Type", sanction.type().toString());
                                 addField(message, "Reason", sanction.reason());

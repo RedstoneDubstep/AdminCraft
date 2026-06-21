@@ -1,6 +1,5 @@
 package fr.liveinground.admin_craft;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
@@ -26,19 +25,14 @@ import fr.liveinground.admin_craft.commands.tools.PlayerInfoCommand;
 import fr.liveinground.admin_craft.discord.DiscordBot;
 import fr.liveinground.admin_craft.lang.LangManager;
 import fr.liveinground.admin_craft.lang.TrKeys;
-import fr.liveinground.admin_craft.moderation.SanctionConfig;
 import fr.liveinground.admin_craft.mutes.MuteEventsHandler;
 import fr.liveinground.admin_craft.storage.PlayerDataManager;
 import fr.liveinground.admin_craft.storage.SanctionDatabase;
-import fr.liveinground.admin_craft.storage.types.sanction.AppealStatus;
-import fr.liveinground.admin_craft.storage.types.sanction.DatabaseSanctionData;
-import fr.liveinground.admin_craft.storage.types.sanction.Sanction;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.NameAndId;
@@ -62,7 +56,6 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerNegotiationEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.ExplosionEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
@@ -366,41 +359,6 @@ public class AdminCraft {
     @Nullable
     public static ServerPlayer getOnlinePlayer(MinecraftServer server, NameAndId profile) {
         return server.getPlayerList().getPlayer(profile.id());
-    }
-
-    @SubscribeEvent
-    public void onPlayerLogin(PlayerNegotiationEvent event) {
-        GameProfile profile = event.getProfile();
-        List<DatabaseSanctionData> punishments = SanctionDatabase.getCurrentSanctions(profile.id().toString());
-        if (punishments.isEmpty()) return;
-
-        DatabaseSanctionData sanction = null;
-
-        for (DatabaseSanctionData data: punishments) {
-            if (data.type().equals(Sanction.BAN)) {
-                sanction = data;
-                break;
-            }
-        }
-
-        if (sanction == null) return;
-
-        MutableComponent message = Component.literal("")
-                .append(Component.literal(LangManager.tr(TrKeys.DISCONNECT_BANNED_TITLE)).withStyle(ChatFormatting.RED))
-            .append(Component.literal(LangManager.tr(TrKeys.DISCONNECT_BANNED_ID) + sanction.id()).withStyle(ChatFormatting.GOLD))
-                .append(Component.literal(LangManager.tr(TrKeys.DISCONNECT_BANNED_REASON)).withStyle(ChatFormatting.RED))
-                .append(Component.literal(sanction.reason()).withStyle(ChatFormatting.YELLOW));
-        if (sanction.expiresOn() == null) {
-            message.append(Component.literal("\n" + LangManager.tr(TrKeys.DISCONNECT_BANNED_DURATION_PERMANENT)).withStyle(ChatFormatting.RED));
-        } else {
-            message.append(Component.literal("\n" + LangManager.tr(TrKeys.DISCONNECT_BANNED_DURATION_EXPIRES_IN, Map.of("duration", SanctionConfig.getDurationAsStringFromDate(sanction.expiresOn())))).withStyle(ChatFormatting.RED));
-        }
-        if (sanction.status().equals(AppealStatus.NOT_ALLOWED) || !DiscordBot.enabled) {
-            message.append(Component.literal("\n" + LangManager.tr(TrKeys.DISCONNECT_BANNED_APPEAL_NOT_ALLOWED)).withStyle(ChatFormatting.YELLOW));
-        } else {
-            message.append(Component.literal("\n" + LangManager.tr(TrKeys.DISCONNECT_BANNED_APPEAL_LINK, Map.of("link", Config.invite_link))).withStyle(ChatFormatting.YELLOW));
-        }
-        event.getConnection().disconnect(message);
     }
 
     public static void ensureLangFilesExist() {
