@@ -20,6 +20,6 @@ public record DatabaseSanctionData(
     }
 
     public boolean hasExpired(Date now) {
-        return expiresOn != null && expiresOn.after(now);
+        return expiresOn != null && !expiresOn.after(now);
     }
 }

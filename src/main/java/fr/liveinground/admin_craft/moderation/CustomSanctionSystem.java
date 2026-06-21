@@ -74,7 +74,7 @@ public class CustomSanctionSystem {
                 banMessage.append(Component.literal(expiresOn + "\n").withStyle(ChatFormatting.YELLOW));
             }
 
-            //serverPlayer.connection.disconnect(banMessage);
+            serverPlayer.connection.disconnect(banMessage);
 
         }
         return id;
