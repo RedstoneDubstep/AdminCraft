@@ -1,4 +1,5 @@
 {
+  "ban.id.error": "Internal error, please contact an admin for a manual appeal.",
   "command.mute.fail.already_muted": "%player% már le lett némítva",
   "command.mute.success": "%player% le lett némítva: %reason%",
   "command.report.failed.self": "Nem jelentheted be magadat!",
@@ -6,7 +7,7 @@
   "command.report.success": "A jelentés sikeresen beküldve. Köszönjük a figyelmességet!",
   "command.unmute.failed.not_muted": "%player% nem volt lenémítva",
   "command.unmute.success": "%player% némításának feloldása megtörtént",
-  "disconnect.banned.appeal_link": "Fellebbezni tudsz a %link% címen",
+  "disconnect.banned.appeal_link": "Discord appeal: %link%",
   "disconnect.banned.appeal_not_allowed": "Ez a büntetés nem fellebezhető",
   "disconnect.banned.duration.expires_in": "Ez a büntetés lejár: %duration%",
   "disconnect.banned.duration.permanent": "Ez a büntetés végleges",
@@ -20,6 +21,7 @@
   "discord.command.status.appeal.enabled": "A fellebbezési rendszer bekapcsolva.",
   "discord.command.status.failure.argument": "A 'target' argumentumnak 'appeals' vagy 'server' kell, hogy legyen.",
   "discord.command.status.server.online": "A szerver online van.",
+  "discord.discussion.starts": "Helló %mention%,\nEz a csatorna azért lett létrehozva, hogy a csapattal megbeszéld a büntetésed %id% azonosítóval. Kérjük, adj meg minnél több részletet",
   "discord.dm.appeal.accepted": "Helló %mention%,\n\nA büntetés %id% fellebbezésed a **%guild%** szerverről felülvizsgálatra került, és jóváhagyták a csapat tagjai.\n\nA következő intézkedés megtörtént:\n- A büntetés eltávolításra került\n\nMegértésedet köszönjük!\n-# AdminCraft által biztosított • Kérjük, ne válaszolj erre az automatizált üzenetre.",
   "discord.dm.appeal.denied": "Helló %mention%,\n\nA büntetés %id% fellebbezésed a **%guild%** szerverről felülvizsgálatra került, és elutasították a csapat tagjai.\n\n## Csapatválasz\n%reason%\n\nHa a büntetés időleges, a lejárati dátuma nem változik.\nFigyelj arra, hogy nem tudsz többet fellebbezni erre a büntetésra.\n\nMegértésedet köszönjük!\n-# AdminCraft által biztosított • Kérjük, ne válaszolj erre az automatizált üzenetre.",
   "discord.dm.appeal.reduced.expired": "Helló %mention%,\n\nA büntetés %id% fellebbezésed a **%guild%** szerverről felülvizsgálatra került, és jóváhagyták a csapat tagjai.\n\nA következő intézkedés megtörtént:\n- A büntetés időtartama módosításra került, és most %expires% dátumon jár le\n- A büntetés eltávolítása megtörtént, mivel a lejárati dátum elérkeztett\n\nMegértésedet köszönjük!\n-# AdminCraft által biztosított • Kérjük, ne válaszolj erre az automatizált üzenetre.",
@@ -95,6 +97,5 @@
   "spawn.enter": "Most már a spawn zóna védelmi területén vagy",
   "spawn.leave": "Már nem vagy a spawn zóna védelmi területén",
   "warn.message": "%operator% figyelmeztetett: %reason%. Kérjük, ellenőrizd a szabályokat!",
-  "warn.title": "FIGYELMEZTETÉSBEN RÉSZESÜLTÉL!",
-  "discord.discussion.starts": "Helló %mention%,\nEz a csatorna azért lett létrehozva, hogy a csapattal megbeszéld a büntetésed %id% azonosítóval. Kérjük, adj meg minnél több részletet"
+  "warn.title": "FIGYELMEZTETÉSBEN RÉSZESÜLTÉL!"
 }
