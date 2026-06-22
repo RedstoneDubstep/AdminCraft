@@ -1,5 +1,5 @@
 {
-  "ban.id.error": "Internal error, please contact an admin for a manual appeal.",
+  "ban.id.error": "Erreur interne, merci de contacter un admin pour un appel manuel.",
   "command.mute.fail.already_muted": "%player% est déjà muet",
   "command.mute.success": "%player% a été rendu muet : %reason%",
   "command.report.failed.self": "Vous ne pouvez pas vous signaler vous-même !",
@@ -7,7 +7,7 @@
   "command.report.success": "Signalement envoyé avec succès. Merci de votre vigilance.",
   "command.unmute.failed.not_muted": "%player% n'est pas muet",
   "command.unmute.success": "%player% a retrouvé la parole",
-  "disconnect.banned.appeal_link": "Discord appeal: %link%",
+  "disconnect.banned.appeal_link": "Appel Discord : %link%",
   "disconnect.banned.appeal_not_allowed": "Cette sanction ne peut pas être contestée",
   "disconnect.banned.duration.expires_in": "Cette sanction expirera dans %duration%",
   "disconnect.banned.duration.permanent": "Cette sanction est permanente",
