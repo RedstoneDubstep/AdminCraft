@@ -35,8 +35,6 @@ public class LoginMixin {
             DatabaseSanctionData sanction = punishments.stream()
                     .filter(d ->
                         d.type().equals(Sanction.BAN)
-                            && !d.removed()
-                            && !d.hasExpired(now)
                     )
                     .findFirst()
                     .orElse(null);
