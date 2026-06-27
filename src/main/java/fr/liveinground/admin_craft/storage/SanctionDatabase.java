@@ -256,11 +256,12 @@ public class SanctionDatabase {
     }
 
     public static List<DatabaseSanctionData> getCurrentSanctions(String uuid) {
+        Date now = new Date();
         return query(
-                "SELECT * FROM sanctions WHERE uuid = ?;",
+                "SELECT * FROM sanctions WHERE uuid = ? AND removed = 0;",
                 stmt -> stmt.setString(1, uuid)
         ).stream()
-                .filter(databaseSanctionData -> databaseSanctionData.expiresOn() == null || databaseSanctionData.expiresOn().after(new Date()))
+                .filter(databaseSanctionData -> databaseSanctionData.expiresOn() == null || databaseSanctionData.expiresOn().after(now))
                 .toList();
     }
 
