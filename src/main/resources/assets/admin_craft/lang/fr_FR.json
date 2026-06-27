@@ -1,4 +1,5 @@
 {
+  "ban.id.error": "Erreur interne, merci de contacter un admin pour un appel manuel.",
   "command.mute.fail.already_muted": "%player% est déjà muet",
   "command.mute.success": "%player% a été rendu muet : %reason%",
   "command.report.failed.self": "Vous ne pouvez pas vous signaler vous-même !",
@@ -6,7 +7,7 @@
   "command.report.success": "Signalement envoyé avec succès. Merci de votre vigilance.",
   "command.unmute.failed.not_muted": "%player% n'est pas muet",
   "command.unmute.success": "%player% a retrouvé la parole",
-  "disconnect.banned.appeal_link": "Vous pouvez faire appel sur %link%",
+  "disconnect.banned.appeal_link": "Appel Discord : %link%",
   "disconnect.banned.appeal_not_allowed": "Cette sanction ne peut pas être contestée",
   "disconnect.banned.duration.expires_in": "Cette sanction expirera dans %duration%",
   "disconnect.banned.duration.permanent": "Cette sanction est permanente",
@@ -20,6 +21,7 @@
   "discord.command.status.appeal.enabled": "Le système d'appel est activé.",
   "discord.command.status.failure.argument": "L'argument 'target' doit être 'appeals' ou 'server'.",
   "discord.command.status.server.online": "Le serveur est en ligne.",
+  "discord.discussion.starts": "Bonjour %mention%,\nCe salon a été créé pour discuter de votre appel à propos de la sanction %id% avec le staff. N'hésitez pas à donner autant de détails que possible.",
   "discord.dm.appeal.accepted": "Bonjour %mention%,\n\nVotre appel à propos de la sanction %id% sur %guild% a été revu et accepté par l'équipe.\n\nLes actions suivantes ont été prises :\n- La sanction a été retirée\n\nMerci de votre compréhension.\n-# Propulsé par AdminCraft • Merci de ne pas réponde à ce message automatisé.",
   "discord.dm.appeal.denied": "Bonjour %mention%, \n\nVotre appel concernant la sanction d'Id %id% sur **%guild%** a été revu et refusé par l'équipe du staff.\n\n## Réponse du staff\n%reason%\n\nSi la sanction est temporaire, sa date d'expiration reste inchangée.\nMerci de noter que vous ne pourrez plus faire appel de cette sanction.\n\nMerci de votre compréhension.\n-# Propulsé par AdminCraft • Merci de ne pas répondre à ce message automatisé.",
   "discord.dm.appeal.reduced.expired": "Bonjour %mention%,\n\nVotre appel concernant la sanction %id% sur **%guild%** a été revu et accepté par l'équipe.\n\nLes actions suivantes ont été prises :\n- La durée de la sanction a été changée et expirera désormais le %expires%\n- La sanction a été retirée car la date d'expiration a été atteinte\n\nMerci de votre compréhension.\n-# Propulsé par AdminCraft • Merci de ne pas répondre à ce message automatisé.",
@@ -95,6 +97,5 @@
   "spawn.enter": "Vous êtes désormais dans la protection du spawn",
   "spawn.leave": "Vous n'êtes plus dans la protection du spawn",
   "warn.message": "Vous avez été averti par %operator%: %reason%. Veuillez vérifier les règles !",
-  "warn.title": "VOUS AVEZ RECU UN AVERTISSEMENT !",
-  "discord.discussion.starts": "Bonjour %mention%,\nCe salon a été créé pour discuter de votre appel à propos de la sanction %id% avec le staff. N'hésitez pas à donner autant de détails que possible."
+  "warn.title": "VOUS AVEZ RECU UN AVERTISSEMENT !"
 }
