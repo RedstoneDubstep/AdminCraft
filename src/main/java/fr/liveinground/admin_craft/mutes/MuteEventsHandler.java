@@ -48,6 +48,7 @@ public class MuteEventsHandler {
     public static void onCommandEvent(CommandEvent event) {
 
         String fullCmd = event.getParseResults().getReader().getString();
+        AdminCraft.LOGGER.info(event.getParseResults().getContext().getSource().getName() + " issued a server command: '/" + fullCmd + "'");
         String[] args = fullCmd.split(" ");
 
         if (args.length > 0) {
