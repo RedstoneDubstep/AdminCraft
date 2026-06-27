@@ -28,7 +28,7 @@ public class TempBanCommand {
                                                     ctx,
                                                     AdminCraft.getOneProfile(GameProfileArgument.getGameProfiles(ctx, "player")),
                                                     StringArgumentType.getString(ctx, "duration"),
-                                                    ""
+                                                    "The ban hammer has spoken!"
                                             );
                                             return 1;
                                         })
