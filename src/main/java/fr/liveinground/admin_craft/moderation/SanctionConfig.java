@@ -101,4 +101,39 @@ public class SanctionConfig {
             return "N/A";
         }
     }
+
+    public static String getOnlyDurationAsStringFromDate(Date input) {
+        if (input != null) {
+            long diff = input.getTime() - System.currentTimeMillis();
+            long days = TimeUnit.MILLISECONDS.toDays(diff);
+            diff -= TimeUnit.DAYS.toMillis(days);
+
+            long hours = TimeUnit.MILLISECONDS.toHours(diff);
+            diff -= TimeUnit.HOURS.toMillis(hours);
+
+            long minutes = TimeUnit.MILLISECONDS.toMinutes(diff);
+
+            String daysStr = String.valueOf(days);
+            String hoursStr = String.valueOf(hours);
+            String minutesStr = String.valueOf(minutes);
+
+            StringBuilder builder = new StringBuilder();
+            if (days != 0) {
+                builder.append(daysStr);
+                builder.append(" days, ");
+            }
+            if (hours != 0) {
+                builder.append(hoursStr);
+                builder.append(" hours and ");
+            }
+            if (minutes != 0) {
+                builder.append(minutesStr);
+                builder.append(" minutes");
+            }
+
+            return builder.toString();
+        } else {
+            return "N/A";
+        }
+    }
 }

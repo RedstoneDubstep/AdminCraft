@@ -39,6 +39,7 @@ public class MuteCommand {
                         .then(Commands.argument("args", StringArgumentType.greedyString())
                                 .suggests((ctx, builder) -> {
                                     String remaining = builder.getRemaining();
+                                    builder.suggest("<reason>");
                                     if (!remaining.contains("--noappeal")) {
                                         builder.suggest("--noappeal");
                                     }
@@ -92,6 +93,7 @@ public class MuteCommand {
                                         .then(Commands.argument("args", StringArgumentType.greedyString())
                                                 .suggests((ctx, builder) -> {
                                                     String remaining = builder.getRemaining();
+                                                    builder.suggest("<reason>");
                                                     if (!remaining.contains("--noappeal")) {
                                                         builder.suggest("--noappeal");
                                                     }

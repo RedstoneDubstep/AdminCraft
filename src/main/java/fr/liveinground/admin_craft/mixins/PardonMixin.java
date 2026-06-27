@@ -26,22 +26,18 @@ public class PardonMixin {
         Optional<DatabaseSanctionData> banData;
 
         if (entry != null) {
+            AdminCraft.LOGGER.debug("not null");
             String reason = entry.getReason();
             Date created = entry.getCreated();
+            AdminCraft.LOGGER.debug("Reason: {}; created: {}", reason, created);
             banData = SanctionDatabase.getCurrentSanctions(p_443373_.id().toString()).stream().filter(
                     data -> data.type().equals(Sanction.BAN)
-                            && !data.removed()
-                            && (data.expiresOn() == null || data.expiresOn().after(now)
                             && data.reason().equals(reason)
-                            && data.date().equals(created)
-                    )
+                            && Math.abs(data.date().getTime() - created.getTime()) < 5000   // avoid offset caused by a system lag
             ).findFirst();
         } else {
             banData = SanctionDatabase.getCurrentSanctions(p_443373_.id().toString()).stream().filter(
                     data -> data.type().equals(Sanction.BAN)
-                            && !data.removed()
-                            && (data.expiresOn() == null || data.expiresOn().after(now)
-                    )
             ).findFirst();
         }
         if (banData.isEmpty()) {

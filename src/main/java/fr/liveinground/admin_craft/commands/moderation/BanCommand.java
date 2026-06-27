@@ -36,6 +36,7 @@ public class BanCommand {
                         .then(Commands.argument("args", StringArgumentType.greedyString())
                                 .suggests((ctx, builder) -> {
                                     String remaining = builder.getRemaining();
+                                    builder.suggest("<reason>");
                                     if (!remaining.contains("--noappeal")) {
                                         builder.suggest("--noappeal");
                                     }

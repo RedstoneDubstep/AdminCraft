@@ -55,7 +55,7 @@ public class CustomSanctionSystem {
             if (expiresOn == null) {
                 message.append(Component.literal("\n" + LangManager.tr(TrKeys.DISCONNECT_BANNED_DURATION_PERMANENT)).withStyle(ChatFormatting.RED));
             } else {
-                message.append(Component.literal("\n" + LangManager.tr(TrKeys.DISCONNECT_BANNED_DURATION_EXPIRES_IN, Map.of("duration", SanctionConfig.getDurationAsStringFromDate(expiresOn)))).withStyle(ChatFormatting.RED));
+                message.append(Component.literal("\n" + LangManager.tr(TrKeys.DISCONNECT_BANNED_DURATION_EXPIRES_IN, Map.of("duration", SanctionConfig.getOnlyDurationAsStringFromDate(expiresOn)))).withStyle(ChatFormatting.RED));
             }
             if (!appealable || !DiscordBot.enabled) {
                 message.append(Component.literal("\n" + LangManager.tr(TrKeys.DISCONNECT_BANNED_APPEAL_NOT_ALLOWED)).withStyle(ChatFormatting.YELLOW));
@@ -63,19 +63,7 @@ public class CustomSanctionSystem {
                 message.append(Component.literal("\n" + LangManager.tr(TrKeys.DISCONNECT_BANNED_APPEAL_LINK, Map.of("link", Config.invite_link))).withStyle(ChatFormatting.YELLOW));
             }
 
-            serverPlayer.connection.disconnect(Component.translatable("multiplayer.disconnect.banned"));
-            MutableComponent banMessage = Component.literal("");
-            banMessage.append(Component.literal("You are now banned on this server.\nReason » ").withStyle(ChatFormatting.RED));
-            banMessage.append(Component.literal(reason + "\n").withStyle(ChatFormatting.YELLOW));
-            if (expiresOn == null) {
-                banMessage.append(Component.literal("This is a permanent ban.\n")).withStyle(ChatFormatting.RED);
-            } else {
-                banMessage.append(Component.literal("This sanction will end on ").withStyle(ChatFormatting.RED));
-                banMessage.append(Component.literal(expiresOn + "\n").withStyle(ChatFormatting.YELLOW));
-            }
-
-            serverPlayer.connection.disconnect(banMessage);
-
+            serverPlayer.connection.disconnect(message);
         }
         return id;
         //AdminCraft.playerDataManager.addSanction(String.valueOf(player.id()), Sanction.BAN, reason, expiresOn);

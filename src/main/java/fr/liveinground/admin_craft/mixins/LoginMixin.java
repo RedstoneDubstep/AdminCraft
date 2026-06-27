@@ -47,7 +47,7 @@ public class LoginMixin {
                 if (sanction.expiresOn() == null) {
                     message.append(Component.literal("\n" + LangManager.tr(TrKeys.DISCONNECT_BANNED_DURATION_PERMANENT)).withStyle(ChatFormatting.RED));
                 } else {
-                    message.append(Component.literal("\n" + LangManager.tr(TrKeys.DISCONNECT_BANNED_DURATION_EXPIRES_IN, Map.of("duration", SanctionConfig.getDurationAsStringFromDate(sanction.expiresOn())))).withStyle(ChatFormatting.RED));
+                    message.append(Component.literal("\n" + LangManager.tr(TrKeys.DISCONNECT_BANNED_DURATION_EXPIRES_IN, Map.of("duration", SanctionConfig.getOnlyDurationAsStringFromDate(sanction.expiresOn())))).withStyle(ChatFormatting.RED));
                 }
                 if (sanction.status().equals(AppealStatus.NOT_ALLOWED) || !DiscordBot.enabled) {
                     message.append(Component.literal("\n" + LangManager.tr(TrKeys.DISCONNECT_BANNED_APPEAL_NOT_ALLOWED)).withStyle(ChatFormatting.YELLOW));
