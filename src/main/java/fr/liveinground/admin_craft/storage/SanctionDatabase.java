@@ -261,7 +261,7 @@ public class SanctionDatabase {
                 "SELECT * FROM sanctions WHERE uuid = ? AND removed = 0;",
                 stmt -> stmt.setString(1, uuid)
         ).stream()
-                .filter(databaseSanctionData -> databaseSanctionData.expiresOn() == null || databaseSanctionData.expiresOn().after(now))
+                .filter(databaseSanctionData -> !databaseSanctionData.hasExpired(now))
                 .toList();
     }
 

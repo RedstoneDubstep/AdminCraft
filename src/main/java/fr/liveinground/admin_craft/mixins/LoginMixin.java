@@ -20,7 +20,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.net.SocketAddress;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +30,6 @@ public class LoginMixin {
     private void canPlayerLogin(SocketAddress address, NameAndId player, CallbackInfoReturnable<Component> cir) {
         List<DatabaseSanctionData> punishments = SanctionDatabase.getCurrentSanctions(player.id().toString());
         if (!punishments.isEmpty()) {
-            Date now = new Date();
             DatabaseSanctionData sanction = punishments.stream()
                     .filter(d ->
                         d.type().equals(Sanction.BAN)
