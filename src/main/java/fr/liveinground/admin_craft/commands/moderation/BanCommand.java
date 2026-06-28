@@ -19,14 +19,8 @@ import java.util.Collection;
 import java.util.Date;
 
 public class BanCommand {
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher, boolean override) {
-        String commandName;
-        if (override) {
-            commandName = "ban";
-        } else {
-            commandName = "admincraft:ban";
-        }
-        dispatcher.register(Commands.literal(commandName)
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        dispatcher.register(Commands.literal("admincraft:ban")
                 .requires(source -> source.hasPermission(Config.ban_level))
                 .then(Commands.argument("player", GameProfileArgument.gameProfile())
                         .executes(ctx -> {

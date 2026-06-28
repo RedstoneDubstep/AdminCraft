@@ -85,20 +85,21 @@ public class OfflineTeleportCommand {
         if (onlinePlayer != null) {
             Set<Relative> _ignored = Set.of();
             onlinePlayer.teleportTo(source.getLevel(), destination.x, destination.y, destination.z, _ignored, onlinePlayer.getYRot(), onlinePlayer.getXRot(), true);
-            source.sendSuccess(() -> Component.literal(PlaceHolderSystem.replacePlaceholders("Teleported %player% to %x%, %y%, %z%",
-                    Map.of("player", onlinePlayer.getDisplayName().getString(),
-                    "x", String.valueOf(destination.x),
-                    "y", String.valueOf(destination.y),
-                    "z", String.valueOf(destination.z)))),
-                    true);
         } else {
             try {
                 PlayerDataSaver.setOfflineLocation(source.getLevel(), profile.id(), destination);
             } catch (IOException e) {
                 AdminCraft.LOGGER.error("Failed to save offline teleport location for {}", profile.name(), e);
                 source.sendFailure(Component.literal("Failure: something went wrong (IOException)").withStyle(ChatFormatting.RED));
+                return;
             }
         }
+        source.sendSuccess(() -> Component.literal(PlaceHolderSystem.replacePlaceholders("Teleported %player% to %x%, %y%, %z%",
+                        Map.of("player", onlinePlayer.getDisplayName().getString(),
+                                "x", String.valueOf(destination.x),
+                                "y", String.valueOf(destination.y),
+                                "z", String.valueOf(destination.z)))),
+                true);
     }
 
     private static void teleportToPlayer(CommandSourceStack source, Collection<NameAndId> profiles) {

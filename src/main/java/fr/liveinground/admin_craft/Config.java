@@ -44,9 +44,6 @@ public class Config {
     private static final ModConfigSpec.ConfigValue<String> LOCALE;
     public static String locale;
 
-    private static final ModConfigSpec.BooleanValue ENABLE_BAN_OVERRIDE;
-    public static boolean enable_ban_override;
-
     // --------------------------
     // -- Commands permissions --
     // --------------------------
@@ -219,8 +216,6 @@ public class Config {
                 .comment("This setting corresponds to the mod version, to check if the config is up to date. Change it when you update the mod, in order to disable the join message.")
                 .define("configVersion", AdminCraft._VERSION);
         LOCALE = BUILDER.comment("The lang file the mod should use. Can be one of the supported languages: en_US, fr_FR.").worldRestart().define("locale", "en_US");
-
-        ENABLE_BAN_OVERRIDE = BUILDER.comment("Should AdminCraft override the vanilla /ban command with its own syntax and ban parsing (including history and appeal management)").worldRestart().define("overrideBanCommand", true);
 
         BUILDER.pop();
     }
@@ -413,7 +408,6 @@ public class Config {
         readme = README.get();
         _config_version = _CONFIG_VERSION.get();
         locale = LOCALE.get();
-        enable_ban_override = ENABLE_BAN_OVERRIDE.get();
 
         LangManager.setLanguage(locale);
         Path langDir = FMLPaths.CONFIGDIR.get()

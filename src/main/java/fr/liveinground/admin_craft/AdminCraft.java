@@ -1,8 +1,6 @@
 package fr.liveinground.admin_craft;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.tree.CommandNode;
-import com.mojang.brigadier.tree.RootCommandNode;
 import com.mojang.logging.LogUtils;
 import fr.liveinground.admin_craft.commands.moderation.BanCommand;
 import fr.liveinground.admin_craft.commands.moderation.FreezeCommand;
@@ -67,14 +65,12 @@ import org.slf4j.Logger;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 @Mod(AdminCraft.MODID)
 public class AdminCraft {
@@ -148,29 +144,8 @@ public class AdminCraft {
         BansCommand.register(dispatcher);
         MutesCommand.register(dispatcher);
         PlayerInfoCommand.register(dispatcher);
+        BanCommand.register(dispatcher);
 
-        if (Config.enable_ban_override) {
-            RootCommandNode<CommandSourceStack> root = dispatcher.getRoot();
-
-            try {
-                Field childrenField = CommandNode.class.getDeclaredField("children");
-                childrenField.setAccessible(true);
-
-                Field literalsField = CommandNode.class.getDeclaredField("literals");
-                literalsField.setAccessible(true);
-
-                Field argumentsField = CommandNode.class.getDeclaredField("arguments");
-                argumentsField.setAccessible(true);
-
-                ((Map<?, ?>) childrenField.get(root)).remove("ban");
-                ((Map<?, ?>) literalsField.get(root)).remove("ban");
-                ((Map<?, ?>) argumentsField.get(root)).remove("ban");
-                BanCommand.register(dispatcher, true);
-
-            } catch (Exception e) {
-                LOGGER.error("Failed to override vanilla /ban command: ", e);
-            }
-        } else BanCommand.register(dispatcher, false);
         // StaffModeCommand.register(dispatcher);
     }
 
