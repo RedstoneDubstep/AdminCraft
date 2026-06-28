@@ -95,7 +95,7 @@ public class OfflineTeleportCommand {
             }
         }
         source.sendSuccess(() -> Component.literal(PlaceHolderSystem.replacePlaceholders("Teleported %player% to %x%, %y%, %z%",
-                        Map.of("player", onlinePlayer.getDisplayName().getString(),
+                        Map.of("player", profile.name(),
                                 "x", String.valueOf(destination.x),
                                 "y", String.valueOf(destination.y),
                                 "z", String.valueOf(destination.z)))),
