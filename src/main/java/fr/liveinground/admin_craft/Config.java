@@ -215,7 +215,7 @@ public class Config {
         _CONFIG_VERSION = BUILDER
                 .comment("This setting corresponds to the mod version, to check if the config is up to date. Change it when you update the mod, in order to disable the join message.")
                 .define("configVersion", AdminCraft._VERSION);
-        LOCALE = BUILDER.comment("The lang file the mod should use. Can be one of the supported languages: en_US, fr_FR.").worldRestart().define("locale", "en_US");
+        LOCALE = BUILDER.comment("The lang file the mod should use. Can be one of the supported languages: en_US, fr_FR, hu_HU.").worldRestart().define("locale", "en_US");
 
         BUILDER.pop();
     }
