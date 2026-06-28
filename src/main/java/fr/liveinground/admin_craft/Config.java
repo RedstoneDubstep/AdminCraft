@@ -196,7 +196,7 @@ public class Config {
     private static final ModConfigSpec.ConfigValue<String> BOT_TOKEN;
     public static String bot_token;
 
-    private static final ModConfigSpec.ConfigValue<String> GUID_ID;
+    private static final ModConfigSpec.ConfigValue<String> GUILD_ID;
     public static String guild_id;
 
     private static final ModConfigSpec.ConfigValue<String> INVITE_LINK;
@@ -324,7 +324,7 @@ public class Config {
 
         ENABLE_APPEALS = BUILDER.comment("Enable the discord appeal system").worldRestart().define("enable", false);
         BOT_TOKEN = BUILDER.comment("The discord bot token for the appeal system").worldRestart().define("discordToken", "configthisplease");
-        GUID_ID = BUILDER.comment("The Guild ID where the appeal system should work").worldRestart().define("guildID", "configthisplease");
+        GUILD_ID = BUILDER.comment("The Guild ID where the appeal system should work").worldRestart().define("guildID", "configthisplease");
         INVITE_LINK = BUILDER.comment("The invite link to the appeal server, displayed on sanction messages").worldRestart().define("invite", "https://discord.com/invite/yourinvite");
         STAFF_ROLE_ID = BUILDER.comment("The role id allowing to manage appeal tickers").worldRestart().define("staffRoleID", "configthisplease");
         DEFAULT_CAN_APPEAL = BUILDER.comment("Should players be able to appeal if nothing is provided in the command?").worldRestart().define("defaultCanAppeal", true);
@@ -558,7 +558,7 @@ public class Config {
 
         enable_appeals = ENABLE_APPEALS.get();
         bot_token = BOT_TOKEN.get();
-        guild_id = GUID_ID.get();
+        guild_id = GUILD_ID.get();
         invite_link = INVITE_LINK.get();
         staff_role_id = STAFF_ROLE_ID.get();
         default_can_appeal = DEFAULT_CAN_APPEAL.get();
